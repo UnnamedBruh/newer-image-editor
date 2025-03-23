@@ -365,6 +365,9 @@ if (!context) {
 						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
 					}
 				}
+				context.clearRect(0, 0, +canvas.width, +canvas.height);
+				canvas.width = +effectParams[2].value;
+				canvas.height = +effectParams[3].value;
 				currentImageData = new ImageData(new Uint8ClampedArray(data), +effectParams[2].value, +effectParams[3].value);
 				break;
 			}
