@@ -375,6 +375,8 @@ if (!context) {
 				canvas.width = croppedWidth;
 				canvas.height = croppedHeight;
 				currentImageData = new ImageData(croppedData, croppedWidth, croppedHeight);
+				effect.selectedIndex = 0;
+				effect.oninput();
 				break;
 			}
 		}
