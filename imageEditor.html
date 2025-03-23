@@ -17,7 +17,7 @@ button, body, a, p, h1, select, option {
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">Sharpen Colors (Gaussian Blur Method)</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
@@ -221,8 +221,8 @@ if (!context) {
 		} else if (effects.value === "backg") {
 			effectSettings.innerHTML = "<a>Background Color:</a><input type=\"color\" value=\"#000000\" id=\"e-backcolor\">";
 			effectParams = [document.getElementById("e-backcolor")];
-		} else if (effects.value === "gblur") {
-			effectSettings.innerHTML = "<a>Kernel Size:</a><input type=\"number\" value=\"3\" step=\"2\" min=\"1\" max=\"15\" id=\"e-gblurkernel\"><br><a>Sigma Value (Blur Spread):</a><input type=\"number\" value=\"1\" step=\"0.1\" min=\"0\" max=\"100\" id=\"e-gblursigma\">";
+		} else if (effects.value === "gblur" || effects.value === "sharpg") {
+			effectSettings.innerHTML = "<a>Kernel Size (Slight Blur Spread, and Smoothness):</a><input type=\"number\" value=\"3\" step=\"2\" min=\"1\" max=\"15\" id=\"e-gblurkernel\"><br><a>Sigma Value:</a><input type=\"number\" value=\"1\" step=\"0.1\" min=\"0\" max=\"100\" id=\"e-gblursigma\">";
 			effectParams = [document.getElementById("e-gblurkernel"), document.getElementById("e-gblursigma")];
 		} else if (effects.value === "crop") {
 			effectSettings.innerHTML = "<a>X:</a><input type=\"number\" value=\"0\" id=\"e-cropx\"><br><a>Y:</a><input type=\"number\" value=\"0\" id=\"e-cropy\"><br><a>Width:</a><input type=\"number\" value=\"0\" id=\"e-cropw\"><br><a>Height:</a><input type=\"number\" value=\"0\" id=\"e-croph\"><br>";
@@ -397,6 +397,15 @@ if (!context) {
 					imageData[i] = invert - imageData[i]; i++;
 					imageData[i] = invert - imageData[i]; i++;
 					imageData[i] = invert - imageData[i]; i += 2;
+				}
+				break;
+			}
+			case "sharpg": {
+				const cur = applyGaussianBlur(currentImageData, generateGaussianKernel(Math.max(0.1, Math.min(2, +effectParams[1].value)), Math.max(1, Math.min(29, Math.round(+effectParams[0].value / 2) * 2 + 1))));
+				for (let i = 0; i < len;) {
+					imageData[i] -= cur[i]; i++;
+					imageData[i] -= cur[i]; i++;
+					imageData[i] -= cur[i]; i += 2;
 				}
 				break;
 			}
