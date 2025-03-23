@@ -355,8 +355,8 @@ if (!context) {
 				len = data.length;
 				effects.selectedIndex = 0;
 				let i = 0, wid = currentImageData.width * 4;
-				let xStart = (Math.max(0, Math.min(currentImageData.width, +effectParams[0]), xEnd = Math.max(0, Math.min(currentImageData.width, +effectParams[2] + +effectParams[0]) - +effectParams[0]) * 4;
-				let yStart = (Math.max(0, Math.min(currentImageData.height, +effectParams[1]), yEnd = Math.max(0, Math.min(currentImageData.height, +effectParams[3] + +effectParams[1]) - +effectParams[1]) * 4;
+				let xStart = Math.max(0, Math.min(currentImageData.width, +effectParams[0])), xEnd = Math.max(0, Math.min(currentImageData.width, +effectParams[2] + +effectParams[0]) - +effectParams[0]) * 4;
+				let yStart = Math.max(0, Math.min(currentImageData.height, +effectParams[1])), yEnd = Math.max(0, Math.min(currentImageData.height, +effectParams[3] + +effectParams[1]) - +effectParams[1]) * 4;
 				for (let j = yStart; j < yEnd; j += wid) {
 					for (i = xStart; i < xEnd;) {
 						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
