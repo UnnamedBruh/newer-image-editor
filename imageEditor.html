@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Image Editor</title>
+<style>
+button, body, select {
+	background-color: rgb(40, 40, 40);
+}
+button, body, a, p, h1, select, option {
+	color: white;
+}
+</style>
+</head>
+<body>
+<h1>Image Editor</h1>
+<input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico"><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
+<hr>
+<canvas id="canvas" width="300" height="300"></canvas>
+<hr>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option></select><button id="apply">Apply Effect</button>
+<div id="configs"></div>
+<script>
+const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
+const context = canvas.getContext("2d");
+if (!context) {
+	alert("Your browser does not support the 2D canvas context yet. Either upgrade to a newer version of your browser, or try using a different one.");
+}
+	let currentImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), backupImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), originalImage;
+	fileInput.addEventListener("input", function(event) {
+		const file = event.target.files[0];
+		let fileReader = new FileReader();
+		fileReader.onload = function(res) {
+			if (treatFile.value === "att") {
+				const img = new Image();
+				img.onload = function() {
+					canvas.width = img.width;
+					canvas.height = img.height;
+					context.clearRect(0, 0, +canvas.width, +canvas.height);
+					context.drawImage(img, 0, 0, +canvas.width, +canvas.height);
+					currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+					originalImage = img;
+				}
+				img.src = res.target.result;
+			} else {
+				if (treatFile.value !== "asv") {
+				const width = Math.round(+(prompt("What should the width of the raw file data be for the final image? (The height is automatically determined. The default value is 300)") || 300));
+				if (treatFile.value === "asa") {
+					const height = Math.ceil(res.target.result.byteLength / width / 4);
+					canvas.width = width;
+					canvas.height = height;
+					const roundedUint = new Uint8ClampedArray(width * height * 4);
+					roundedUint.set(new Uint8ClampedArray(res.target.result));
+					currentImageData = new ImageData(roundedUint, width, height);
+					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+					context.putImageData(currentImageData, 0, 0);
+				} else if (treatFile.value === "asb") {
+					const height = Math.ceil(res.target.result.byteLength / width / 3);
+					canvas.width = width;
+					canvas.height = height;
+					const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
+					let byte = 0;
+					for (let i = 0; i < roundedUint.byteLength; i += 4, byte += 3) {
+						roundedUint[i] = buff[byte]; i++;
+						roundedUint[i] = buff[byte + 1]; i++;
+						roundedUint[i] = buff[byte + 2]; i++;
+						roundedUint[i] = 255; i++;
+					}
+					currentImageData = new ImageData(roundedUint, width, height);
+					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+					context.putImageData(currentImageData, 0, 0);
+				} else if (treatFile.value === "asd") {
+					const height = Math.ceil(res.target.result.byteLength / width);
+					canvas.width = width;
+					canvas.height = height;
+					const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
+					let first = 0;
+					for (let i = 0; i < roundedUint.byteLength; i += 4) {
+						roundedUint[i] = buff[first]; i++;
+						roundedUint[i] = buff[first]; i++;
+						roundedUint[i] = buff[first]; i++;
+						roundedUint[i] = 255; i++; first++;
+					}
+					currentImageData = new ImageData(roundedUint, width, height);
+					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+					context.putImageData(currentImageData, 0, 0);
+				}
+				} else {
+					const video = document.createElement("video");
+					video.oncanplaythrough = function() {
+						video.oncanplaythrough = function() {}
+						setTimeout(function() {
+						canvas.width = video.width;
+						canvas.height = video.height;
+						canvas.style.display = "none";
+						context.clearRect(0, 0, +canvas.width, +canvas.height);
+						video.ontimeupdate = function() {
+							context.drawImage(video, 0, 0, +canvas.width, +canvas.height);
+						}
+						document.body.appendChild(video);
+						const bounding = video.getBoundingClientRect();
+						if (canvas.width == 0 || canvas.height == 0) {
+							canvas.width = bounding.width;
+							canvas.height = bounding.height;
+						}
+						video.controls = true;
+						const confirm = document.createElement("button");
+						confirm.textContent = "Select Frame";
+						document.body.appendChild(confirm);
+						confirm.onclick = function() {
+							canvas.style.display = "";
+							currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+							backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+							const image = new Image();
+							image.src = canvas.toDataURL("image/png");
+							originalImage = image;
+							video.src = "";
+							video.remove();
+						}
+						}, 1000);
+					}
+					video.src = res.target.result;
+				}
+			}
+		}
+		if (treatFile.value === "att" || treatFile.value === "asv") fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
+	});
+	let effectParams = [];
+	function extractRGBA(hex, a) {
+		const r = parseInt(hex.slice(1, 3), 16) / 255;
+		const g = parseInt(hex.slice(3, 5), 16) / 255;
+		const b = parseInt(hex.slice(5, 7), 16) / 255;
+		return [r, g, b, a];
+	}
+	function extractRGBA2(hex, a) {
+		const r = parseInt(hex.slice(1, 3), 16);
+		const g = parseInt(hex.slice(3, 5), 16);
+		const b = parseInt(hex.slice(5, 7), 16);
+		return [r, g, b, a];
+	}
+	function interpolate(x, y, n) {
+		return x + (y - x) * n;
+	}
+	function applyGaussianBlur(imageData, kernel) {
+		const width = imageData.width;
+		const height = imageData.height;
+		const output = new ImageData(new Uint8ClampedArray(width * height * 4), width, height);
+		const kernelSize = kernel.length;
+		const halfKernel = Math.floor(kernelSize / 2);
+		let r, g, b, a;
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < width; x++) {
+				r = 0, g = 0, b = 0, a = 0;
+				for (let ky = 0; ky < kernelSize; ky++) {
+					for (let kx = 0; kx < kernelSize; kx++) {
+						const px = x + kx - halfKernel;
+						const py = y + ky - halfKernel;
+						if (px >= 0 && py >= 0 && px < width && py < height) {
+							const pixelIndex = (py * width + px) * 4;
+							const weight = kernel[ky][kx];
+							r += imageData.data[pixelIndex] * weight;
+							g += imageData.data[pixelIndex + 1] * weight;
+							b += imageData.data[pixelIndex + 2] * weight;
+							a += imageData.data[pixelIndex + 3] * weight;
+						}
+					}
+				}
+				const outputIndex = (y * width + x) * 4;
+				output.data[outputIndex] = r;
+				output.data[outputIndex + 1] = g;
+				output.data[outputIndex + 2] = b;
+				output.data[outputIndex + 3] = a;
+			}
+		}
+		return output;
+	}
+	function generateGaussianKernel(sigma, size) {
+		const kernel = [];
+		const mean = Math.floor(size / 2);
+		let sum = 0;
+		for (let y = 0; y < size; y++) {
+			kernel[y] = [];
+			for (let x = 0; x < size; x++) {
+				const dx = x - mean;
+				const dy = y - mean;
+				const value = (1 / (2 * Math.PI * sigma * sigma)) * Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+				kernel[y][x] = value;
+				sum += value;
+			}
+		}
+		for (let y = 0; y < size; y++) {
+			for (let x = 0; x < size; x++) {
+				kernel[y][x] /= sum;
+			}
+		}
+		return kernel;
+	}
+	function mod(x, y) {
+		let result = x % y;
+		return result < 0 ? result + y : result;
+	}
+	effects.oninput = function() {
+		effectSettings.innerHTML = "";
+		if (effects.value === "tint") {
+			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\">";
+			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac"), document.getElementById("e-tintmult")];
+		} else if (effects.value === "tintblend") {
+			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Blending Percentage:</a><input type=\"number\" value=\"20\" min=\"0\" max=\"100\" step=\"1\" id=\"e-tintopac\">";
+			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac")];
+		} else if (effects.value === "shift") {
+			effectSettings.innerHTML = "<a>Direction (in pixels. negative = leftwards, positive = rightwards):</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Color Padding:</a><input type=\"color\" value=\"#000000\" id=\"e-shiftcolor\"><br><a>Color Padding Opacity:</a><input type=\"number\" value=\"0\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-shiftopac\"><br><a>Wrap Around Image:</a><input type=\"checkbox\" id=\"e-shiftwrap\">";
+			effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-shiftcolor"), document.getElementById("e-shiftopac"), document.getElementById("e-shiftwrap")];
+		} else if (effects.value === "backg") {
+			effectSettings.innerHTML = "<a>Background Color:</a><input type=\"color\" value=\"#000000\" id=\"e-backcolor\">";
+			effectParams = [document.getElementById("e-backcolor")];
+		} else if (effects.value === "gblur") {
+			effectSettings.innerHTML = "<a>Kernel Size:</a><input type=\"number\" value=\"3\" step=\"2\" min=\"1\" max=\"15\" id=\"e-gblurkernel\"><br><a>Sigma Value (Blur Spread):</a><input type=\"number\" value=\"1\" step=\"0.1\" min=\"0\" max=\"100\" id=\"e-gblursigma\">";
+			effectParams = [document.getElementById("e-gblurkernel"), document.getElementById("e-gblursigma")];
+		} else if (effects.value === "crop") {
+			effectSettings.innerHTML = "<a>X:</a><input type=\"number\" value=\"0\" id=\"e-cropx\"><br><a>Y:</a><input type=\"number\" value=\"0\" id=\"e-cropy\"><br><a>Width:</a><input type=\"number\" value=\"0\" id=\"e-cropw\"><br><a>Height:</a><input type=\"number\" value=\"0\" id=\"e-croph\"><br>";
+			effectParams = [document.getElementById("e-cropx"), document.getElementById("e-cropy"), document.getElementById("e-cropw"), document.getElementById("e-croph")];
+			for (const p of effectParams) {
+				p.oninput = function() {
+					p.value = String(Math.round(+p.value.trim()));
+					context.clearRect(0, 0, currentImageData.width, currentImageData.height);
+					context.putImageData(currentImageData, 0, 0);
+					context.fillStyle = "rgba(255, 255, 255, 0.3)";
+					context.fillRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
+				}
+			}
+		} else {
+			effectSettings.innerHTML = "";
+			effectParams = [];
+		}
+	}
+	apply.onclick = function() {
+		const imageData = currentImageData.data;
+		let len = imageData.length;
+		switch (effects.value) {
+			case "tint": {
+				let i = 0, tintColor = extractRGBA(effectParams[0].value, Math.max(0, Math.min(1, +effectParams[1].value)));
+				tintColor = tintColor.map(x => x * +effectParams[2].value);
+				if (tintColor[0] === 1 && tintColor[1] === 1 && tintColor[2] === 1) {
+					if (tintColor[3] !== 1) {
+						for (i = 3; i < len; i += 4) {
+							imageData[i] *= tintColor[3];
+						}
+					}
+				} else {
+					for (; i < len;) {
+						imageData[i] *= tintColor[0]; i++;
+						imageData[i] *= tintColor[1]; i++;
+						imageData[i] *= tintColor[2]; i++;
+						imageData[i] *= tintColor[3]; i++;
+					}
+				}
+				break;
+			}
+			case "tintblend": {
+				let i = 0, tintColor = extractRGBA2(effectParams[0].value, Math.max(0, Math.min(1, +effectParams[1].value / 100)));
+				if (tintColor[3] === 0) {} else if (tintColor[3] === 100) {
+					for (; i < len;) {
+						imageData[i] = tintColor[0]; i++;
+						imageData[i] = tintColor[1]; i++;
+						imageData[i] = tintColor[2]; i++;
+						imageData[i] = 255; i++;
+					}
+				} else {
+					for (; i < len;) {
+						imageData[i] = interpolate(imageData[i], tintColor[0], tintColor[3]); i++;
+						imageData[i] = interpolate(imageData[i], tintColor[1], tintColor[3]); i++;
+						imageData[i] = interpolate(imageData[i], tintColor[2], tintColor[3]); i++;
+						imageData[i] = interpolate(imageData[i], 255, tintColor[3]); i++;
+					}
+				}
+				break;
+			}
+			case "shift": {
+				let i = 0, shift = 0 - Math.round(+effectParams[0].value) * 4, colorPadding = extractRGBA2(effectParams[1].value, Math.max(0, Math.min(255, +effectParams[2].value * 255)));
+				if (effectParams[3].checked) {
+					if (shift === 0) {} else if (shift < 0) {
+						for (i = len - 1; i >= 0;) {
+							imageData[i] = imageData[mod(i + shift, len)]; i--;
+							imageData[i] = imageData[mod(i + shift, len)]; i--;
+							imageData[i] = imageData[mod(i + shift, len)]; i--;
+							imageData[i] = imageData[mod(i + shift, len)]; i--;
+						}
+					} else {
+						for (i = 0; i < len;) {
+							imageData[i] = imageData[mod(i + shift, len)]; i++;
+							imageData[i] = imageData[mod(i + shift, len)]; i++;
+							imageData[i] = imageData[mod(i + shift, len)]; i++;
+							imageData[i] = imageData[mod(i + shift, len)]; i++;
+						}
+					}
+				} else {
+					if (shift === 0) {} else if (shift < 0) {
+						for (i = len - 1; i >= 0;) {
+							if (i + shift < 0) {
+								i -= 4;
+								continue;
+							}
+							imageData[i] = imageData[i + shift]; i--;
+							imageData[i] = imageData[i + shift]; i--;
+							imageData[i] = imageData[i + shift]; i--;
+							imageData[i] = imageData[i + shift]; i--;
+						}
+						for (i = -shift - 1; i >= 0;) {
+							imageData[i] = colorPadding[3]; i--;
+							imageData[i] = colorPadding[2]; i--;
+							imageData[i] = colorPadding[1]; i--;
+							imageData[i] = colorPadding[0]; i--;
+						}
+					} else {
+						for (i = 0; i < len;) {
+							if (i + shift > len) {
+								i += 4;
+								continue;
+							}
+							imageData[i] = imageData[i + shift]; i++;
+							imageData[i] = imageData[i + shift]; i++;
+							imageData[i] = imageData[i + shift]; i++;
+							imageData[i] = imageData[i + shift]; i++;
+						}
+						for (i = len - shift; i < len;) {
+							imageData[i] = colorPadding[0]; i++;
+							imageData[i] = colorPadding[1]; i++;
+							imageData[i] = colorPadding[2]; i++;
+							imageData[i] = colorPadding[3]; i++;
+						}
+					}
+				}
+				break;
+			}
+			case "backg": {
+				let i = 0, bgColor = extractRGBA2(effectParams[0].value, 100);
+				for (i = 0; i < len;) {
+					imageData[i] = interpolate(imageData[i], bgColor[0], (255 - imageData[i + 3]) / 255); i++;
+					imageData[i] = interpolate(imageData[i], bgColor[1], (255 - imageData[i + 2]) / 255); i++;
+					imageData[i] = interpolate(imageData[i], bgColor[2], (255 - imageData[i + 1]) / 255); i++;
+					imageData[i] = 255; i++;
+				}
+				break;
+			}
+			case "restore": {
+				currentImageData = new ImageData(new Uint8ClampedArray(backupImageData.data), backupImageData.width, backupImageData.height);
+				break;
+			}
+			case "gblur": {
+				currentImageData = applyGaussianBlur(currentImageData, generateGaussianKernel(Math.max(0.1, Math.min(2, +effectParams[1].value)), Math.max(1, Math.min(29, Math.round(+effectParams[0].value / 2) * 2 + 1))));
+				break;
+			}
+			case "crop": {
+				const data = new Uint8ClampedArray((Math.max(0, Math.min(currentImageData.width, +effectParams[2] + +effectParams[0])) - +effectParams[0]) * (Math.max(0, Math.min(currentImageData.height, +effectParams[3] + +effectParams[1])) - +effectParams[1]) * 4);
+				len = data.length;
+				effects.selectedIndex = 0;
+				let i = 0, wid = currentImageData.width * 4;
+				let xStart = (Math.max(0, Math.min(currentImageData.width, +effectParams[0]), xEnd = Math.max(0, Math.min(currentImageData.width, +effectParams[2] + +effectParams[0]) - +effectParams[0]) * 4;
+				let yStart = (Math.max(0, Math.min(currentImageData.height, +effectParams[1]), yEnd = Math.max(0, Math.min(currentImageData.height, +effectParams[3] + +effectParams[1]) - +effectParams[1]) * 4;
+				for (let j = yStart; j < yEnd; j += wid) {
+					for (i = xStart; i < xEnd;) {
+						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
+						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
+						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
+						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
+					}
+				}
+				currentImageData = new ImageData(new Uint8ClampedArray(data), +effectParams[2], +effectParams[3]);
+				break;
+			}
+		}
+		context.putImageData(currentImageData, 0, 0);
+	}
+</script>
+</body>
+</html>
