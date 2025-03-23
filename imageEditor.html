@@ -17,7 +17,7 @@ button, body, a, p, h1, select, option {
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
@@ -236,6 +236,9 @@ if (!context) {
 					context.fillRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
 				}
 			}
+		} else if (effects.value === "inv") {
+			effectSettings.innerHTML = "<a>Invert Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%";
+			effectParams = [document.getElementById("e-invpro")];
 		} else {
 			effectSettings.innerHTML = "";
 			effectParams = [];
@@ -386,6 +389,15 @@ if (!context) {
 				currentImageData = new ImageData(croppedData, croppedWidth, croppedHeight);
 				effects.selectedIndex = 0;
 				chooseEffect();
+				break;
+			}
+			case "inv": {
+				let i = 0, invert = +effectParams[0].value * 2.55;
+				for (i = 0; i < len;) {
+					imageData[i] = invert - imageData[i]; i++;
+					imageData[i] = invert - imageData[i]; i++;
+					imageData[i] = invert - imageData[i]; i += 2;
+				}
 				break;
 			}
 		}
