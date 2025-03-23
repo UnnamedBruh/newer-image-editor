@@ -60,7 +60,7 @@ if (!context) {
 						canvas.height = height;
 						const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
 						let byte = 0;
-						for (let i = 0; i < roundedUint.byteLength; i += 4) {
+						for (let i = 0; i < roundedUint.byteLength;) {
 							roundedUint[i] = buff[byte]; i++, byte++;
 							roundedUint[i] = buff[byte]; i++, byte++;
 							roundedUint[i] = buff[byte]; i++, byte++;
@@ -75,7 +75,7 @@ if (!context) {
 						canvas.height = height;
 						const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
 						let first = 0;
-						for (let i = 0; i < roundedUint.byteLength; i += 4) {
+						for (let i = 0; i < roundedUint.byteLength;) {
 							roundedUint[i] = buff[first]; i++;
 							roundedUint[i] = buff[first]; i++;
 							roundedUint[i] = buff[first]; i++;
