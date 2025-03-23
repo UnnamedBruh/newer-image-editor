@@ -17,7 +17,7 @@ button, body, a, p, h1, select, option {
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">Sharpen Colors (Gaussian Blur Method)</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">Sharpen Colors (Gaussian Blur Method)</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
@@ -86,6 +86,7 @@ if (!context) {
 						context.putImageData(currentImageData, 0, 0);
 					}
 				} else {
+					fileInput.style.display = "none";
 					const video = document.createElement("video");
 					video.oncanplaythrough = function() {
 						video.oncanplaythrough = function() {}
@@ -119,6 +120,7 @@ if (!context) {
 									originalImage = image;
 									video.src = "";
 									video.remove();
+									fileInput.style.display = "";
 								}, 200);
 							}
 						}, 1000);
@@ -403,9 +405,29 @@ if (!context) {
 			case "sharpg": {
 				const cur = applyGaussianBlur(currentImageData, generateGaussianKernel(Math.max(0.1, Math.min(2, +effectParams[1].value)), Math.max(1, Math.min(29, Math.round(+effectParams[0].value / 2) * 2 + 1))));
 				for (let i = 0; i < len;) {
-					imageData[i] -= cur[i]; i++;
-					imageData[i] -= cur[i]; i++;
-					imageData[i] -= cur[i]; i += 2;
+					imageData[i] = (imageData[i] + cur[i]) % 255; i++;
+					imageData[i] = (imageData[i] + cur[i]) % 255; i++;
+					imageData[i] = (imageData[i] + cur[i]) % 255; i += 2;
+				}
+				break;
+			}
+			case "sepia": {
+				let r, g, b;
+				for (let i = 0; i < len;) {
+					r = imageData[i]; g = imageData[i + 1]; b = imageData[i + 2];
+					imageData[i] = Math.min(255, (0.393 * r) + (0.769 * g) + (0.189 * b)); i++;
+					imageData[i] = Math.min(255, (0.349 * r) + (0.686 * g) + (0.168 * b)); i++;
+        				imageData[i] = Math.min(255, (0.272 * r) + (0.534 * g) + (0.131 * b)); i += 2;
+				}
+				break;
+			}
+			case "graya": {
+				let res;
+				for (let i = 0; i < len;) {
+					res = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
+					imageData[i] = res; i++;
+					imageData[i] = res; i++;
+        				imageData[i] = res; i += 2;
 				}
 				break;
 			}
