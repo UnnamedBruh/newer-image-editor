@@ -343,6 +343,9 @@ if (!context) {
 				break;
 			}
 			case "restore": {
+				context.clearRect(0, 0, +canvas.width, +canvas.height);
+				canvas.width = +backupImageData.width;
+				canvas.height = +backupImageData.height;
 				currentImageData = new ImageData(new Uint8ClampedArray(backupImageData.data), backupImageData.width, backupImageData.height);
 				break;
 			}
@@ -356,7 +359,7 @@ if (!context) {
 				effects.selectedIndex = 0;
 				let i = 0, wid = currentImageData.width * 4;
 				let xStart = Math.max(0, Math.min(currentImageData.width, +effectParams[0].value)), xEnd = Math.max(0, Math.min(currentImageData.width, +effectParams[2].value + +effectParams[0].value)) * 4;
-				let yStart = Math.max(0, Math.min(currentImageData.height, +effectParams[1].value)), yEnd = Math.max(0, Math.min(currentImageData.height, +effectParams[3].value + +effectParams[1].value)) * 4;
+				let yStart = Math.max(0, Math.min(currentImageData.height, +effectParams[1].value)), yEnd = Math.max(0, Math.min(currentImageData.height, (+effectParams[3].value + +effectParams[1].value) * currentImageData.width)) * 4;
 				for (let j = yStart; j < yEnd; j += wid) {
 					for (i = xStart; i < xEnd;) {
 						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
