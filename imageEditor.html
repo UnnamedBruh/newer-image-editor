@@ -354,24 +354,27 @@ if (!context) {
 				break;
 			}
 			case "crop": {
-				const data = new Uint8ClampedArray((Math.max(0, Math.min(currentImageData.width, +effectParams[2].value + +effectParams[0].value)) - +effectParams[0].value) * (Math.max(0, Math.min(currentImageData.height, +effectParams[3].value + +effectParams[1].value)) - +effectParams[1].value) * 4);
-				len = data.length;
-				effects.selectedIndex = 0;
-				let i = 0, wid = currentImageData.width * 4;
-				let xStart = Math.max(0, Math.min(currentImageData.width, +effectParams[0].value)), xEnd = Math.max(0, Math.min(wid, (+effectParams[2].value + +effectParams[0].value) * 4));
-				let yStart = Math.max(0, Math.min(currentImageData.height, +effectParams[1].value * currentImageData.height * 4)), yEnd = Math.max(0, Math.min(Math.floor(currentImageData.data.length / currentImageData.width) * currentImageData.height * 4, (+effectParams[3].value + +effectParams[1].value) * currentImageData.width * 4));
-				for (let j = yStart; j < yEnd; j += wid) {
-					for (i = xStart; i < xEnd;) {
-						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
-						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
-						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
-						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
+				const xStart = Math.max(0, Math.min(currentImageData.width, +effectParams[0].value));
+				const yStart = Math.max(0, Math.min(currentImageData.height, +effectParams[1].value));
+				const xEnd = Math.max(0, Math.min(currentImageData.width, +effectParams[0].value + +effectParams[2].value));
+				const yEnd = Math.max(0, Math.min(currentImageData.height, +effectParams[1].value + +effectParams[3].value));
+				const croppedWidth = xEnd - xStart;
+				const croppedHeight = yEnd - yStart;
+				const croppedData = new Uint8ClampedArray(croppedWidth * croppedHeight * 4);
+				let index = 0;
+				for (let y = yStart; y < yEnd; y++) {
+					for (let x = xStart; x < xEnd; x++) {
+						let srcIndex = (y * currentImageData.width + x) * 4;
+						croppedData[index++] = currentImageData.data[srcIndex]; srcIndex++;
+						croppedData[index++] = currentImageData.data[srcIndex]; srcIndex++;
+						croppedData[index++] = currentImageData.data[srcIndex]; srcIndex++;
+						croppedData[index++] = currentImageData.data[srcIndex]; srcIndex++;
 					}
 				}
-				context.clearRect(0, 0, +canvas.width, +canvas.height);
-				canvas.width = +effectParams[2].value;
-				canvas.height = +effectParams[3].value;
-				currentImageData = new ImageData(new Uint8ClampedArray(data), +effectParams[2].value, +effectParams[3].value);
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				canvas.width = croppedWidth;
+				canvas.height = croppedHeight;
+				currentImageData = new ImageData(croppedData, croppedWidth, croppedHeight);
 				break;
 			}
 		}
