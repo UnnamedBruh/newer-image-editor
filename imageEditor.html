@@ -199,7 +199,7 @@ if (!context) {
 		let result = x % y;
 		return result < 0 ? result + y : result;
 	}
-	effects.oninput = function() {
+	function chooseEffect() {
 		effectSettings.innerHTML = "";
 		if (effects.value === "tint") {
 			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\">";
@@ -233,6 +233,7 @@ if (!context) {
 			effectParams = [];
 		}
 	}
+	effects.oninput = chooseEffect;
 	apply.onclick = function() {
 		const imageData = currentImageData.data;
 		let len = imageData.length;
@@ -375,8 +376,8 @@ if (!context) {
 				canvas.width = croppedWidth;
 				canvas.height = croppedHeight;
 				currentImageData = new ImageData(croppedData, croppedWidth, croppedHeight);
-				effect.selectedIndex = 0;
-				effect.oninput();
+				effects.selectedIndex = 0;
+				chooseEffect();
 				break;
 			}
 		}
