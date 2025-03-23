@@ -44,79 +44,83 @@ if (!context) {
 				img.src = res.target.result;
 			} else {
 				if (treatFile.value !== "asv") {
-				const width = Math.round(+(prompt("What should the width of the raw file data be for the final image? (The height is automatically determined. The default value is 300)") || 300));
-				if (treatFile.value === "asa") {
-					const height = Math.ceil(res.target.result.byteLength / width / 4);
-					canvas.width = width;
-					canvas.height = height;
-					const roundedUint = new Uint8ClampedArray(width * height * 4);
-					roundedUint.set(new Uint8ClampedArray(res.target.result));
-					currentImageData = new ImageData(roundedUint, width, height);
-					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-					context.putImageData(currentImageData, 0, 0);
-				} else if (treatFile.value === "asb") {
-					const height = Math.ceil(res.target.result.byteLength / width / 3);
-					canvas.width = width;
-					canvas.height = height;
-					const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
-					let byte = 0;
-					for (let i = 0; i < roundedUint.byteLength; i += 4, byte += 3) {
-						roundedUint[i] = buff[byte]; i++;
-						roundedUint[i] = buff[byte + 1]; i++;
-						roundedUint[i] = buff[byte + 2]; i++;
-						roundedUint[i] = 255; i++;
+					const width = Math.round(+(prompt("What should the width of the raw file data be for the final image? (The height is automatically determined. The default value is 300)") || 300));
+					if (treatFile.value === "asa") {
+						const height = Math.ceil(res.target.result.byteLength / width / 4);
+						canvas.width = width;
+						canvas.height = height;
+						const roundedUint = new Uint8ClampedArray(width * height * 4);
+						roundedUint.set(new Uint8ClampedArray(res.target.result));
+						currentImageData = new ImageData(roundedUint, width, height);
+						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+						context.putImageData(currentImageData, 0, 0);
+					} else if (treatFile.value === "asb") {
+						const height = Math.ceil(res.target.result.byteLength / width / 3);
+						canvas.width = width;
+						canvas.height = height;
+						const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
+						let byte = 0;
+						for (let i = 0; i < roundedUint.byteLength; i += 4) {
+							roundedUint[i] = buff[byte]; i++, byte++;
+							roundedUint[i] = buff[byte]; i++, byte++;
+							roundedUint[i] = buff[byte]; i++, byte++;
+							roundedUint[i] = 255; i++;
+						}
+						currentImageData = new ImageData(roundedUint, width, height);
+						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+						context.putImageData(currentImageData, 0, 0);
+					} else if (treatFile.value === "asd") {
+						const height = Math.ceil(res.target.result.byteLength / width);
+						canvas.width = width;
+						canvas.height = height;
+						const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
+						let first = 0;
+						for (let i = 0; i < roundedUint.byteLength; i += 4) {
+							roundedUint[i] = buff[first]; i++;
+							roundedUint[i] = buff[first]; i++;
+							roundedUint[i] = buff[first]; i++;
+							roundedUint[i] = 255; i++; first++;
+						}
+						currentImageData = new ImageData(roundedUint, width, height);
+						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+						context.putImageData(currentImageData, 0, 0);
 					}
-					currentImageData = new ImageData(roundedUint, width, height);
-					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-					context.putImageData(currentImageData, 0, 0);
-				} else if (treatFile.value === "asd") {
-					const height = Math.ceil(res.target.result.byteLength / width);
-					canvas.width = width;
-					canvas.height = height;
-					const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
-					let first = 0;
-					for (let i = 0; i < roundedUint.byteLength; i += 4) {
-						roundedUint[i] = buff[first]; i++;
-						roundedUint[i] = buff[first]; i++;
-						roundedUint[i] = buff[first]; i++;
-						roundedUint[i] = 255; i++; first++;
-					}
-					currentImageData = new ImageData(roundedUint, width, height);
-					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-					context.putImageData(currentImageData, 0, 0);
-				}
 				} else {
 					const video = document.createElement("video");
 					video.oncanplaythrough = function() {
 						video.oncanplaythrough = function() {}
 						setTimeout(function() {
-						canvas.width = video.width;
-						canvas.height = video.height;
-						canvas.style.display = "none";
-						context.clearRect(0, 0, +canvas.width, +canvas.height);
-						video.ontimeupdate = function() {
-							context.drawImage(video, 0, 0, +canvas.width, +canvas.height);
-						}
-						document.body.appendChild(video);
-						const bounding = video.getBoundingClientRect();
-						if (canvas.width == 0 || canvas.height == 0) {
-							canvas.width = bounding.width;
-							canvas.height = bounding.height;
-						}
-						video.controls = true;
-						const confirm = document.createElement("button");
-						confirm.textContent = "Select Frame";
-						document.body.appendChild(confirm);
-						confirm.onclick = function() {
-							canvas.style.display = "";
-							currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
-							backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-							const image = new Image();
-							image.src = canvas.toDataURL("image/png");
-							originalImage = image;
-							video.src = "";
-							video.remove();
-						}
+							canvas.width = video.width;
+							canvas.height = video.height;
+							canvas.style.display = "none";
+							context.clearRect(0, 0, +canvas.width, +canvas.height);
+							video.ontimeupdate = function() {
+								context.drawImage(video, 0, 0, +canvas.width, +canvas.height);
+							}
+							document.body.appendChild(video);
+							const bounding = video.getBoundingClientRect();
+							if (canvas.width == 0 || canvas.height == 0) {
+								canvas.width = bounding.width;
+								canvas.height = bounding.height;
+							}
+							video.controls = true;
+							const confirm = document.createElement("button");
+							confirm.textContent = "Select Frame";
+							document.body.appendChild(confirm);
+							confirm.onclick = function() {
+								video.pause();
+								video.muted = true;
+								setTimeout(function() {
+									canvas.style.display = "";
+									currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+									backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+									const image = new Image();
+									image.src = canvas.toDataURL("image/png");
+									originalImage = image;
+									video.src = "";
+									video.remove();
+								}, 200);
+							}
 						}, 1000);
 					}
 					video.src = res.target.result;
@@ -150,29 +154,30 @@ if (!context) {
 		const output = new ImageData(new Uint8ClampedArray(width * height * 4), width, height);
 		const kernelSize = kernel.length;
 		const halfKernel = Math.floor(kernelSize / 2);
-		let r, g, b, a;
+		const data = output.data;
+		let r, g, b, a, outputIndex, px, py, pixelIndex, weight;
 		for (let y = 0; y < height; y++) {
 			for (let x = 0; x < width; x++) {
 				r = 0, g = 0, b = 0, a = 0;
 				for (let ky = 0; ky < kernelSize; ky++) {
 					for (let kx = 0; kx < kernelSize; kx++) {
-						const px = x + kx - halfKernel;
-						const py = y + ky - halfKernel;
+						px = x + kx - halfKernel;
+						py = y + ky - halfKernel;
 						if (px >= 0 && py >= 0 && px < width && py < height) {
-							const pixelIndex = (py * width + px) * 4;
-							const weight = kernel[ky][kx];
-							r += imageData.data[pixelIndex] * weight;
-							g += imageData.data[pixelIndex + 1] * weight;
-							b += imageData.data[pixelIndex + 2] * weight;
-							a += imageData.data[pixelIndex + 3] * weight;
+							pixelIndex = (py * width + px) * 4;
+							weight = kernel[ky][kx];
+							r += imageData.data[pixelIndex] * weight; pixelIndex++;
+							g += imageData.data[pixelIndex] * weight; pixelIndex++;
+							b += imageData.data[pixelIndex] * weight; pixelIndex++;
+							a += imageData.data[pixelIndex] * weight;
 						}
 					}
 				}
-				const outputIndex = (y * width + x) * 4;
-				output.data[outputIndex] = r;
-				output.data[outputIndex + 1] = g;
-				output.data[outputIndex + 2] = b;
-				output.data[outputIndex + 3] = a;
+				outputIndex = (y * width + x) * 4;
+				data[outputIndex] = r; outputIndex++;
+				data[outputIndex] = g; outputIndex++;
+				data[outputIndex] = b; outputIndex++;
+				data[outputIndex] = a;
 			}
 		}
 		return output;
@@ -180,13 +185,13 @@ if (!context) {
 	function generateGaussianKernel(sigma, size) {
 		const kernel = [];
 		const mean = Math.floor(size / 2);
-		let sum = 0;
+		let sum = 0, dx, dy, value;
 		for (let y = 0; y < size; y++) {
 			kernel[y] = [];
 			for (let x = 0; x < size; x++) {
-				const dx = x - mean;
-				const dy = y - mean;
-				const value = (1 / (2 * Math.PI * sigma * sigma)) * Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+				dx = x - mean;
+				dy = y - mean;
+				value = (1 / (2 * Math.PI * sigma * sigma)) * Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
 				kernel[y][x] = value;
 				sum += value;
 			}
