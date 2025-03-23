@@ -365,7 +365,7 @@ if (!context) {
 						data[(j - yStart) + (i - xStart)] = imageData[j + i]; i++;
 					}
 				}
-				currentImageData = new ImageData(new Uint8ClampedArray(data), +effectParams[2], +effectParams[3]);
+				currentImageData = new ImageData(new Uint8ClampedArray(data), +effectParams[2].value, +effectParams[3].value);
 				break;
 			}
 		}
