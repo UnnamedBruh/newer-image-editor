@@ -466,11 +466,19 @@ if (!context) {
 				break;
 			}
 			case "contr": {
-				const contr = +effectParams[0].input.value + 1;
-				for (let i = 0; i < len;) {
-					imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i++;
-					imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i++;
-					imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i += 2;
+				const contr = +effectParams[0].value + 1;
+				if (contr === 0) {
+					for (let i = 0; i < len;) {
+						imageData[i] = 0; i++;
+						imageData[i] = 0; i++;
+						imageData[i] = 0; i += 2;
+					}
+				} else {
+					for (let i = 0; i < len;) {
+						imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i++;
+						imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i++;
+						imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i += 2;
+					}
 				}
 				break;
 			}
