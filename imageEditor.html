@@ -152,7 +152,7 @@ if (!context) {
 		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga")) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
 	});
 	treatFile.oninput = function() {
-		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
+		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
 	}
 	let effectParams = [];
 	function extractRGBA(hex, a) {
