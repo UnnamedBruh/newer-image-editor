@@ -40,7 +40,7 @@ function loadTgaFromUint8Array(tgaData) {
 		],
 		[
 			(loader.header.flags & ORIGIN_MASK) === ORIGIN_TOP_LEFT,
-			"shift the color channels until the image's color feels right to you."
+			"reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you."
 		],
 		[
 			(loader.header.flags & ORIGIN_MASK) === ORIGIN_TOP_RIGHT,
@@ -48,7 +48,7 @@ function loadTgaFromUint8Array(tgaData) {
 		]
 	];
 	let instructions = possibleInstructions.find(x => x[0])[1];
-	alert("Proper handling for the TGA origins and different color orders will come in a future update. For now, you must " + instructions + (instructions === "shift the color channels until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
+	alert("Proper handling for the TGA origins and different color orders will come in a future update. For now, you must " + instructions + (instructions === "reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
 	if (loader.header.pixelDepth === 24) {
 		const buffer = new Uint8ClampedArray(loader.header.width * loader.header.height * 4)
 		for (let i = 0, j = 0; i < buffer.length;) {
