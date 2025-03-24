@@ -17,7 +17,7 @@ button, body, a, p, h1, select, option {
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="resi">Resize Image</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
@@ -509,6 +509,15 @@ if (!context) {
 					}
 				}
 				imageData.set(newData);
+				break;
+			}
+			case "parag": {
+				canvas.width = effectParams[0].input.value;
+				canvas.height = effectParams[1].input.value;
+				const requiredSize = +effectParams[0].value * +effectParams[1].value * 4;
+				let deeea = new Uint8ClampedArray(requiredSize);
+				deeea.set(imageData.slice(0, Math.min(requiredSize, imageData.length)));
+				currentImageData = new ImageData(deeea, +canvas.width, +canvas.height);
 				break;
 			}
 		}
