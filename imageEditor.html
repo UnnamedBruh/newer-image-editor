@@ -241,9 +241,9 @@ if (!context) {
 		} else if (effects.value === "inv" || effects.value === "sepia" || effects.value === "graya" || effects.value === "grayb") {
 			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%";
 			effectParams = [document.getElementById("e-invpro")];
-		} else if (effects.value === "resi") {
-			effectSettings.innerHTML = "<a>Width:</a><input type=\"number\" value=\"\" id=\"e-resiw\"><br><a>Height:</a><input type=\"number\" value=\"\" id=\"e-resih\"><br><a>Anti-aliasing:</a><input type=\"checkbox\" checked id=\"e-resia\">";
-			effectParams = [document.getElementById("e-resiw"), document.getElementById("e-resih"), document.getElementById("e-resia")];
+		} else if (effects.value === "resi" || effects.value === "parag") {
+			effectSettings.innerHTML = "<a>Width:</a><input type=\"number\" value=\"\" id=\"e-resiw\"><br><a>Height:</a><input type=\"number\" value=\"\" id=\"e-resih\">" + (effects.value === "resi" ? "<br><a>Anti-aliasing:</a><input type=\"checkbox\" checked id=\"e-resia\">" : "");
+			effectParams = [document.getElementById("e-resiw"), document.getElementById("e-resih"), effects.value === "resi" ? document.getElementById("e-resia") : null];
 			effectParams[0].value = canvas.width;
 			effectParams[1].value = canvas.height;
 		} else if (effects.value === "contr") {
