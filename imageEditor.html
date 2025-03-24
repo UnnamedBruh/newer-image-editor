@@ -27,6 +27,28 @@ function loadTgaFromUint8Array(tgaData) {
 	const loader = new TgaLoader();
 	const texture = loader.load(tgaData);
 	const image = loader.imageData;
+	//
+	//(loader.header.flags & ORIGIN_MASK) === ORIGIN_BOTTOM_LEFT
+	const possibleInstructions = [
+		[
+			(loader.header.flags & ORIGIN_MASK) === ORIGIN_BOTTOM_LEFT,
+			"flip the image vertically."
+		],
+		[
+			(loader.header.flags & ORIGIN_MASK) === ORIGIN_BOTTOM_RIGHT,
+			"flip the image horizontally, and flip the image vertically."
+		],
+		[
+			(loader.header.flags & ORIGIN_MASK) === ORIGIN_TOP_LEFT,
+			"shift the color channels until the image's color feels right to you."
+		],
+		[
+			(loader.header.flags & ORIGIN_MASK) === ORIGIN_TOP_RIGHT,
+			"flip the image horizontally."
+		]
+	];
+	let instructions = possibleInstructions.find(x => x[0])[1];
+	alert("Proper handling for the image being flipped upside down will come soon. For now, you must " + instructions + (instructions === "shift the color channels until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
 	if (loader.header.pixelDepth === 24) {
 		const buffer = new Uint8ClampedArray(loader.header.width * loader.header.height * 4)
 		for (let i = 0, j = 0; i < buffer.length;) {
@@ -557,6 +579,18 @@ if (!context) {
 				let deeea = new Uint8ClampedArray(requiredSize);
 				deeea.set(imageData.slice(0, Math.min(requiredSize, imageData.length)));
 				currentImageData = new ImageData(deeea, +canvas.width, +canvas.height);
+				break;
+			}
+			case "rgbsh": {
+				let i = 0, prog = +effectParams[0].value * 2.55, r, g, b;
+				for (i = 0; i < len;) {
+					r = imageData[i];
+					g = imageData[i + 1];
+					b = imageData[i + 2];
+					imageData[i] = interpolate(imageData[i], g, prog); i++;
+					imageData[i] = interpolate(imageData[i], b, prog); i++;
+					imageData[i] = interpolate(imageData[i], r, prog); i += 2;
+				}
 				break;
 			}
 		}
