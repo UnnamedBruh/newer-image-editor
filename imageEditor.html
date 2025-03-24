@@ -27,11 +27,7 @@ function loadTgaFromUint8Array(tgaData) {
 	const loader = new TgaLoader();
 	const texture = loader.load(tgaData);
 	const image = loader.imageData;
-	return new ImageData(
-		new Uint8ClampedArray(image.data),
-		image.width,
-		image.height
-	);
+	return image;
 }
 
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
