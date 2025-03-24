@@ -166,7 +166,7 @@ if (!context) {
 					context.putImageData(currentImageData, 0, 0);
 				} else if (file.name.endsWith(".dds")) {
 					alert("DDS.js (browser port) is being used to decode the image.");
-					currentImageData = loadDdsFromUint8Array(new Uint8Array(res.target.result));
+					currentImageData = loadDdsFromUint8Array(res.target.result);
 					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
 					canvas.width = currentImageData.width;
 					canvas.height = currentImageData.height;
