@@ -435,11 +435,9 @@ if (!context) {
 				break;
 			}
 			case "resi": {
-				const wi = originalImage.width, hi = originalImage.height;
-				if (canvas.width == wi && canvas.height == hi) break;
 				originalImage.width = +effectParams[0].value;
 				originalImage.height = +effectParams[1].value;
-				context.clearRect(0, 0, canvas.width, canvas.height);
+				context.clearRect(0, 0, +canvas.width, +canvas.height);
 				canvas.width = +effectParams[0].value;
 				canvas.height = +effectParams[1].value;
 				context.fillStyle = effectParams[2].checked ? "" : "pixelated";
