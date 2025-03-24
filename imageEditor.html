@@ -441,11 +441,11 @@ if (!context) {
 				context.clearRect(0, 0, +canvas.width, +canvas.height);
 				canvas.width = +effectParams[0].value;
 				canvas.height = +effectParams[1].value;
-				context.fillStyle = effectParams[2].checked ? "" : "pixelated";
+				ctx.imageSmoothingEnabled = effectParams[2].checked;
 				context.drawImage(image, +effectParams[0].value, +effectParams[1].value);
 				currentImageData = context.getImageData(0, 0, +effectParams[0].value, +effectParams[1].value);
 				console.log(currentImageData);
-				context.fillStyle = "";
+				context.imageSmoothingEnabled = true;
 				break;
 			}
 		}
