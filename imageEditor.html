@@ -27,12 +27,26 @@ function loadTgaFromUint8Array(tgaData) {
 	const loader = new TgaLoader();
 	const texture = loader.load(tgaData);
 	const image = loader.imageData;
-	console.log(loader);
-	return new ImageData(
-		new Uint8ClampedArray(image),
-		loader.header.width,
-		loader.header.height
-	);
+	if (loader.header.pixelDepth === 24) {
+		const buffer = new Uint8ClampedArray(loader.header.width * loader.header.height * 4);
+		for (let i = 0; i < buffer.length;) {
+			buffer[i] = image[i]; i++;
+			buffer[i] = image[i]; i++;
+			buffer[i] = image[i]; i++;
+			buffer[i] = 255; i++;
+		}
+		return new ImageData(
+			buffer,
+			loader.header.width,
+			loader.header.height
+		);
+	} else if (loader.header.pixelDepth === 32) {
+		return new ImageData(
+			image,
+			loader.header.width,
+			loader.header.height
+		);
+	}
 }
 
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
