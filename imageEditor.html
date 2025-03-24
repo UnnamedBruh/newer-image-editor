@@ -244,6 +244,8 @@ if (!context) {
 		} else if (effects.value === "resi") {
 			effectSettings.innerHTML = "<a>Width:</a><input type=\"number\" value=\"\" id=\"e-resiw\"><br><a>Height:</a><input type=\"number\" value=\"\" id=\"e-resih\"><br><a>Anti-aliasing:</a><input type=\"checkbox\" checked id=\"e-resia\">";
 			effectParams = [document.getElementById("e-resiw"), document.getElementById("e-resih"), document.getElementById("e-resia")];
+			effectParams[0].value = canvas.width;
+			effectParams[1].value = canvas.height;
 		} else {
 			effectSettings.innerHTML = "";
 			effectParams = [];
