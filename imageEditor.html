@@ -17,7 +17,7 @@ button, body, a, p, h1, select, option {
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">Sharpen Colors (Gaussian Blur Method)</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">Sharpen Colors (Gaussian Blur Method)</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option><option value="resi">Resize Image</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
@@ -238,9 +238,12 @@ if (!context) {
 					context.fillRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
 				}
 			}
-		} else if (effects.value === "inv") {
-			effectSettings.innerHTML = "<a>Invert Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%";
+		} else if (effects.value === "inv" || effects.value === "sepia" || effects.value === "graya") {
+			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%";
 			effectParams = [document.getElementById("e-invpro")];
+		} else if (effects.value === "resi") {
+			effectSettings.innerHTML = "<a>Width:</a><input type=\"number\" value=\"\" id=\"e-resiw\"><br><a>Height:</a><input type=\"number\" value=\"\" id=\"e-resih\"><br><a>Anti-aliasing:</a><input type=\"checkbox\" checked id=\"e-resia\">";
+			effectParams = [document.getElementById("e-resiw"), document.getElementById("e-resih"), document.getElementById("e-resia")];
 		} else {
 			effectSettings.innerHTML = "";
 			effectParams = [];
@@ -405,30 +408,46 @@ if (!context) {
 			case "sharpg": {
 				const cur = applyGaussianBlur(currentImageData, generateGaussianKernel(Math.max(0.1, Math.min(2, +effectParams[1].value)), Math.max(1, Math.min(29, Math.round(+effectParams[0].value / 2) * 2 + 1))));
 				for (let i = 0; i < len;) {
-					imageData[i] = (imageData[i] + cur[i]) % 255; i++;
-					imageData[i] = (imageData[i] + cur[i]) % 255; i++;
-					imageData[i] = (imageData[i] + cur[i]) % 255; i += 2;
+					imageData[i] = (imageData[i] + cur[i]) / 2; i++;
+					imageData[i] = (imageData[i] + cur[i]) / 2; i++;
+					imageData[i] = (imageData[i] + cur[i]) / 2; i += 2;
 				}
 				break;
 			}
 			case "sepia": {
-				let r, g, b;
+				let r, g, b, prog = +effectParams[0].value / 100;
 				for (let i = 0; i < len;) {
 					r = imageData[i]; g = imageData[i + 1]; b = imageData[i + 2];
-					imageData[i] = Math.min(255, (0.393 * r) + (0.769 * g) + (0.189 * b)); i++;
-					imageData[i] = Math.min(255, (0.349 * r) + (0.686 * g) + (0.168 * b)); i++;
-        				imageData[i] = Math.min(255, (0.272 * r) + (0.534 * g) + (0.131 * b)); i += 2;
+					imageData[i] = interpolate(imageData[i], Math.min(255, (0.393 * r) + (0.769 * g) + (0.189 * b)), prog); i++;
+					imageData[i] = interpolate(imageData[i], Math.min(255, (0.349 * r) + (0.686 * g) + (0.168 * b)), prog); i++;
+        				imageData[i] = interpolate(imageData[i], Math.min(255, (0.272 * r) + (0.534 * g) + (0.131 * b)), prog); i += 2;
 				}
 				break;
 			}
 			case "graya": {
-				let res;
+				let res, prog = +effectParams[0].value / 100;
 				for (let i = 0; i < len;) {
 					res = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
-					imageData[i] = res; i++;
-					imageData[i] = res; i++;
-        				imageData[i] = res; i += 2;
+					imageData[i] = interpolate(imageData[i], res, prog); i++;
+					imageData[i] = interpolate(imageData[i], res, prog); i++;
+        				imageData[i] = interpolate(imageData[i], res, prog); i += 2;
 				}
+				break;
+			}
+			case "resi": {
+				const wi = originalImage.width, hi = originalImage.height;
+				if (canvas.width == wi && canvas.height == hi) break;
+				originalImage.width = +effectParams[0].value;
+				originalImage.height = +effectParams[1].value;
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				canvas.width = +effectParams[0].value;
+				canvas.height = +effectParams[1].value;
+				context.fillStyle = effectParams[2].checked ? "" : "pixelated";
+				context.drawImage(originalImage, +effectParams[0].value, +effectParams[1].value);
+				const newImg = new Image(canvas.toDataURL("image/png"));
+				originalImage = newImg;
+				currentImageData = new ImageData(context.getImageData(0, 0, +effectParams[0].value, +effectParams[1].value), +effectParams[0].value, +effectParams[1].value);
+				context.fillStyle = "";
 				break;
 			}
 		}
