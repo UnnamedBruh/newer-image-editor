@@ -13,7 +13,7 @@ button, body, a, p, h1, select, option {
 </head>
 <body>
 <h1>Image Editor</h1>
-<input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga"><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
+<input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga, .dds"><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
@@ -164,6 +164,14 @@ if (!context) {
 					canvas.height = currentImageData.height;
 					context.clearRect(0, 0, +canvas.width, +canvas.height);
 					context.putImageData(currentImageData, 0, 0);
+				} else if (file.name.endsWith(".dds")) {
+					alert("DDS.js (browser port) is being used to decode the image.");
+					currentImageData = loadDdsFromUint8Array(new Uint8Array(res.target.result));
+					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+					canvas.width = currentImageData.width;
+					canvas.height = currentImageData.height;
+					context.clearRect(0, 0, +canvas.width, +canvas.height);
+					context.putImageData(currentImageData, 0, 0);
 				} else {
 					const img = new Image();
 					img.onload = function() {
@@ -264,10 +272,10 @@ if (!context) {
 				}
 			}
 		}
-		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga")) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
+		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga") && !file.name.endsWith(".dds")) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
 	});
 	treatFile.oninput = function() {
-		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
+		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga, .dds"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
 	}
 	let effectParams = [];
 	function extractRGBA(hex, a) {
