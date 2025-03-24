@@ -435,16 +435,16 @@ if (!context) {
 				break;
 			}
 			case "resi": {
-				originalImage.width = +effectParams[0].value;
-				originalImage.height = +effectParams[1].value;
+				const image = new Image();
+				image.src = canvas.toDataURL("image/png");
+				console.log(image.src);
 				context.clearRect(0, 0, +canvas.width, +canvas.height);
 				canvas.width = +effectParams[0].value;
 				canvas.height = +effectParams[1].value;
 				context.fillStyle = effectParams[2].checked ? "" : "pixelated";
-				context.drawImage(originalImage, +effectParams[0].value, +effectParams[1].value);
-				const newImg = new Image(canvas.toDataURL("image/png"));
-				originalImage = newImg;
+				context.drawImage(image, +effectParams[0].value, +effectParams[1].value);
 				currentImageData = context.getImageData(0, 0, +effectParams[0].value, +effectParams[1].value);
+				console.log(currentImageData);
 				context.fillStyle = "";
 				break;
 			}
