@@ -241,7 +241,7 @@ function loadDdsFromUint8Array(ddsData) {
 		}
 	} catch (err) {
 		alert("There has been an error trying to decode the DDS image: " + err.message);
-		if (tgaData.length === 0) alert("The DDS image contains no file data at all. This is needed to provide the context of the image (e.g. the width, height, color channels, etc), and the image data itself.");
+		if (ddsData.length === 0) alert("The DDS image contains no file data at all. This is needed to provide the context of the image (e.g. the width, height, color channels, etc), and the image data itself.");
 		else if ((loader.pf_rgbBitCount === 24 && image.length !== loader.width * loader.height * 3) || (loader.pf_rgbBitCount === 32 && image.length !== loader.width * loader.height * 4)) alert("There appears to be an image data overflow (providing too many pixel values) or underflow (providing too little pixel values). This has to be fixed, so the image can correctly be loaded next time.");
 		else if ([24, 32].indexOf(loader.pf_rgbBitCount) === -1) {
 			if (confirm("The DDS image has a very odd specification of the pixel depth (provided was " + loader.pf_rgbBitCount + ", expected was 24, or 32). Do you want to provide the pixel depth?")) {
