@@ -137,7 +137,7 @@ function getFormatInfo(header) {
   }
 
   if (!formatInfo) {
-    throw new Error("Unknown or unsupported DDS format");
+    throw new Error("Unknown or unsupported DDS format (provided format is {'pf_flags': " + header.pf_flags + ", 'header.pf_rgbBitCount': " + header.pf_rgbBitCount + "}");
   }
 
   return formatInfo;
