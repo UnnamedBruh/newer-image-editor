@@ -48,7 +48,7 @@ function loadTgaFromUint8Array(tgaData) {
 		]
 	];
 	let instructions = possibleInstructions.find(x => x[0])[1];
-	alert("Proper handling for the image being flipped upside down will come soon. For now, you must " + instructions + (instructions === "shift the color channels until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
+	alert("Proper handling for the TGA origins and different color orders will come in a future update. For now, you must " + instructions + (instructions === "shift the color channels until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
 	if (loader.header.pixelDepth === 24) {
 		const buffer = new Uint8ClampedArray(loader.header.width * loader.header.height * 4)
 		for (let i = 0, j = 0; i < buffer.length;) {
@@ -582,7 +582,7 @@ if (!context) {
 				break;
 			}
 			case "rgbsh": {
-				let i = 0, prog = +effectParams[0].value * 2.55, r, g, b;
+				let i = 0, prog = +effectParams[0].value / 100, r, g, b;
 				for (i = 0; i < len;) {
 					r = imageData[i];
 					g = imageData[i + 1];
