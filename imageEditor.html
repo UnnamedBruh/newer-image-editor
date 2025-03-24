@@ -27,6 +27,7 @@ function loadTgaFromUint8Array(tgaData) {
 	const loader = new TgaLoader();
 	const texture = loader.load(tgaData);
 	const image = loader.data;
+	console.log(loader);
 	return new ImageData(
 		image,
 		loader.header.width,
