@@ -227,51 +227,63 @@ function loadTgaFromUint8Array(tgaData) {
 }
 
 function loadDdsFromUint8Array(ddsData) {
-	let buffer, image, loader;
+	let buffer, image, ddsFileInfo;
 	try {
-		loader = parseDDS(ddsData);
-		image = loader.parts[Math.floor(Math.max(0, Math.min(result.parts.length - 1, +prompt("Select a mipmap to be chosen for the imported image (there are " + loader.parts.length + " mipmaps left. select an index that is zero-based)") || 0)))];
-		if (loader.pf_rgbBitCount === 24 && (loader.format === gl.BGR && loader.internal_format === gl.RGB8)) {
-			buffer = new Uint8ClampedArray(loader.header.width * loader.header.height * 4);
+		// Parse DDS file
+		ddsFileInfo = parseDDS(ddsData);
+
+		// User selects mipmap level
+		const mipmapIndex = Math.floor(Math.max(0, Math.min(ddsFileInfo.parts.length - 1, +prompt(
+			`Select a mipmap level (there are ${ddsFileInfo.parts.length} mipmaps available). ` +
+			`Select an index (zero-based) or use 0 for the highest resolution level.`)) || 0));
+		
+		image = ddsFileInfo.parts[mipmapIndex];
+		
+		// Handle specific DDS formats
+		if (ddsFileInfo.pf_rgbBitCount === 24 && (ddsFileInfo.format === gl.BGR && ddsFileInfo.internal_format === gl.RGB8)) {
+			// Convert BGR to RGBA (add alpha channel)
+			buffer = new Uint8ClampedArray(ddsFileInfo.header.width * ddsFileInfo.header.height * 4);
 			let i = 0;
 			for (let j = 0; i < buffer.length; j += 3) {
-				buffer[i] = image[j + 2]; i++;
-				buffer[i] = image[j + 1]; i++;
-				buffer[i] = image[j]; i++;
-				buffer[i] = 255; i++;
+				// Swap R and B channels (since it's BGR) and add alpha channel as 255
+				buffer[i] = image[j + 2]; i++;  // R
+				buffer[i] = image[j + 1]; i++;  // G
+				buffer[i] = image[j]; i++;      // B
+				buffer[i] = 255; i++;           // Alpha (fully opaque)
 			}
-			return new ImageData(
-				buffer,
-				loader.header.width,
-				loader.header.height
-			);
-		} else if (loader.pf_rgbBitCount === 32 && (loader.format === gl.RGB && loader.internal_format === gl.RGBA8)) {
-			return new ImageData(
-				image,
-				loader.header.width,
-				loader.header.height
-			);
+			return new ImageData(buffer, ddsFileInfo.header.width, ddsFileInfo.header.height);
+
+		} else if (ddsFileInfo.pf_rgbBitCount === 32 && (ddsFileInfo.format === gl.RGB && ddsFileInfo.internal_format === gl.RGBA8)) {
+			// No conversion needed for RGBA8 format
+			return new ImageData(image, ddsFileInfo.header.width, ddsFileInfo.header.height);
+
 		} else {
-			alert("Unknown colorspace for the DDS image - this case will be handled in the future");
+			// Handle unsupported formats
+			alert("Unknown colorspace for the DDS image - this case will be handled in the future.");
 		}
 	} catch (err) {
-		alert("There has been an error trying to decode the DDS image: " + err.message);
-		if (ddsData.length === 0) alert("The DDS image contains no file data at all. This is needed to provide the context of the image (e.g. the width, height, color channels, etc), and the image data itself.");
-		else if ((loader.pf_rgbBitCount === 24 && image.length !== loader.width * loader.height * 3) || (loader.pf_rgbBitCount === 32 && image.length !== loader.width * loader.height * 4)) alert("There appears to be an image data overflow (providing too many pixel values) or underflow (providing too little pixel values). This has to be fixed, so the image can correctly be loaded next time.");
-		else if ([24, 32].indexOf(loader.pf_rgbBitCount) === -1) {
-			if (confirm("The DDS image has a very odd specification of the pixel depth (provided was " + loader.pf_rgbBitCount + ", expected was 24, or 32). Do you want to provide the pixel depth?")) {
-				//16
-				let pixelDepth = +prompt("Provide the pixel depth (the default is 24).") || 24;
-				if ([24, 32].indexOf(loader.header.pixelDepth) === -1) {
-					while ([24, 32].indexOf(loader.header.pixelDepth) === -1) {
-						alert("That level isn't recommended; you need to specify again.");
-						pixelDepth = +prompt("Provide the pixel depth (the default is 24).") || 24;
-					}
+		alert("Error decoding the DDS image: " + err.message);
+		
+		// Specific checks for potential issues
+		if (ddsData.length === 0) {
+			alert("The DDS file is empty. This image requires data for width, height, channels, etc.");
+		} else if ((ddsFileInfo.pf_rgbBitCount === 24 && image.length !== ddsFileInfo.width * ddsFileInfo.height * 3) || 
+			(ddsFileInfo.pf_rgbBitCount === 32 && image.length !== ddsFileInfo.width * ddsFileInfo.height * 4)) {
+			alert("Image data overflow or underflow: the provided pixel data does not match the expected dimensions.");
+		} else if (![24, 32].includes(ddsFileInfo.pf_rgbBitCount)) {
+			// Handle unexpected pixel depth
+			if (confirm("Unexpected pixel depth in DDS image (" + ddsFileInfo.pf_rgbBitCount + "). Would you like to provide the pixel depth?")) {
+				let pixelDepth = +prompt("Provide the pixel depth (default is 24).") || 24;
+				while (![24, 32].includes(pixelDepth)) {
+					alert("Unsupported pixel depth. Please choose 24 or 32.");
+					pixelDepth = +prompt("Provide the pixel depth (default is 24).") || 24;
 				}
+				// Update the pixel depth
 				ddsData[28] = Math.round(pixelDepth & 256);
 				ddsData[29] = 0;
 				ddsData[30] = 0;
 				ddsData[31] = 0;
+				// Assuming this function exists
 				loadTgaFromUint8Array(ddsData);
 			}
 		}
