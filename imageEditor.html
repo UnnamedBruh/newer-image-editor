@@ -17,7 +17,7 @@ button, body, a, p, h1, select, option {
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">Sharpen Colors (Gaussian Blur Method)</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="contr">Contrast</option><option value="resi">Resize Image</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">Sharpen Colors (Gaussian Blur Method)</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="resi">Resize Image</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
@@ -480,6 +480,35 @@ if (!context) {
 						imageData[i] = interpolate(0, 255, Math.pow(imageData[i] / 255, contr)); i += 2;
 					}
 				}
+				break;
+			}
+			case "flipy": {
+				const a = new Uint8ClampedArray(imageData.length), rowSize = 4 * currentImageData.width, hei = currentImageData.height;
+				let sourceRowIndex, destRowindex;
+				for (let y = 0; y < hei; y++) {
+					sourceRowIndex = (currentImageData.height - 1 - y) * rowSize;
+					destRowIndex = y * rowSize;
+					for (let x = 0; x < rowSize; x++) {
+						a[destRowIndex + x] = imageData[sourceRowIndex + x];
+					}
+				}
+				imageData.set(a);
+				break;
+			}
+			case "flipx": {
+				const newData = new Uint8ClampedArray(imageData.length), casa = currentImageData.width * 4
+				let mirroredX, mirrorCache, mirrorETarg;
+				for (let y = 0; y < len; y += casa) {
+					for (let x = 0; x < casa; x += 4) {
+						mirroredX = casa - x - 4;
+						mirrorCache = y + mirroredX, mirrorTarg = y + x;
+						newData[mirrorCache] = imageData[mirrorTarg]; mirrorCache++, mirrorTarg++;
+						newData[mirrorCache] = imageData[mirrorTarg]; mirrorCache++, mirrorTarg++;
+						newData[mirrorCache] = imageData[mirrorTarg]; mirrorCache++, mirrorTarg++;
+						newData[mirrorCache] = imageData[mirrorTarg];
+					}
+				}
+				data.set(newData);
 				break;
 			}
 		}
