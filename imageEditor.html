@@ -475,9 +475,9 @@ if (!context) {
 					}
 				} else {
 					for (let i = 0; i < len;) {
-						imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i++;
-						imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i++;
-						imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i += 2;
+						imageData[i] = interpolate(0, 255, Math.pow(imageData[i] / 255, contr)); i++;
+						imageData[i] = interpolate(0, 255, Math.pow(imageData[i] / 255, contr)); i++;
+						imageData[i] = interpolate(0, 255, Math.pow(imageData[i] / 255, contr)); i += 2;
 					}
 				}
 				break;
