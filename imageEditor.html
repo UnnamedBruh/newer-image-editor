@@ -17,7 +17,7 @@ button, body, a, p, h1, select, option {
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">Sharpen Colors (Gaussian Blur Method)</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option><option value="resi">Resize Image</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">Sharpen Colors (Gaussian Blur Method)</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="contr">Contrast</option><option value="resi">Resize Image</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
@@ -238,7 +238,7 @@ if (!context) {
 					context.fillRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
 				}
 			}
-		} else if (effects.value === "inv" || effects.value === "sepia" || effects.value === "graya") {
+		} else if (effects.value === "inv" || effects.value === "sepia" || effects.value === "graya" || effects.value === "grayb") {
 			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%";
 			effectParams = [document.getElementById("e-invpro")];
 		} else if (effects.value === "resi") {
@@ -246,6 +246,9 @@ if (!context) {
 			effectParams = [document.getElementById("e-resiw"), document.getElementById("e-resih"), document.getElementById("e-resia")];
 			effectParams[0].value = canvas.width;
 			effectParams[1].value = canvas.height;
+		} else if (effects.value === "contr") {
+			effectSettings.innerHTML = "<a>Contrast Level:</a><input type=\"number\" value=\"0.5\" step=\"0.02\" min=\"0\" max=\"10\" id=\"e-contr\">";
+			effectParams = [document.getElementById("e-contr")];
 		} else {
 			effectSettings.innerHTML = "";
 			effectParams = [];
@@ -449,6 +452,25 @@ if (!context) {
 					currentImageData = context.getImageData(0, 0, +effectParams[0].value, +effectParams[1].value);
 					context.imageSmoothingEnabled = true;
 					image.src = "";
+				}
+				break;
+			}
+			case "grayb": {
+				let brightness, prog = +effectParams[0].value / 100;
+				for (let i = 0; i < len;) {
+					brightness = (0.34 * imageData[i]) + (0.5 * imageData[i + 1]) + (0.16 * imageData[i + 2]);
+					imageData[i] = interpolate(imageData[i], brightness, prog); i++;
+					imageData[i] = interpolate(imageData[i], brightness, prog); i++;
+					imageData[i] = interpolate(imageData[i], brightness, prog); i += 2;
+				}
+				break;
+			}
+			case "contr": {
+				const contr = +effectParams[0].input.value + 1;
+				for (let i = 0; i < len;) {
+					imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i++;
+					imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i++;
+					imageData[i] = interpolate(0, 255, Math.pow(data[i] / 255, contr)); i += 2;
 				}
 				break;
 			}
