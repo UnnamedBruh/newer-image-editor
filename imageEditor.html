@@ -444,7 +444,7 @@ if (!context) {
 				context.drawImage(originalImage, +effectParams[0].value, +effectParams[1].value);
 				const newImg = new Image(canvas.toDataURL("image/png"));
 				originalImage = newImg;
-				currentImageData = new ImageData(context.getImageData(0, 0, +effectParams[0].value, +effectParams[1].value), +effectParams[0].value, +effectParams[1].value);
+				currentImageData = context.getImageData(0, 0, +effectParams[0].value, +effectParams[1].value);
 				context.fillStyle = "";
 				break;
 			}
