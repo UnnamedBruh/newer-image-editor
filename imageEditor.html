@@ -512,8 +512,8 @@ if (!context) {
 				break;
 			}
 			case "parag": {
-				canvas.width = effectParams[0].input.value;
-				canvas.height = effectParams[1].input.value;
+				canvas.width = effectParams[0].value;
+				canvas.height = effectParams[1].value;
 				const requiredSize = +effectParams[0].value * +effectParams[1].value * 4;
 				let deeea = new Uint8ClampedArray(requiredSize);
 				deeea.set(imageData.slice(0, Math.min(requiredSize, imageData.length)));
