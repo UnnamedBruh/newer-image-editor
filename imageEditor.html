@@ -26,7 +26,7 @@ const TYPE_NO_DATA=0,TYPE_INDEXED=1,TYPE_RGB=2,TYPE_GREY=3,TYPE_RLE_INDEXED=9,TY
 function loadTgaFromUint8Array(tgaData) {
 	const loader = new TgaLoader();
 	const texture = loader.load(tgaData);
-	const image = texture.image;
+	const image = loader.imageData;
 	return new ImageData(
 		new Uint8ClampedArray(image.data),
 		image.width,
