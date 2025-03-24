@@ -27,13 +27,10 @@ const TYPE_NO_DATA=0,TYPE_INDEXED=1,TYPE_RGB=2,TYPE_GREY=3,TYPE_RLE_INDEXED=9,TY
 const gl = document.createElement("canvas").getContext("webgl");
 
 const DDS_MAGIC = "DDS ";
-const DDS_HEADER = {
-  size: 0, flags: 0, height: 0, width: 0, pitchOrLinearSize: 0, 
-  depth: 0, mipMapCount: 0, pf_size: 0, pf_flags: 0, pf_fourCC: 0, 
-  pf_rgbBitCount: 0, pf_rMask: 0, pf_gMask: 0, pf_bMask: 0, pf_aMask: 0, 
-  caps1: 0, caps2: 0
-};
+const DX10_MAGIC = "DX10";  // Added DX10 magic constant
+const DDS_HEADER_SIZE = 124; // Fixed size for standard DDS header
 
+// Constants for DDS flags and formats
 const DDSF_CAPS = 1;
 const DDSF_HEIGHT = 2;
 const DDSF_WIDTH = 4;
@@ -57,6 +54,7 @@ const fourccFormats = {
   [FOURCC.RGB24]: format(gl.BGR, gl.RGB8, gl.UNSIGNED_BYTE, 3)
 };
 
+// Helper functions to define format and compressed format
 function format(t, e, r, a) {
   return { format: t, internal_format: e, type: r, bytesPerElement: a, compressed: false };
 }
@@ -65,6 +63,7 @@ function compressedFormat(t, e) {
   return { format: t, internal_format: t, type: t, bytesPerElement: e, compressed: true };
 }
 
+// Main function to parse DDS file
 function parseDDS(arrayBuffer) {
   if (!(arrayBuffer instanceof ArrayBuffer)) {
     throw new Error("Expected ArrayBuffer");
@@ -94,7 +93,7 @@ function parseDDS(arrayBuffer) {
   let width = result.width;
   let height = result.height;
   let depth = result.depth || 1;
-  let offset = 4 + DDS_HEADER.size;
+  let offset = 4 + DDS_HEADER_SIZE;  // Start offset after the header
 
   for (let level = 0; level < result.levels; level++) {
     const size = Math.max(1, Math.floor(width / 2)) * Math.max(1, Math.floor(height / 2)) * depth * result.bytesPerElement;
@@ -107,9 +106,10 @@ function parseDDS(arrayBuffer) {
   return result;
 }
 
+// Unpack the DDS header
 function unpackDDSHeader(bytes) {
   const view = new DataView(bytes.buffer);
-  return {
+  const header = {
     width: view.getUint32(4, true),
     height: view.getUint32(8, true),
     flags: view.getUint32(12, true),
@@ -121,8 +121,23 @@ function unpackDDSHeader(bytes) {
     caps2: view.getUint32(112, true),
     size: view.getUint32(0, true)
   };
+
+  // Check for DX10 extended header
+  if (new TextDecoder().decode(bytes.slice(0, 4)) === DX10_MAGIC) {
+    // Parse DX10 header (additional fields)
+    header.isDX10 = true;
+    // For simplicity, let's assume DX10 header starts at byte 124
+    const dx10View = new DataView(bytes.buffer, DDS_HEADER_SIZE);
+    header.dx10Format = dx10View.getUint32(0, true);
+    header.arraySize = dx10View.getUint32(4, true);
+    header.miscFlags = dx10View.getUint32(8, true);
+    // Any other DX10-specific parsing can go here...
+  }
+
+  return header;
 }
 
+// Interpret the format based on flags and FOURCC
 function getFormatInfo(header) {
   let formatInfo = null;
 
@@ -137,7 +152,7 @@ function getFormatInfo(header) {
   }
 
   if (!formatInfo) {
-    throw new Error("Unknown or unsupported DDS format (provided format is {'pf_flags': " + header.pf_flags + ", 'header.pf_rgbBitCount': " + header.pf_rgbBitCount + "}");
+    throw new Error(`Unknown DDS format: pf_flags=${header.pf_flags}, pf_fourCC=${header.pf_fourCC}, pf_rgbBitCount=${header.pf_rgbBitCount}`);
   }
 
   return formatInfo;
