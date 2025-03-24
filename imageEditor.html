@@ -212,9 +212,9 @@ function loadTgaFromUint8Array(tgaData) {
 }
 
 function loadDdsFromUint8Array(ddsData) {
-	let buffer, image;
+	let buffer, image, loader;
 	try {
-		const loader = parseDDS(ddsData);
+		loader = parseDDS(ddsData);
 		image = loader.parts[Math.floor(Math.max(0, Math.min(result.parts.length - 1, +prompt("Select a mipmap to be chosen for the imported image (there are " + loader.parts.length + " mipmaps left. select an index that is zero-based)") || 0)))];
 		if (loader.pf_rgbBitCount === 24 && (loader.format === gl.BGR && loader.internal_format === gl.RGB8)) {
 			buffer = new Uint8ClampedArray(loader.header.width * loader.header.height * 4);
