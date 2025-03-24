@@ -413,9 +413,9 @@ if (!context) {
 			case "sharpg": {
 				const cur = applyGaussianBlur(currentImageData, generateGaussianKernel(Math.max(0.1, Math.min(2, +effectParams[1].value)), Math.max(1, Math.min(29, Math.round(+effectParams[0].value / 2) * 2 + 1)))).data;
 				for (let i = 0; i < len;) {
-					imageData[i] = (imageData[i] + cur[i]) * 2; i++;
-					imageData[i] = (imageData[i] + cur[i]) * 2; i++;
-					imageData[i] = (imageData[i] + cur[i]) * 2; i += 2;
+					imageData[i] = (imageData[i] + cur[i]) / 1.5; i++;
+					imageData[i] = (imageData[i] + cur[i]) / 1.5; i++;
+					imageData[i] = (imageData[i] + cur[i]) / 1.5; i += 2;
 				}
 				break;
 			}
