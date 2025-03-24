@@ -24,7 +24,116 @@ button, body, a, p, h1, select, option {
 const TYPE_NO_DATA=0,TYPE_INDEXED=1,TYPE_RGB=2,TYPE_GREY=3,TYPE_RLE_INDEXED=9,TYPE_RLE_RGB=10,TYPE_RLE_GREY=11,ORIGIN_BOTTOM_LEFT=0,ORIGIN_BOTTOM_RIGHT=1,ORIGIN_TOP_LEFT=2,ORIGIN_TOP_RIGHT=3,ORIGIN_SHIFT=4,ORIGIN_MASK=48;class TgaLoader{_checkHeader(){const e=this.header;if(0===e.imageType)throw new Error("No data");if(e.hasColorMap){if(e.colorMapLength>256||24!==e.colorMapDepth||1!==e.colorMapType)throw new Error("Invalid colormap for indexed type")}else if(e.colorMapType)throw new Error("Why does the image contain a palette?");if(!e.width||!e.height)throw new Error("Invalid image size");if(8!==e.pixelDepth&&16!==e.pixelDepth&&24!==e.pixelDepth&&32!==e.pixelDepth)throw new Error('Invalid pixel size "'+e.pixelDepth+'"')}_decodeRLE(e,t,a,r){const o=new Uint8Array(r),i=new Uint8Array(a);let s=0;for(;s<r;){const r=e[t++];let h=1+(127&r);if(128&r){for(let r=0;r<a;++r)i[r]=e[t+r];t+=a;for(let e=0;e<h;++e)o.set(i,s),s+=a}else{h*=a;for(let a=0;a<h;++a)o[s+a]=e[t+a];s+=h,t+=h}}return o}_getImageData8bits(e,t,a,r,o,i,s,h,n,g){for(let l=0,p=o;p!==s;p+=i)for(let o=h;o!==g;o+=n,l++){const i=t[l];e[4*(o+r*p)+3]=255,e[4*(o+r*p)+2]=a[3*i+0],e[4*(o+r*p)+1]=a[3*i+1],e[4*(o+r*p)+0]=a[3*i+2]}return e}_getImageData16bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=2){const i=t[a+0]|t[a+1]<<8;e[4*(o+r*l)+0]=(31744&i)>>7,e[4*(o+r*l)+1]=(992&i)>>2,e[4*(o+r*l)+2]=(31&i)>>3,e[4*(o+r*l)+3]=32768&i?0:255}return e}_getImageData24bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=3)e[4*(o+r*l)+3]=255,e[4*(o+r*l)+2]=t[a+0],e[4*(o+r*l)+1]=t[a+1],e[4*(o+r*l)+0]=t[a+2];return e}_getImageData32bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=4)e[4*(o+r*l)+2]=t[a+0],e[4*(o+r*l)+1]=t[a+1],e[4*(o+r*l)+0]=t[a+2],e[4*(o+r*l)+3]=t[a+3];return e}_getImageDataGrey8bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a++){const i=t[a];e[4*(o+r*l)+0]=i,e[4*(o+r*l)+1]=i,e[4*(o+r*l)+2]=i,e[4*(o+r*l)+3]=255}return e}_getImageDataGrey16bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=2)e[4*(o+r*l)+0]=t[a+0],e[4*(o+r*l)+1]=t[a+0],e[4*(o+r*l)+2]=t[a+0],e[4*(o+r*l)+3]=t[a+1];return e}open(e,t){const a=new XMLHttpRequest;a.responseType="arraybuffer",a.open("GET",e,!0),a.onload=()=>{200===a.status&&(this.load(new Uint8Array(a.response)),t&&t())},a.send(null)}load(e){let t=0;if(e.length<18)throw new Error("Not enough data to contain header");const a={idLength:e[t++],colorMapType:e[t++],imageType:e[t++],colorMapIndex:e[t++]|e[t++]<<8,colorMapLength:e[t++]|e[t++]<<8,colorMapDepth:e[t++],offsetX:e[t++]|e[t++]<<8,offsetY:e[t++]|e[t++]<<8,width:e[t++]|e[t++]<<8,height:e[t++]|e[t++]<<8,pixelDepth:e[t++],flags:e[t++]};if(a.hasEncoding=9===a.imageType||10===a.imageType||11===a.imageType,a.hasColorMap=9===a.imageType||1===a.imageType,a.isGreyColor=11===a.imageType||3===a.imageType,this.header=a,this._checkHeader(),t+=a.idLength,t>=e.length)throw new Error("No data");if(a.hasColorMap){const r=a.colorMapLength*(a.colorMapDepth>>3);this.palette=e.subarray(t,t+r),t+=r}const r=a.pixelDepth>>3,o=a.width*a.height,i=o*r;a.hasEncoding?this.imageData=this._decodeRLE(e,t,r,i):this.imageData=e.subarray(t,t+(a.hasColorMap?o:i))}getImageData(e){const{width:t,height:a,flags:r,pixelDepth:o,isGreyColor:i}=this.header,s=(48&r)>>4;let h,n,g,l,p,c,d;switch(e||(e=document?document.createElement("canvas").getContext("2d").createImageData(t,a):{width:t,height:a,data:new Uint8ClampedArray(t*a*4)}),2===s||3===s?(l=0,p=1,c=a):(l=a-1,p=-1,c=-1),2===s||0===s?(h=0,n=1,g=t):(h=t-1,n=-1,g=-1),o){case 8:d=i?this._getImageDataGrey8bits:this._getImageData8bits;break;case 16:d=i?this._getImageDataGrey16bits:this._getImageData16bits;break;case 24:d=this._getImageData24bits;break;case 32:d=this._getImageData32bits}return d.call(this,e.data,this.imageData,this.palette,t,l,p,c,h,n,g),e}getCanvas(){const{width:e,height:t}=this.header,a=document.createElement("canvas"),r=a.getContext("2d"),o=r.createImageData(e,t);return a.width=e,a.height=t,r.putImageData(this.getImageData(o),0,0),a}getDataURL(e){return this.getCanvas().toDataURL(e||"image/png")}};
 
 // dds.js
-const gl=document.createElement("canvas").getContext("webgl"),DDSF_CAPS=1,DDSF_HEIGHT=2,DDSF_WIDTH=4,DDSF_PIXELFORMAT=4096,DDSF_MIPMAPCOUNT=131072,DDSF_FOURCC=4,DDSF_RGBA=65,DDSF_RGB=64,FOURCC_DXT1=827611204,FOURCC_DXT5=894720068,FOURCC_R8G8B8=20,FOURCC_RGB32=1145194322,FOURCC_RGBA32=1178748754,FOURCC_RGB24=910313298,DDS_MAGIC="DDS ",DDS_HEADER={size:0,flags:0,height:0,width:0,pitchOrLinearSize:0,depth:0,mipMapCount:0,pf_size:0,pf_flags:0,pf_fourCC:0,pf_rgbBitCount:0,pf_rMask:0,pf_gMask:0,pf_bMask:0,pf_aMask:0,caps1:0,caps2:0},format=(t,e,r,a)=>({format:t,internal_format:e,type:r,bytesPerElement:a,compressed:!1}),compressedFormat=(t,e)=>({format:t,internal_format:t,type:t,bytesPerElement:e,compressed:!0}),fourcc_formats={827611204:compressedFormat(gl.COMPRESSED_RGBA_S3TC_DXT1_EXT,8),894720068:compressedFormat(gl.COMPRESSED_RGBA_S3TC_DXT5_EXT,16),20:format(gl.BGR,gl.RGB8,gl.UNSIGNED_BYTE,3),1145194322:format(gl.RGB,gl.RGBA8,gl.UNSIGNED_BYTE,4),1178748754:format(gl.RGBA,gl.RGBA8,gl.UNSIGNED_BYTE,4),910313298:format(gl.BGR,gl.RGB8,gl.UNSIGNED_BYTE,3)};function parseDDS(t){let e={};if(!(t instanceof ArrayBuffer))throw new Error("Expected ArrayBuffer");const r=new Uint8Array(t);if("DDS "!==(new TextDecoder).decode(r.slice(0,4)))throw new Error("Not a valid DDS file");const a=unpackDDSHeader(r);let f=4+DDS_HEADER.size;e.width=a.width,e.height=a.height,e.depth=1&a.caps2?a.depth:0,e.levels=131072&a.flags?a.mipMapCount:1;let o=null;if(4&a.pf_flags?o=fourcc_formats[a.pf_fourCC]:65===a.pf_flags&&32===a.pf_rgbBitCount?o=fourcc_formats[1178748754]:64===a.pf_flags&&32===a.pf_rgbBitCount?o=fourcc_formats[1145194322]:64===a.pf_flags&&24===a.pf_rgbBitCount&&(o=fourcc_formats[910313298]),!o)throw new Error("Unknown or unsupported DDS format");Object.assign(e,o),e.parts=[];let s=e.width,n=e.height,_=e.depth||1;for(let t=0;t<e.levels;t++){const t=Math.max(1,Math.floor(s/2))*Math.max(1,Math.floor(n/2))*_*e.bytesPerElement;e.parts.push({offset:f,size:t}),f+=t,s=Math.max(1,Math.floor(s/2)),n=Math.max(1,Math.floor(n/2))}return e}function unpackDDSHeader(t){const e=new DataView(t.buffer);return{width:e.getUint32(4,!0),height:e.getUint32(8,!0),flags:e.getUint32(12,!0),pf_flags:e.getUint32(20,!0),pf_fourCC:e.getUint32(84,!0),pf_rgbBitCount:e.getUint32(28,!0),mipMapCount:e.getUint32(104,!0),caps1:e.getUint32(108,!0),caps2:e.getUint32(112,!0),size:e.getUint32(0,!0)}}
+const gl = document.createElement("canvas").getContext("webgl");
+
+const DDS_MAGIC = "DDS ";
+const DDS_HEADER = {
+  size: 0, flags: 0, height: 0, width: 0, pitchOrLinearSize: 0, 
+  depth: 0, mipMapCount: 0, pf_size: 0, pf_flags: 0, pf_fourCC: 0, 
+  pf_rgbBitCount: 0, pf_rMask: 0, pf_gMask: 0, pf_bMask: 0, pf_aMask: 0, 
+  caps1: 0, caps2: 0
+};
+
+const FOURCC = {
+  DXT1: 827611204, DXT5: 894720068, R8G8B8: 20, RGB32: 1145194322, 
+  RGBA32: 1178748754, RGB24: 910313298
+};
+
+const fourccFormats = {
+  [FOURCC.DXT1]: compressedFormat(gl.COMPRESSED_RGBA_S3TC_DXT1_EXT, 8),
+  [FOURCC.DXT5]: compressedFormat(gl.COMPRESSED_RGBA_S3TC_DXT5_EXT, 16),
+  [FOURCC.R8G8B8]: format(gl.BGR, gl.RGB8, gl.UNSIGNED_BYTE, 3),
+  [FOURCC.RGB32]: format(gl.RGB, gl.RGBA8, gl.UNSIGNED_BYTE, 4),
+  [FOURCC.RGBA32]: format(gl.RGBA, gl.RGBA8, gl.UNSIGNED_BYTE, 4),
+  [FOURCC.RGB24]: format(gl.BGR, gl.RGB8, gl.UNSIGNED_BYTE, 3)
+};
+
+function format(t, e, r, a) {
+  return { format: t, internal_format: e, type: r, bytesPerElement: a, compressed: false };
+}
+
+function compressedFormat(t, e) {
+  return { format: t, internal_format: t, type: t, bytesPerElement: e, compressed: true };
+}
+
+function parseDDS(arrayBuffer) {
+  if (!(arrayBuffer instanceof ArrayBuffer)) {
+    throw new Error("Expected ArrayBuffer");
+  }
+
+  const bytes = new Uint8Array(arrayBuffer);
+
+  // Validate DDS Magic String
+  if (new TextDecoder().decode(bytes.slice(0, 4)) !== DDS_MAGIC) {
+    throw new Error("Not a valid DDS file");
+  }
+
+  const header = unpackDDSHeader(bytes);
+  const formatInfo = getFormatInfo(header);
+  
+  let result = {
+    width: header.width,
+    height: header.height,
+    depth: header.caps2 & 1 ? header.depth : 0,
+    levels: (header.flags & DDSF_MIPMAPCOUNT) ? header.mipMapCount : 1,
+    parts: []
+  };
+
+  Object.assign(result, formatInfo);
+
+  // Calculate mipmap levels
+  let width = result.width;
+  let height = result.height;
+  let depth = result.depth || 1;
+  let offset = 4 + DDS_HEADER.size;
+
+  for (let level = 0; level < result.levels; level++) {
+    const size = Math.max(1, Math.floor(width / 2)) * Math.max(1, Math.floor(height / 2)) * depth * result.bytesPerElement;
+    result.parts.push({ offset, size });
+    offset += size;
+    width = Math.max(1, Math.floor(width / 2));
+    height = Math.max(1, Math.floor(height / 2));
+  }
+
+  return result;
+}
+
+function unpackDDSHeader(bytes) {
+  const view = new DataView(bytes.buffer);
+  return {
+    width: view.getUint32(4, true),
+    height: view.getUint32(8, true),
+    flags: view.getUint32(12, true),
+    pf_flags: view.getUint32(20, true),
+    pf_fourCC: view.getUint32(84, true),
+    pf_rgbBitCount: view.getUint32(28, true),
+    mipMapCount: view.getUint32(104, true),
+    caps1: view.getUint32(108, true),
+    caps2: view.getUint32(112, true),
+    size: view.getUint32(0, true)
+  };
+}
+
+function getFormatInfo(header) {
+  let formatInfo = null;
+
+  if (header.pf_flags & DDSF_FOURCC) {
+    formatInfo = fourccFormats[header.pf_fourCC];
+  } else if (header.pf_flags === DDSF_RGBA && header.pf_rgbBitCount === 32) {
+    formatInfo = fourccFormats[FOURCC.RGBA32];
+  } else if (header.pf_flags === DDSF_RGB && header.pf_rgbBitCount === 32) {
+    formatInfo = fourccFormats[FOURCC.RGB32];
+  } else if (header.pf_flags === DDSF_RGB && header.pf_rgbBitCount === 24) {
+    formatInfo = fourccFormats[FOURCC.RGB24];
+  }
+
+  if (!formatInfo) {
+    throw new Error("Unknown or unsupported DDS format");
+  }
+
+  return formatInfo;
+}
+// end dds.js
 
 function loadTgaFromUint8Array(tgaData) {
 	let buffer, image;
