@@ -541,7 +541,7 @@ if (!context) {
 			effectSettings.innerHTML = "<a>Contrast Level:</a><input type=\"number\" value=\"0.5\" step=\"0.02\" min=\"0\" max=\"10\" id=\"e-contr\">";
 			effectParams = [document.getElementById("e-contr")];
 		} else if (effects.value === "grayc") {
-			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-graypro\">%<br><a>R Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayr\">%";
+			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-graypro\">%<br><a>R Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayr\">%<br><a>G Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayg\">%<br><a>B Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayb\">%";
 			effectParams = [document.getElementById("e-graypro"), document.getElementById("e-grayr"), document.getElementById("e-grayg"), document.getElementById("e-grayb")];
 		} else {
 			effectSettings.innerHTML = "";
@@ -835,6 +835,16 @@ if (!context) {
 					imageData[i] = interpolate(imageData[i], b, prog); i++;
 					imageData[i] = interpolate(imageData[i], g, prog); i++;
 					imageData[i] = interpolate(imageData[i], r, prog); i += 2;
+				}
+				break;
+			}
+			case "grayc": {
+				let brightness, prog = +effectParams[0].value / 100, r = +effectParams[1].value / 100, g = +effectParams[2].value / 100, b = +effectParams[3].value / 100;
+				for (let i = 0; i < len;) {
+					brightness = (r * imageData[i]) + (g * imageData[i + 1]) + (b * imageData[i + 2]);
+					imageData[i] = interpolate(imageData[i], brightness, prog); i++;
+					imageData[i] = interpolate(imageData[i], brightness, prog); i++;
+					imageData[i] = interpolate(imageData[i], brightness, prog); i += 2;
 				}
 				break;
 			}
