@@ -73,7 +73,7 @@ function parseDDS(arrayBuffer) {
 
   // Validate DDS Magic String
   if (new TextDecoder().decode(bytes.slice(0, 4)) !== DDS_MAGIC) {
-    throw new Error("Not a valid DDS file");
+    return {error: Error("Not a valid DDS file")};
   }
 
   const header = unpackDDSHeader(bytes);
@@ -152,7 +152,7 @@ function getFormatInfo(header) {
   }
 
   if (!formatInfo) {
-    throw new Error(`Unknown DDS format: pf_flags=${header.pf_flags}, pf_fourCC=${header.pf_fourCC}, pf_rgbBitCount=${header.pf_rgbBitCount}`);
+     return {...formatInfo, error: Error(`Unknown DDS format: pf_flags=${header.pf_flags}, pf_fourCC=${header.pf_fourCC}, pf_rgbBitCount=${header.pf_rgbBitCount}`)};
   }
 
   return formatInfo;
@@ -231,6 +231,7 @@ function loadDdsFromUint8Array(ddsData) {
 	try {
 		// Parse DDS file
 		ddsFileInfo = parseDDS(ddsData);
+		if (ddsFileInfo.error) throw ddsFileInfo.error;
 
 		// User selects mipmap level
 		const mipmapIndex = Math.floor(Math.max(0, Math.min(ddsFileInfo.parts.length - 1, +prompt(
@@ -263,6 +264,8 @@ function loadDdsFromUint8Array(ddsData) {
 		}
 	} catch (err) {
 		alert("Error decoding the DDS image: " + err.message);
+
+		console.log(ddsFileInfo);
 		
 		// Specific checks for potential issues
 		if (ddsData.length === 0) {
@@ -284,7 +287,7 @@ function loadDdsFromUint8Array(ddsData) {
 				ddsData[30] = 0;
 				ddsData[31] = 0;
 				// Assuming this function exists
-				loadTgaFromUint8Array(ddsData);
+				loadDdsFromUint8Array(ddsData);
 			}
 		}
 	}
