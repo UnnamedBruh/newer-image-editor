@@ -13,17 +13,17 @@ button, body, a, p, h1, select, option {
 </head>
 <body>
 <h1>Image Editor</h1>
-<input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga, .dds"><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
+<input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga"><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
 const TYPE_NO_DATA=0,TYPE_INDEXED=1,TYPE_RGB=2,TYPE_GREY=3,TYPE_RLE_INDEXED=9,TYPE_RLE_RGB=10,TYPE_RLE_GREY=11,ORIGIN_BOTTOM_LEFT=0,ORIGIN_BOTTOM_RIGHT=1,ORIGIN_TOP_LEFT=2,ORIGIN_TOP_RIGHT=3,ORIGIN_SHIFT=4,ORIGIN_MASK=48;class TgaLoader{_checkHeader(){const e=this.header;if(0===e.imageType)throw new Error("No data");if(e.hasColorMap){if(e.colorMapLength>256||24!==e.colorMapDepth||1!==e.colorMapType)throw new Error("Invalid colormap for indexed type")}else if(e.colorMapType)throw new Error("Why does the image contain a palette?");if(!e.width||!e.height)throw new Error("Invalid image size");if(8!==e.pixelDepth&&16!==e.pixelDepth&&24!==e.pixelDepth&&32!==e.pixelDepth)throw new Error('Invalid pixel size "'+e.pixelDepth+'"')}_decodeRLE(e,t,a,r){const o=new Uint8Array(r),i=new Uint8Array(a);let s=0;for(;s<r;){const r=e[t++];let h=1+(127&r);if(128&r){for(let r=0;r<a;++r)i[r]=e[t+r];t+=a;for(let e=0;e<h;++e)o.set(i,s),s+=a}else{h*=a;for(let a=0;a<h;++a)o[s+a]=e[t+a];s+=h,t+=h}}return o}_getImageData8bits(e,t,a,r,o,i,s,h,n,g){for(let l=0,p=o;p!==s;p+=i)for(let o=h;o!==g;o+=n,l++){const i=t[l];e[4*(o+r*p)+3]=255,e[4*(o+r*p)+2]=a[3*i+0],e[4*(o+r*p)+1]=a[3*i+1],e[4*(o+r*p)+0]=a[3*i+2]}return e}_getImageData16bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=2){const i=t[a+0]|t[a+1]<<8;e[4*(o+r*l)+0]=(31744&i)>>7,e[4*(o+r*l)+1]=(992&i)>>2,e[4*(o+r*l)+2]=(31&i)>>3,e[4*(o+r*l)+3]=32768&i?0:255}return e}_getImageData24bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=3)e[4*(o+r*l)+3]=255,e[4*(o+r*l)+2]=t[a+0],e[4*(o+r*l)+1]=t[a+1],e[4*(o+r*l)+0]=t[a+2];return e}_getImageData32bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=4)e[4*(o+r*l)+2]=t[a+0],e[4*(o+r*l)+1]=t[a+1],e[4*(o+r*l)+0]=t[a+2],e[4*(o+r*l)+3]=t[a+3];return e}_getImageDataGrey8bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a++){const i=t[a];e[4*(o+r*l)+0]=i,e[4*(o+r*l)+1]=i,e[4*(o+r*l)+2]=i,e[4*(o+r*l)+3]=255}return e}_getImageDataGrey16bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=2)e[4*(o+r*l)+0]=t[a+0],e[4*(o+r*l)+1]=t[a+0],e[4*(o+r*l)+2]=t[a+0],e[4*(o+r*l)+3]=t[a+1];return e}open(e,t){const a=new XMLHttpRequest;a.responseType="arraybuffer",a.open("GET",e,!0),a.onload=()=>{200===a.status&&(this.load(new Uint8Array(a.response)),t&&t())},a.send(null)}load(e){let t=0;if(e.length<18)throw new Error("Not enough data to contain header");const a={idLength:e[t++],colorMapType:e[t++],imageType:e[t++],colorMapIndex:e[t++]|e[t++]<<8,colorMapLength:e[t++]|e[t++]<<8,colorMapDepth:e[t++],offsetX:e[t++]|e[t++]<<8,offsetY:e[t++]|e[t++]<<8,width:e[t++]|e[t++]<<8,height:e[t++]|e[t++]<<8,pixelDepth:e[t++],flags:e[t++]};if(a.hasEncoding=9===a.imageType||10===a.imageType||11===a.imageType,a.hasColorMap=9===a.imageType||1===a.imageType,a.isGreyColor=11===a.imageType||3===a.imageType,this.header=a,this._checkHeader(),t+=a.idLength,t>=e.length)throw new Error("No data");if(a.hasColorMap){const r=a.colorMapLength*(a.colorMapDepth>>3);this.palette=e.subarray(t,t+r),t+=r}const r=a.pixelDepth>>3,o=a.width*a.height,i=o*r;a.hasEncoding?this.imageData=this._decodeRLE(e,t,r,i):this.imageData=e.subarray(t,t+(a.hasColorMap?o:i))}getImageData(e){const{width:t,height:a,flags:r,pixelDepth:o,isGreyColor:i}=this.header,s=(48&r)>>4;let h,n,g,l,p,c,d;switch(e||(e=document?document.createElement("canvas").getContext("2d").createImageData(t,a):{width:t,height:a,data:new Uint8ClampedArray(t*a*4)}),2===s||3===s?(l=0,p=1,c=a):(l=a-1,p=-1,c=-1),2===s||0===s?(h=0,n=1,g=t):(h=t-1,n=-1,g=-1),o){case 8:d=i?this._getImageDataGrey8bits:this._getImageData8bits;break;case 16:d=i?this._getImageDataGrey16bits:this._getImageData16bits;break;case 24:d=this._getImageData24bits;break;case 32:d=this._getImageData32bits}return d.call(this,e.data,this.imageData,this.palette,t,l,p,c,h,n,g),e}getCanvas(){const{width:e,height:t}=this.header,a=document.createElement("canvas"),r=a.getContext("2d"),o=r.createImageData(e,t);return a.width=e,a.height=t,r.putImageData(this.getImageData(o),0,0),a}getDataURL(e){return this.getCanvas().toDataURL(e||"image/png")}};
 
-// dds.js
+/* dds.js
 const gl = document.createElement("canvas").getContext("webgl");
 
 const DDS_MAGIC = "DDS ";
@@ -157,7 +157,7 @@ function getFormatInfo(header) {
 
   return formatInfo;
 }
-// end dds.js
+*/ // end dds.js
 
 function loadTgaFromUint8Array(tgaData) {
 	let buffer, image;
@@ -226,7 +226,7 @@ function loadTgaFromUint8Array(tgaData) {
 	}
 }
 
-function loadDdsFromUint8Array(ddsData) {
+/* function loadDdsFromUint8Array(ddsData) {
 	let buffer, image, ddsFileInfo;
 	try {
 		// Parse DDS file
@@ -291,7 +291,7 @@ function loadDdsFromUint8Array(ddsData) {
 			}
 		}
 	}
-}
+} */
 
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
 const context = canvas.getContext("2d");
@@ -312,7 +312,7 @@ if (!context) {
 					canvas.height = currentImageData.height;
 					context.clearRect(0, 0, +canvas.width, +canvas.height);
 					context.putImageData(currentImageData, 0, 0);
-				} else if (file.name.endsWith(".dds")) {
+				}/* else if (file.name.endsWith(".dds")) {
 					alert("DDS.js (browser port) is being used to decode the image.");
 					currentImageData = loadDdsFromUint8Array(res.target.result);
 					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
@@ -320,7 +320,7 @@ if (!context) {
 					canvas.height = currentImageData.height;
 					context.clearRect(0, 0, +canvas.width, +canvas.height);
 					context.putImageData(currentImageData, 0, 0);
-				} else {
+				}*/ else {
 					const img = new Image();
 					img.onload = function() {
 						canvas.width = img.width;
@@ -420,10 +420,10 @@ if (!context) {
 				}
 			}
 		}
-		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga") && !file.name.endsWith(".dds")) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
+		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga") /*&& !file.name.endsWith(".dds")*/) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
 	});
 	treatFile.oninput = function() {
-		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga, .dds"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
+		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
 	}
 	let effectParams = [];
 	function extractRGBA(hex, a) {
@@ -540,6 +540,9 @@ if (!context) {
 		} else if (effects.value === "contr") {
 			effectSettings.innerHTML = "<a>Contrast Level:</a><input type=\"number\" value=\"0.5\" step=\"0.02\" min=\"0\" max=\"10\" id=\"e-contr\">";
 			effectParams = [document.getElementById("e-contr")];
+		} else if (effects.value === "grayc") {
+			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-graypro\">%<br><a>R Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayr\">%";
+			effectParams = [document.getElementById("e-graypro"), document.getElementById("e-grayr"), document.getElementById("e-grayg"), document.getElementById("e-grayb")];
 		} else {
 			effectSettings.innerHTML = "";
 			effectParams = [];
