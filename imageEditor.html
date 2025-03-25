@@ -110,8 +110,8 @@ function parseDDS(arrayBuffer) {
 function unpackDDSHeader(bytes) {
   const view = new DataView(bytes.buffer);
   const header = {
-    width: view.getUint32(4, true),
-    height: view.getUint32(8, true),
+    width: view.getUint32(4, false),
+    height: view.getUint32(8, false),
     flags: view.getUint32(12, true),
     pf_flags: view.getUint32(20, true),
     pf_fourCC: view.getUint32(84, true),
