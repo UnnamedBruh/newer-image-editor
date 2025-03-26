@@ -13,7 +13,7 @@ button, body, a, p, h1, select, option {
 </head>
 <body>
 <h1>Image Editor</h1>
-<input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga"><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
+<input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
@@ -423,7 +423,7 @@ if (!context) {
 		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga") /*&& !file.name.endsWith(".dds")*/) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
 	});
 	treatFile.oninput = function() {
-		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
+		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
 	}
 	let effectParams = [];
 	function extractRGBA(hex, a) {
