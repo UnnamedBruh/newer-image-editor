@@ -509,8 +509,8 @@ if (!context) {
 			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Blending Percentage:</a><input type=\"number\" value=\"20\" min=\"0\" max=\"100\" step=\"1\" id=\"e-tintopac\">";
 			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac")];
 		} else if (effects.value === "shift") {
-			effectSettings.innerHTML = "<a>Direction (in pixels. negative = leftwards, positive = rightwards):</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Color Padding:</a><input type=\"color\" value=\"#000000\" id=\"e-shiftcolor\"><br><a>Color Padding Opacity:</a><input type=\"number\" value=\"0\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-shiftopac\"><br><a>Wrap Around Image:</a><input type=\"checkbox\" id=\"e-shiftwrap\">";
-			effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-shiftcolor"), document.getElementById("e-shiftopac"), document.getElementById("e-shiftwrap")];
+			effectSettings.innerHTML = "<a>Direction (in pixels. negative = leftwards, positive = rightwards):</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Color Padding:</a><input type=\"color\" value=\"#000000\" id=\"e-shiftcolor\"><br><a>Color Padding Opacity:</a><input type=\"number\" value=\"0\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-shiftopac\"><br><a>Wrap Around Image:</a><input type=\"checkbox\" id=\"e-shiftwrap\"><br><a>(if enabled) Pixel Level (if disabled) Integral Level:</a><input type=\"checkbox\" id=\"e-shiftint\" checked>";
+			effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-shiftcolor"), document.getElementById("e-shiftopac"), document.getElementById("e-shiftwrap"), document.getElementById("e-shiftint")];
 		} else if (effects.value === "backg") {
 			effectSettings.innerHTML = "<a>Background Color:</a><input type=\"color\" value=\"#000000\" id=\"e-backcolor\">";
 			effectParams = [document.getElementById("e-backcolor")];
@@ -592,7 +592,7 @@ if (!context) {
 				break;
 			}
 			case "shift": {
-				let i = 0, shift = 0 - Math.round(+effectParams[0].value) * 4, colorPadding = extractRGBA2(effectParams[1].value, Math.max(0, Math.min(255, +effectParams[2].value * 255)));
+				let i = 0, shift = -Math.round(+effectParams[0].value) * (effectParams[3].checked ? 4 : 1), colorPadding = extractRGBA2(effectParams[1].value, Math.max(0, Math.min(255, +effectParams[2].value * 255)));
 				if (effectParams[3].checked) {
 					if (shift === 0) {} else if (shift < 0) {
 						for (i = len - 1; i >= 0;) {
