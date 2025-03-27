@@ -305,7 +305,7 @@ if (!context) {
 		fileReader.onload = function(res) {
 			if (treatFile.value === "att") {
 				if (file.name.endsWith(".tga")) {
-					alert("TGA.js is being used to decode the image.");
+					alert("TGA.js is being used to decode the image. (Borrowed code from https://github.com/vthibault/tga.js/blob/master/src/tga.js - later modified to fit this editor's standards)");
 					currentImageData = loadTgaFromUint8Array(new Uint8Array(res.target.result));
 					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
 					canvas.width = currentImageData.width;
