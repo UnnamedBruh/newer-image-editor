@@ -523,9 +523,9 @@ if (!context) {
 			effectParams = [document.getElementById("e-cropx"), document.getElementById("e-cropy"), document.getElementById("e-cropw"), document.getElementById("e-croph"), document.getElementById("e-cropc")];
 			for (const p of effectParams) {
 				p.oninput = function() {
-					p.value = String(Math.round(+p.value.trim()));
+					if (p.type !== "color") p.value = String(Math.round(+p.value.trim()));
 					context.putImageData(currentImageData, 0, 0);
-					context.fillStyle = "rgba(" + extractRGBA2(effectParams[4].value).join(", ") + ", 0.3)";
+					context.fillStyle = "rgba(" + extractRGBA2(effectParams[4].value, 0.3).join(", ") + ")";
 					context.fillRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
 				}
 			}
