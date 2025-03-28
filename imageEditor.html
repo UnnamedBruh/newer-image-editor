@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
 <title>Image Editor</title>
-<style>
-button, body, select {
+<style id="css">
+button, body, select, input {
 	background-color: rgb(40, 40, 40);
 }
-button, body, a, p, h1, select, option {
+button, body, a, p, h1, select, option, input {
 	color: white;
 }
 </style>
 </head>
 <body>
+Background Color: <input id="bgcolor" type="color">
 <h1>Image Editor</h1>
 <input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
 <hr>
@@ -882,6 +883,15 @@ if (!context) {
 		}
 		context.putImageData(currentImageData, 0, 0);
 		if (effects.value === "resid") currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+	}
+	const css = document.getElementById("css"), bg = document.getElementById("bgcolor");
+	bg.oninput = function() {
+		css.textContent = `button, body, select, input {
+	background-color: ${bg.value};
+}
+button, body, a, p, h1, select, option, input {
+	color: ${extractRGBA(bg.value, 0).reduce((a, b) => a + b) > 382 ? "black" : "white"};
+}`;
 	}
 </script>
 </body>
