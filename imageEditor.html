@@ -17,7 +17,7 @@ button, body, a, p, h1, select, option {
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -532,7 +532,7 @@ if (!context) {
 		} else if (effects.value === "inv" || effects.value === "sepia" || effects.value === "graya" || effects.value === "grayb" || effects.value === "rgbsh" || effects.value === "rgbre") {
 			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%";
 			effectParams = [document.getElementById("e-invpro")];
-		} else if (effects.value === "resi" || effects.value === "parag") {
+		} else if (effects.value === "resi" || effects.value === "parag" || effects.value === "resid") {
 			effectSettings.innerHTML = "<a>Width:</a><input type=\"number\" value=\"\" id=\"e-resiw\"><br><a>Height:</a><input type=\"number\" value=\"\" id=\"e-resih\">" + (effects.value === "resi" ? "<br><a>Anti-aliasing:</a><input type=\"checkbox\" checked id=\"e-resia\">" : "");
 			effectParams = [document.getElementById("e-resiw"), document.getElementById("e-resih"), effects.value === "resi" ? document.getElementById("e-resia") : null];
 			effectParams[0].value = canvas.width;
@@ -848,8 +848,17 @@ if (!context) {
 				}
 				break;
 			}
+			case "resid": {
+				canvas.width = +effectParams[0].value;
+				canvas.height = +effectParams[1].value;
+
+				// Not all browsers have the same behavior of handling direct dimension changes, so we'll clear the canvas, then put the image data
+				context.clearRect(0, 0, +effectParams[0].value, +effectParams[1].value);
+				break;
+			}
 		}
 		context.putImageData(currentImageData, 0, 0);
+		if (effects.value === "resid") currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
 	}
 </script>
 </body>
