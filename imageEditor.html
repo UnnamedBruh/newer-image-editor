@@ -867,8 +867,7 @@ if (!context) {
 				break;
 			}
 			case "opac": {
-				let op = +effectParams[0].value * 2.55;
-				op = effectParams[1].checked ? op : Math.floor(op);
+				let op = effectParams[1].checked ? +effectParams[0].value : Math.floor(255 - +effectParams[0].value * 2.55);
 				if (effectParams[1].checked) {
 					for (let i = 3; i < len; i += 4) {
 						imageData[i] *= op;
