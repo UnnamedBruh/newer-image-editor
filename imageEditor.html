@@ -890,7 +890,7 @@ if (!context) {
 	background-color: ${bg.value};
 }
 button, body, a, p, h1, select, option, input {
-	color: ${extractRGBA(bg.value, 0).reduce((a, b) => a + b) > 382 ? "black" : "white"};
+	color: ${extractRGBA2(bg.value, 0).reduce((a, b) => a + b) > 382 ? "black" : "white"};
 }`;
 	}
 </script>
