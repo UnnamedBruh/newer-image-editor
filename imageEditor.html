@@ -17,7 +17,7 @@ button, body, a, p, h1, select, option {
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -543,6 +543,16 @@ if (!context) {
 		} else if (effects.value === "grayc") {
 			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-graypro\">%<br><a>R Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayr\">%<br><a>G Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayg\">%<br><a>B Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayb\">%";
 			effectParams = [document.getElementById("e-graypro"), document.getElementById("e-grayr"), document.getElementById("e-grayg"), document.getElementById("e-grayb")];
+		} else if (effects.value === "opac") {
+			effectSettings.innerHTML = "<a>Transparency (as a percentage):</a><input type=\"number\" value=\"0\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-opactr\"><a id=\"percent\">%</a><br><a>Act As Opacity Multiplier:</a><input type=\"checkbox\" id=\"e-opacmu\">";
+			effectParams = [document.getElementById("e-opactr"), document.getElementById("e-opacmu")];
+			let x = document.getElementById("percent");
+			effectParams[1].oninput = function() {
+				x.textContent = effectParams[1].checked ? "x" : "%";
+				effectParams[0].step = effectParams[1].checked ? "0.01" : "0.390625";
+				effectParams[0].max = effectParams[1].checked ? "10" : "100";
+				effectParams[0].value = effectParams[1].checked ? +effectParams[0].value / 100 : +effectParams[0].value * 100;
+			}
 		} else {
 			effectSettings.innerHTML = "";
 			effectParams = [];
@@ -810,7 +820,7 @@ if (!context) {
 				canvas.height = effectParams[1].value;
 				const requiredSize = +effectParams[0].value * +effectParams[1].value * 4;
 				let deeea = new Uint8ClampedArray(requiredSize);
-				deeea.set(imageData.slice(0, Math.min(requiredSize, imageData.length)));
+				deeea.set(imageData.slice(0, Math.min(requiredSize, len)));
 				currentImageData = new ImageData(deeea, +canvas.width, +canvas.height);
 				break;
 			}
@@ -854,6 +864,19 @@ if (!context) {
 
 				// Not all browsers have the same behavior of handling direct dimension changes, so we'll clear the canvas, then put the image data
 				context.clearRect(0, 0, +effectParams[0].value, +effectParams[1].value);
+				break;
+			}
+			case "opac": {
+				let op = Math.floor(+effectParams[0].value * 2.55);
+				if (effectParams[1].checked) {
+					for (let i = 3; i < len; i += 4) {
+						imageData[i] *= op;
+					}
+				} else {
+					for (let i = 3; i < len; i += 4) {
+						imageData[i] = op;
+					}
+				}
 				break;
 			}
 		}
