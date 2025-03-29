@@ -403,6 +403,7 @@ if (!context) {
 							confirm.onclick = function() {
 								video.pause();
 								video.muted = true;
+								confirm.onclick = function() {};
 								setTimeout(function() {
 									canvas.style.display = "";
 									currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
@@ -413,6 +414,7 @@ if (!context) {
 									video.src = "";
 									video.remove();
 									fileInput.style.display = "";
+									confirm.remove();
 								}, 200);
 							}
 						}, 1000);
