@@ -883,14 +883,17 @@ if (!context) {
 				break;
 			}
 			case "jpeg": {
-				const image = new Image();
-				image.onload = function() {
-					image.onload = function() {};
-					context.drawImage(image, 0, 0, +canvas.width, +canvas.height);
-					currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
-					image.src = "";
+				const quality = Math.min(1, Math.max(0, Math.round(+effectParams[0].value) / 100));
+				if (quality !== 1) {
+					const image = new Image();
+					image.onload = function() {
+						image.onload = function() {};
+						context.drawImage(image, 0, 0, +canvas.width, +canvas.height);
+						currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+						image.src = "";
+					}
+					image.src = canvas.toDataURL("image/jpeg", quality);
 				}
-				image.src = canvas.toDataURL("image/jpeg", Math.min(1, Math.max(0, Math.round(+effectParams[0].value) / 100)));
 				break;
 			}
 		}
