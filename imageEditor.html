@@ -521,8 +521,8 @@ if (!context) {
 			effectSettings.innerHTML = "<a>Kernel Size (Slight Blur Spread, and Smoothness):</a><input type=\"number\" value=\"3\" step=\"2\" min=\"1\" max=\"15\" id=\"e-gblurkernel\"><br><a>Sigma Value:</a><input type=\"number\" value=\"1\" step=\"0.1\" min=\"0\" max=\"100\" id=\"e-gblursigma\">";
 			effectParams = [document.getElementById("e-gblurkernel"), document.getElementById("e-gblursigma")];
 		} else if (effects.value === "crop" || effects.value === "rect") {
-			effectSettings.innerHTML = "<a>X:</a><input type=\"number\" value=\"0\" id=\"e-cropx\"><br><a>Y:</a><input type=\"number\" value=\"0\" id=\"e-cropy\"><br><a>Width:</a><input type=\"number\" value=\"0\" id=\"e-cropw\"><br><a>Height:</a><input type=\"number\" value=\"0\" id=\"e-croph\"><br><a>" + (effects.value === "rect" ? "Rectangle" : "Highlight") + " Color:</a><input type=\"color\" value=\"#ffffff\" id=\"e-cropc\">";
-			effectParams = [document.getElementById("e-cropx"), document.getElementById("e-cropy"), document.getElementById("e-cropw"), document.getElementById("e-croph"), document.getElementById("e-cropc")];
+			effectSettings.innerHTML = "<a>X:</a><input type=\"number\" value=\"0\" id=\"e-cropx\"><br><a>Y:</a><input type=\"number\" value=\"0\" id=\"e-cropy\"><br><a>Width:</a><input type=\"number\" value=\"0\" id=\"e-cropw\"><br><a>Height:</a><input type=\"number\" value=\"0\" id=\"e-croph\"><br><a>" + (effects.value === "rect" ? "Rectangle" : "Highlight") + " Color:</a><input type=\"color\" value=\"#ffffff\" id=\"e-cropc\">" + (effects.value === "rect" ? "<br><a>Rectangle Opacity:</a><input type=\"number\" value=\"1\" step=\"0.01\" min=\"0\" max=\"1\" id=\"e-recto\">" : "");
+			effectParams = [document.getElementById("e-cropx"), document.getElementById("e-cropy"), document.getElementById("e-cropw"), document.getElementById("e-croph"), document.getElementById("e-cropc"), document.getElementById("e-recto")];
 			for (const p of effectParams) {
 				p.oninput = function() {
 					if (p.type !== "color") p.value = String(Math.round(+p.value.trim()));
@@ -911,9 +911,10 @@ if (!context) {
 				break;
 			}
 			case "rect": {
-				context.fillStyle = "rgb(" + extractRGBA2(effectParams[4].value, 0).slice(0, 3).join(", ") + ")";
+				context.fillStyle = "rgba(" + extractRGBA2(effectParams[4].value, Math.max(0, Math.min(1, +effectParams[5].value))).join(", ") + ")";
 				context.fillRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
 				currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+				context.fillStyle = "";
 				break;
 			}
 		}
