@@ -748,7 +748,6 @@ if (!context) {
 			}
 			case "resi": {
 				const image = new Image();
-				image.src = canvas.toDataURL("image/png");
 				image.onload = function() {
 					image.onload = function() {};
 					context.clearRect(0, 0, +canvas.width, +canvas.height);
@@ -760,6 +759,7 @@ if (!context) {
 					context.imageSmoothingEnabled = true;
 					image.src = "";
 				}
+				image.src = canvas.toDataURL("image/png");
 				break;
 			}
 			case "grayb": {
@@ -884,13 +884,13 @@ if (!context) {
 			}
 			case "jpeg": {
 				const image = new Image();
-				image.src = canvas.toDataURL("image/jpeg", Math.min(100, Math.max(1, Math.round(+effectParams[0].value))));
 				image.onload = function() {
 					image.onload = function() {};
 					context.drawImage(image, 0, 0, +canvas.width, +canvas.height);
 					currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
 					image.src = "";
 				}
+				image.src = canvas.toDataURL("image/jpeg", Math.min(100, Math.max(1, Math.round(+effectParams[0].value))));
 				break;
 			}
 		}
