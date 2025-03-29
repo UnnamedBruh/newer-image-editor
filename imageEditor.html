@@ -912,7 +912,7 @@ if (!context) {
 			}
 			case "rect": {
 				context.fillStyle = "rgb(" + extractRGBA2(effectParams[4].value, 0).slice(0, 3).join(", ") + ")";
-				context.drawRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
+				context.fillRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
 				currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
 				break;
 			}
