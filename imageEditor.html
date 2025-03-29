@@ -18,7 +18,7 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -553,6 +553,9 @@ if (!context) {
 				effectParams[0].max = effectParams[1].checked ? "10" : "100";
 				effectParams[0].value = effectParams[1].checked ? +effectParams[0].value / 100 : +effectParams[0].value * 100;
 			}
+		} else if (effects.value === "jpeg") {
+			effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" value=\"80\" step=\"1\" min=\"1\" max=\"100\" id=\"e-jpegq\">";
+			effectParams = [document.getElementById("e-jpegq")];
 		} else {
 			effectSettings.innerHTML = "";
 			effectParams = [];
@@ -876,6 +879,17 @@ if (!context) {
 					for (let i = 3; i < len; i += 4) {
 						imageData[i] = op;
 					}
+				}
+				break;
+			}
+			case "jpeg": {
+				const image = new Image();
+				image.src = canvas.toDataURL("image/jpeg", Math.min(100, Math.max(1, Math.round(+effectParams[0].value))));
+				image.onload = function() {
+					image.onload = function() {};
+					context.drawImage(image, 0, 0, +canvas.width, +canvas.height);
+					currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+					image.src = "";
 				}
 				break;
 			}
