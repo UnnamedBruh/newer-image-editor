@@ -18,7 +18,7 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="minip">Minimize Color Palette</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="minip">Minimize Color Palette</option><option value="rect">Draw Rectangle</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -520,8 +520,8 @@ if (!context) {
 		} else if (effects.value === "gblur" || effects.value === "sharpg") {
 			effectSettings.innerHTML = "<a>Kernel Size (Slight Blur Spread, and Smoothness):</a><input type=\"number\" value=\"3\" step=\"2\" min=\"1\" max=\"15\" id=\"e-gblurkernel\"><br><a>Sigma Value:</a><input type=\"number\" value=\"1\" step=\"0.1\" min=\"0\" max=\"100\" id=\"e-gblursigma\">";
 			effectParams = [document.getElementById("e-gblurkernel"), document.getElementById("e-gblursigma")];
-		} else if (effects.value === "crop") {
-			effectSettings.innerHTML = "<a>X:</a><input type=\"number\" value=\"0\" id=\"e-cropx\"><br><a>Y:</a><input type=\"number\" value=\"0\" id=\"e-cropy\"><br><a>Width:</a><input type=\"number\" value=\"0\" id=\"e-cropw\"><br><a>Height:</a><input type=\"number\" value=\"0\" id=\"e-croph\"><br><a>Highlight Color:</a><input type=\"color\" value=\"#ffffff\" id=\"e-cropc\">";
+		} else if (effects.value === "crop" || effects.value === "rect") {
+			effectSettings.innerHTML = "<a>X:</a><input type=\"number\" value=\"0\" id=\"e-cropx\"><br><a>Y:</a><input type=\"number\" value=\"0\" id=\"e-cropy\"><br><a>Width:</a><input type=\"number\" value=\"0\" id=\"e-cropw\"><br><a>Height:</a><input type=\"number\" value=\"0\" id=\"e-croph\"><br><a>" + (effects.value === "rect" ? "Rectangle" : "Highlight") + " Color:</a><input type=\"color\" value=\"#ffffff\" id=\"e-cropc\">";
 			effectParams = [document.getElementById("e-cropx"), document.getElementById("e-cropy"), document.getElementById("e-cropw"), document.getElementById("e-croph"), document.getElementById("e-cropc")];
 			for (const p of effectParams) {
 				p.oninput = function() {
@@ -555,9 +555,12 @@ if (!context) {
 				effectParams[0].max = effectParams[1].checked ? "10" : "100";
 				effectParams[0].value = effectParams[1].checked ? +effectParams[0].value / 100 : +effectParams[0].value * 100;
 			}
-		} else if (effects.value === "jpeg" || effects.value === "minip") {
+		} else if (effects.value === "jpeg") {
 			effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" value=\"80\" step=\"1\" min=\"1\" max=\"100\" id=\"e-jpegq\">";
 			effectParams = [document.getElementById("e-jpegq")];
+		} else if (effects.value === "minip") {
+			effectSettings.innerHTML = "<a>Palette Reduction:</a><input type=\"number\" value=\"16\" step=\"1\" min=\"1\" max=\"256\" id=\"e-minipq\">";
+			effectParams = [document.getElementById("e-minipq")];
 		} else {
 			effectSettings.innerHTML = "";
 			effectParams = [];
@@ -905,6 +908,12 @@ if (!context) {
 					imageData[i] = Math.round(imageData[i] / op) * op; i++;
 					imageData[i] = Math.round(imageData[i] / op) * op; i += 2;
 				}
+				break;
+			}
+			case "rect": {
+				context.fillStyle = "rgb(" + extractRGBA2(effectParams[4].value, 0).slice(0, 3).join(", ") + ")";
+				context.drawRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
+				currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
 				break;
 			}
 		}
