@@ -1,5 +1,5 @@
 // HCIF stands for "Highly Compressed Image Format"
-const HCIF_PALETTE = 1, HCIF_RLE = 2 SET_ENCODE = 0, SET_DECODE = 1, SET_AUTO = 2;
+const HCIF_PALETTE = 1, HCIF_RLE = 2, SET_ENCODE = 0, SET_DECODE = 1, SET_AUTO = 2;
 
 function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 	if (mani === SET_AUTO) {
