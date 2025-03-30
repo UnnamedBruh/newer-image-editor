@@ -21,11 +21,12 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 		header[6] = imageData.height >> 8; // Height (bigger byte)
 		// header[7] is reserved. Even if changed, nothing affects the image
 		let currentByteRead = 8;
-		let paletteChunks = [], gridChunks = [];
+		let paletteChunks = new Map();
 		const imageDataLen = imageData.data.byteLength, data = imageData.data;
 
 		function includesColor(r, g, b, a) {
-			for (const p of paletteChunks) {
+			for (let i = 0; i < paletteChunks.size; i++) {
+				const p = paletteChunks.get(i);
 				if (p[0] === r && p[1] === g && p[2] === b && p[3] === a) return true;
 			}
 			return false;
@@ -36,22 +37,26 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 			for (let i = 0; i < imageDataLen;) {
 				r = data[i]; g = data[i + 1]; b = data[i + 2]; a = data[i + 3];
 				if (!includesColor(r, g, b, a)) {
-					paletteChunks.push(new Uint8Array([r, g, b, a]));
+					paletteChunks.set(paletteChunks.size, new Uint8Array([r, g, b, a]));
 					if (paletteChunks.length > 65535) {
-						paletteChunks = [];
+						paletteChunks = null;
 						throw new Error("The palette size has reached a color overflow; there are more colors than 65536.");
 					}
 				}
 				i += 4;
 			}
 			header[currentByteRead] = (paletteChunks.length - 1) & 255; currentByteRead++;
-			header[currentByteRead] = (paletteChunks.length - 1) << 8; currentByteRead++;
+			header[currentByteRead] = (paletteChunks.length - 1) >> 8; currentByteRead++;
 			chunks.push(header);
-			header = new Uint8Array(paletteChunks.reduce((acc, chunk) => acc + (chunk[3] === 0 ? 1 : 4), 0));
+			let size = 0;
+			for (let i = 0; i < paletteChunks.size; i++) {
+				size += paletteChunks.get(i)[3] === 0 ? 1 : 4;
+			}
+			header = new Uint8Array(size);
 			currentByteRead = 0;
 			let currentPalChunk = 0, cc;
 			for (; currentByteRead < header.byteLength; currentByteRead++) {
-				cc = paletteChunks[currentPalChunk];
+				cc = paletteChunks.get(currentPalChunk);
 				if (cc[3] === 0) {} else {
 					header[currentByteRead] = cc[3]; currentByteRead++;
 					header[currentByteRead] = cc[0]; currentByteRead++;
@@ -61,13 +66,13 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 			}
 
 			chunks.push(header);
-			header = new Uint8Array(imageDataLen / (paletteChunks.length > 256 ? 2 : 4));
+			header = new Uint8Array(imageDataLen / (paletteChunks.size > 256 ? 2 : 4));
 			currentByteRead = 0;
 
 			function indexColor(r, g, b, a) {
 				let p;
-				for (let i = 0; i < paletteChunks.length; i++) {
-					p = paletteChunks[i];
+				for (let i = 0; i < paletteChunks.size; i++) {
+					p = paletteChunks.get(i);
 					if (p[0] === r && p[1] === g && p[2] === b && p[3] === a) return i;
 				}
 				return -1; // This case shouldn't happen.
@@ -75,7 +80,7 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 
 			if (configs & HCIF_RLE) {
 				let pixel = 0;
-				if (paletteChunks.length > 256) {
+				if (paletteChunks.size > 256) {
 					let timesRepeated = 0, pr = data[0], pg = data[1], pb = data[2], pa = data[3];
 					for (; pixel < imageDataLen;) {
 						r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
@@ -111,7 +116,7 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 				}
 				header = header.subarray(0, currentByteRead);
 			} else {
-				if (paletteChunks.length > 256) {
+				if (paletteChunks.size > 256) {
 					let pixel = 0;
 					for (; currentByteRead < header.byteLength; currentByteRead++) {
 						r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
