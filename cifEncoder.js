@@ -16,9 +16,9 @@ function HCIF(imageData, configs = HCIF_PALETTE, mani = SET_AUTO) {
 		header[1] = 73; //  I
 		header[2] = configs; // flags
 		header[3] = imageData.width & 255; // Width (smaller byte)
-		header[4] = imageData.width << 8; // Width (bigger byte)
+		header[4] = imageData.width >> 8; // Width (bigger byte)
 		header[5] = imageData.height & 255; // Height (smaller byte)
-		header[6] = imageData.height << 8; // Height (bigger byte)
+		header[6] = imageData.height >> 8; // Height (bigger byte)
 		// header[7] is reserved. Even if changed, nothing affects the image
 		let currentByteRead = 8;
 		let paletteChunks = [], gridChunks = [];
@@ -59,12 +59,45 @@ function HCIF(imageData, configs = HCIF_PALETTE, mani = SET_AUTO) {
 					header[currentByteRead] = cc[2];
 				}
 			}
+
+			chunks.push(header);
+			header = new Uint8Array(imageDataLen / (paletteChunks.length > 256 ? 2 : 4));
+			currentByteRead = 0;
+
+			function indexColor(r, g, b, a) {
+				let p;
+				for (let i = 0; i < paletteChunks.length; i++) {
+					p = paletteChunks[i];
+					if (p[0] === r && p[1] === g && p[2] === b && p[3] === a) return i;
+				}
+				return -1; // This case shouldn't happen.
+			}
+
+			if (paletteChunks.length > 256) {
+				let pixel = 0;
+				for (; currentByteRead < header.byteLength; currentByteRead++) {
+					r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
+					const index = indexColor(r, g, b, a);
+					header[currentByteRead] = index & 255; currentByteRead++;
+					header[currentByteRead] = index >> 8;
+					pixel += 4;
+				}
+			} else {
+				let pixel = 0;
+				for (; currentByteRead < header.byteLength; currentByteRead++) {
+					r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
+					const index = indexColor(r, g, b, a);
+					header[currentByteRead] = index;
+					pixel += 4;
+				}
+			}
 		}
 		const trueResult = new Uint8Array(chunks.reduce((a, b) => a + b.byteLength));
 		let current = 0;
-		for (const l of chunks) {
+		while (chunks.length > 0) {
 			trueResult.set(l, current);
 			current += l.byteLength;
+			chunks.splice(0, 1);
 		}
 		return trueResult;
 	} else if (mani === SET_DECODE) {
