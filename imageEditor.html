@@ -922,10 +922,14 @@ if (!context) {
 			case "jpegd": {
 				if (+canvas.width > 1000 && +canvas.height > 1000) alert("The fascinating effect must require the image to be smaller than the current dimensions."); else {
 					const int = setInterval(function() {
-						// 16, 17
+						// 15, 16
 						effects.selectedIndex = Math.random() < 0.5 ? (15 + Math.round(Math.random())) : 23;
-						if (effects.selectedIndex === 23) effectParams[0].value = Math.round(Math.random() * 100);
-						chooseEffect();
+						if (effects.selectedIndex === 23) {
+							effects.value = "jpeg";
+							effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" value=\"80\" step=\"1\" min=\"1\" max=\"100\" id=\"e-jpegq\">";
+							effectParams = [document.getElementById("e-jpegq")];
+							effectParams[0].value = Math.round(Math.random() * 100);
+						} else chooseEffect();
 						apply.click();
 					}, 100);
 					setTimeout(function() {clearInterval(int)}, 10000);
