@@ -920,9 +920,16 @@ if (!context) {
 				break;
 			}
 			case "jpegd": {
-				const int = setInterval(function() {
-					
-				}, 333);
+				if (+canvas.width > 1000 && +canvas.height > 1000) alert("The fascinating effect must require the image to be smaller than the current dimensions."); else {
+					const int = setInterval(function() {
+						// 16, 17
+						effect.selectedIndex = Math.random() < 0.5 ? (16 + Math.round(Math.random())) : 24;
+						if (effect.selectedIndex === 24) effectParams[0].value = Math.round(Math.random() * 100);
+						chooseEffect();
+						apply.click();
+					}, 200);
+					setTimeout(function() {clearInterval(int)}, 10000);
+				}
 			}
 		}
 		context.putImageData(currentImageData, 0, 0);
