@@ -18,7 +18,7 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">JPEG Distortion Animation</option><option value="rect">Draw Rectangle</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -928,10 +928,10 @@ if (!context) {
 					if (+effectParams[0].value < 0.05) alert("PERFORMANCE WARNING: It is not recommended to use intervals with that pausing time! Performance degradations can easily occur, and effects can sometimes overlap with each other, breaking functionality for the time of this animation (10 seconds).");
 					const int = setInterval(function() {
 						// 15, 16
-						effects.selectedIndex = Math.random() < 0.333333 ? (15 + Math.round(Math.random())) : (Math.random() < 0.5 ? 4 : 23);
-						if (effects.selectedIndex === 23) {
-							effects.value = "jpeg";
-							effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" value=\"80\" step=\"1\" min=\"1\" max=\"100\" id=\"e-jpegq\">";
+						effects.selectedIndex = Math.random() < 0.333333 ? (15 + Math.round(Math.random())) : (Math.random() < 0.5 ? 4 : 23 + Math.round(Math.random()));
+						if (effects.selectedIndex === 23 || effects.selectedIndex === 24) {
+							effects.value = effects.selectedIndex === 23 ? "jpeg" : "webp";
+							effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" id=\"e-jpegq\">";
 							effectParams = [document.getElementById("e-jpegq")];
 							effectParams[0].value = Math.round(Math.random() * 40);
 						} else if (effects.selectedIndex === 4) {
