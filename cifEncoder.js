@@ -74,8 +74,9 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 			}
 
 			if (configs & HCIF_RLE) {
+				let pixel = 0;
 				if (paletteChunks.length > 256) {
-					let pixel = 0, timesRepeated = 0, pr = data[0], pg = data[1], pb = data[2], pa = data[3];
+					let timesRepeated = 0, pr = data[0], pg = data[1], pb = data[2], pa = data[3];
 					for (; pixel < imageDataLen;) {
 						r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
 						if (timesRepeated > 255 || (pr !== r || pg !== g || pb !== b || pa !== a)) {
@@ -90,7 +91,7 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 						}
 					}
 				} else {
-					let pixel = 0, timesRepeated = 0, pr = data[0], pg = data[1], pb = data[2], pa = data[3];
+					let timesRepeated = 0, pr = data[0], pg = data[1], pb = data[2], pa = data[3];
 					for (; pixel < imageDataLen;) {
 						r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
 						if (timesRepeated > 255 || (pr !== r || pg !== g || pb !== b || pa !== a)) {
@@ -104,6 +105,7 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 						}
 					}
 				}
+				header = header.subarray(0, currentByteRead);
 			} else {
 				if (paletteChunks.length > 256) {
 					let pixel = 0;
