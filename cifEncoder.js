@@ -95,7 +95,7 @@ function HCIF(imageData, configs = HCIF_PALETTE, mani = SET_AUTO) {
 		const trueResult = new Uint8Array(chunks.reduce((a, b) => a + b.byteLength));
 		let current = 0;
 		while (chunks.length > 0) {
-			trueResult.set(l, current);
+			trueResult.set(chunks[0], current);
 			current += l.byteLength;
 			chunks.splice(0, 1);
 		}
