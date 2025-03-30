@@ -1,7 +1,7 @@
 // HCIF stands for "Highly Compressed Image Format"
-const HCIF_PALETTE = 1, SET_ENCODE = 0, SET_DECODE = 1, SET_AUTO = 2;
+const HCIF_PALETTE = 1, HCIF_RLE = 2 SET_ENCODE = 0, SET_DECODE = 1, SET_AUTO = 2;
 
-function HCIF(imageData, configs = HCIF_PALETTE, mani = SET_AUTO) {
+function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 	if (mani === SET_AUTO) {
 		if (imageData instanceof ImageData) mani = SET_ENCODE; else if (imageData instanceof Uint8Array || imageData instanceof Uint8ClampedArray) mani = SET_DECODE; else if (imageData instanceof ArrayBuffer) {
 			imageData = new Uint8Array(imageData);
@@ -73,22 +73,55 @@ function HCIF(imageData, configs = HCIF_PALETTE, mani = SET_AUTO) {
 				return -1; // This case shouldn't happen.
 			}
 
-			if (paletteChunks.length > 256) {
-				let pixel = 0;
-				for (; currentByteRead < header.byteLength; currentByteRead++) {
-					r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
-					const index = indexColor(r, g, b, a);
-					header[currentByteRead] = index & 255; currentByteRead++;
-					header[currentByteRead] = index >> 8;
-					pixel += 4;
+			if (configs & HCIF_RLE) {
+				if (paletteChunks.length > 256) {
+					let pixel = 0, timesRepeated = 0, pr = data[0], pg = data[1], pb = data[2], pa = data[3];
+					for (; pixel < imageDataLen;) {
+						r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
+						if (timesRepeated > 255 || (pr !== r || pg !== g || pb !== b || pa !== a)) {
+							const index = indexColor(r, g, b, a);
+							header[currentByteRead] = timesRepeated - 1; currentByteRead++;
+							header[currentByteRead] = index & 255; currentByteRead++;
+							header[currentByteRead] = index >> 8; currentByteRead++;
+							pixel += 4;
+							pr = r, pg = g, pb = b, pa = a;
+						} else {
+							pixel += 4;
+						}
+					}
+				} else {
+					let pixel = 0, timesRepeated = 0, pr = data[0], pg = data[1], pb = data[2], pa = data[3];
+					for (; pixel < imageDataLen;) {
+						r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
+						if (timesRepeated > 255 || (pr !== r || pg !== g || pb !== b || pa !== a)) {
+							const index = indexColor(r, g, b, a);
+							header[currentByteRead] = timesRepeated - 1; currentByteRead++;
+							header[currentByteRead] = index; currentByteRead++;
+							pixel += 4;
+							pr = r, pg = g, pb = b, pa = a;
+						} else {
+							pixel += 4;
+						}
+					}
 				}
 			} else {
-				let pixel = 0;
-				for (; currentByteRead < header.byteLength; currentByteRead++) {
-					r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
-					const index = indexColor(r, g, b, a);
-					header[currentByteRead] = index;
-					pixel += 4;
+				if (paletteChunks.length > 256) {
+					let pixel = 0;
+					for (; currentByteRead < header.byteLength; currentByteRead++) {
+						r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
+						const index = indexColor(r, g, b, a);
+						header[currentByteRead] = index & 255; currentByteRead++;
+						header[currentByteRead] = index >> 8;
+						pixel += 4;
+					}
+				} else {
+					let pixel = 0;
+					for (; currentByteRead < header.byteLength; currentByteRead++) {
+						r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
+						const index = indexColor(r, g, b, a);
+						header[currentByteRead] = index;
+						pixel += 4;
+					}
 				}
 			}
 
