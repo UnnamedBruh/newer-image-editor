@@ -91,6 +91,9 @@ function HCIF(imageData, configs = HCIF_PALETTE, mani = SET_AUTO) {
 					pixel += 4;
 				}
 			}
+
+			chunks.push(header);
+			header = null;
 		}
 		const trueResult = new Uint8Array(chunks.reduce((a, b) => a + b.byteLength + 1, 0));
 		let current = 0;
