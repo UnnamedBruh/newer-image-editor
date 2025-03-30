@@ -96,14 +96,16 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 					let timesRepeated = 0, pr = data[0], pg = data[1], pb = data[2], pa = data[3];
 					for (; pixel < imageDataLen;) {
 						r = data[pixel], g = data[pixel + 1], b = data[pixel + 2], c = data[pixel + 3];
-						if (timesRepeated > 255 || (pr !== r || pg !== g || pb !== b || pa !== a)) {
+						if (timesRepeated === 255 || (pr !== r || pg !== g || pb !== b || pa !== a)) {
 							const index = indexColor(r, g, b, a);
-							header[currentByteRead] = timesRepeated - 1; currentByteRead++;
+							header[currentByteRead] = timesRepeated; currentByteRead++;
 							header[currentByteRead] = index; currentByteRead++;
 							pixel += 4;
 							pr = r, pg = g, pb = b, pa = a;
+							timesRepeated = 0;
 						} else {
 							pixel += 4;
+							timesRepeated++;
 						}
 					}
 				}
