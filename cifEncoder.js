@@ -92,11 +92,11 @@ function HCIF(imageData, configs = HCIF_PALETTE, mani = SET_AUTO) {
 				}
 			}
 		}
-		const trueResult = new Uint8Array(chunks.reduce((a, b) => a + b.byteLength));
+		const trueResult = new Uint8Array(chunks.reduce((a, b) => a + b.byteLength + 1));
 		let current = 0;
 		while (chunks.length > 0) {
 			trueResult.set(chunks[0], current);
-			current += l.byteLength;
+			current += checks[0].byteLength;
 			chunks.splice(0, 1);
 		}
 		return trueResult;
