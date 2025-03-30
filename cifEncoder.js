@@ -45,8 +45,8 @@ function HCIF(imageData, configs = HCIF_PALETTE | HCIF_RLE, mani = SET_AUTO) {
 				}
 				i += 4;
 			}
-			header[currentByteRead] = (paletteChunks.length - 1) & 255; currentByteRead++;
-			header[currentByteRead] = (paletteChunks.length - 1) >> 8; currentByteRead++;
+			header[currentByteRead] = (paletteChunks.size - 1) & 255; currentByteRead++;
+			header[currentByteRead] = (paletteChunks.size - 1) >> 8; currentByteRead++;
 			chunks.push(header);
 			let size = 0;
 			for (let i = 0; i < paletteChunks.size; i++) {
