@@ -927,12 +927,17 @@ if (!context) {
 					if (+effectParams[0].value < 0.05) alert("PERFORMANCE WARNING: It is not recommended to use intervals with that pausing time! Performance degradations can easily occur, and effects can sometimes overlap with each other, breaking functionality for the time of this animation (10 seconds).");
 					const int = setInterval(function() {
 						// 15, 16
-						effects.selectedIndex = Math.random() < 0.5 ? (15 + Math.round(Math.random())) : 23;
+						effects.selectedIndex = Math.random() < 0.333333 ? (15 + Math.round(Math.random())) : (Math.random() < 0.5 ? 4 : 23);
 						if (effects.selectedIndex === 23) {
 							effects.value = "jpeg";
 							effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" value=\"80\" step=\"1\" min=\"1\" max=\"100\" id=\"e-jpegq\">";
 							effectParams = [document.getElementById("e-jpegq")];
-							effectParams[0].value = Math.round(Math.random() * 100);
+							effectParams[0].value = Math.round(Math.random() * 40);
+						} else if (effects.selectedIndex === 4) {
+							effects.value = "shift";
+							effectSettings.innerHTML = "<a>Direction (in pixels. negative = leftwards, positive = rightwards):</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Color Padding:</a><input type=\"color\" value=\"#000000\" id=\"e-shiftcolor\"><br><a>Color Padding Opacity:</a><input type=\"number\" value=\"0\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-shiftopac\"><br><a>Wrap Around Image:</a><input type=\"checkbox\" id=\"e-shiftwrap\" checked><br><a>(if enabled) Pixel Level (if disabled) Integral Level:</a><input type=\"checkbox\" id=\"e-shiftint\" checked>";
+							effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-shiftcolor"), document.getElementById("e-shiftopac"), document.getElementById("e-shiftwrap"), document.getElementById("e-shiftint")];
+							effectParams[0].value = Math.round(4 - Math.random() * 8);
 						} else chooseEffect();
 						apply.click();
 					}, Math.max(0, +effectParams[0].value) * 1000);
