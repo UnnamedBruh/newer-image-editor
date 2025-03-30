@@ -563,6 +563,9 @@ if (!context) {
 		} else if (effects.value === "minip") {
 			effectSettings.innerHTML = "<a>Palette Reduction:</a><input type=\"number\" value=\"16\" step=\"1\" min=\"1\" max=\"256\" id=\"e-minipq\">";
 			effectParams = [document.getElementById("e-minipq")];
+		} else if (effects.value === "jpegd") {
+			effectSettings.innerHTML = "<a>Effect Interval:</a><input type=\"number\" value=\"0.05\" step=\"0.01\" min=\"0\" max=\"10\" id=\"e-jpegdint\">";
+			effectParams = [document.getElementById("e-jpegdint")];
 		} else {
 			effectSettings.innerHTML = "";
 			effectParams = [];
@@ -921,6 +924,7 @@ if (!context) {
 			}
 			case "jpegd": {
 				if (+canvas.width > 1000 && +canvas.height > 1000) alert("The fascinating effect must require the image to be smaller than the current dimensions."); else {
+					if (+effectParams[0].value < 0.05) alert("PERFORMANCE WARNING: It is not recommended to use intervals with that pausing time! Performance degradations can easily occur, and effects can sometimes overlap with each other, breaking functionality for the time of this animation (10 seconds).");
 					const int = setInterval(function() {
 						// 15, 16
 						effects.selectedIndex = Math.random() < 0.5 ? (15 + Math.round(Math.random())) : 23;
@@ -931,7 +935,7 @@ if (!context) {
 							effectParams[0].value = Math.round(Math.random() * 100);
 						} else chooseEffect();
 						apply.click();
-					}, 100);
+					}, Math.max(0, +effectParams[0].value) * 1000);
 					setTimeout(function() {clearInterval(int)}, 10000);
 				}
 			}
