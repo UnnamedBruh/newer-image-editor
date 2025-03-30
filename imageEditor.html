@@ -18,7 +18,7 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">JPEG Distortion Animation</option><option value="rect">Draw Rectangle</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">JPEG Distortion Animation</option><option value="rect">Draw Rectangle</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -557,7 +557,7 @@ if (!context) {
 				effectParams[0].max = effectParams[1].checked ? "10" : "100";
 				effectParams[0].value = effectParams[1].checked ? +effectParams[0].value / 100 : +effectParams[0].value * 100;
 			}
-		} else if (effects.value === "jpeg") {
+		} else if (effects.value === "jpeg" || effects.value === "webp") {
 			effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" value=\"80\" step=\"1\" min=\"1\" max=\"100\" id=\"e-jpegq\">";
 			effectParams = [document.getElementById("e-jpegq")];
 		} else if (effects.value === "minip") {
@@ -892,6 +892,7 @@ if (!context) {
 				}
 				break;
 			}
+			case "webp":
 			case "jpeg": {
 				const quality = Math.min(1, Math.max(0, Math.round(+effectParams[0].value) / 100));
 				if (quality !== 1) {
@@ -902,7 +903,7 @@ if (!context) {
 						currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
 						image.src = "";
 					}
-					image.src = canvas.toDataURL("image/jpeg", quality);
+					image.src = canvas.toDataURL("image/" + effects.value, quality);
 				}
 				break;
 			}
