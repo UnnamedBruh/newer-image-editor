@@ -984,14 +984,14 @@ if (!context) {
 				const audioBuffer = await audioContext.decodeAudioData(mp3ArrayBuffer);
 
 				const decodedPCM = audioBuffer.getChannelData(0);
-				const reconstructedImageData = new Uint8ClampedArray(decodedPCM.length);
-				const len2 = decodedPCM.length;
+				const reconstructedImageData = new Uint8ClampedArray(imageData.length);
+				const len2 = imageData.length;
 
 				for (let i = 0; i < len2; i++) {
 					reconstructedImageData[i] = Math.min(255, Math.max(0, (decodedPCM[i] / 256) + 128));
 				}
 
-				imageData = new ImageData(reconstructedImageData, imageData.width, imageData.height);
+				imageData = new ImageData(reconstructedImageData, currentImageData.width, currentImageData.height);
 				break;
 			}
 		}
