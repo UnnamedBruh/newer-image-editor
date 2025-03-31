@@ -976,22 +976,27 @@ if (!context) {
 				finalBuffer = null;
 				
 				let mp3Blob = new Blob(mp3Data, { type: "audio/mpeg" });
-				const mp3ArrayBuffer = await mp3Blob.arrayBuffer();
+				let mp3ArrayBuffer = await mp3Blob.arrayBuffer();
 				mp3Blob = null;
 				mp3Data = null;
 				
-				const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-				const audioBuffer = await audioContext.decodeAudioData(mp3ArrayBuffer);
+				let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+				let audioBuffer = await audioContext.decodeAudioData(mp3ArrayBuffer);
+				mp3ArrayBuffer = null;
 
-				const decodedPCM = audioBuffer.getChannelData(0);
+				let decodedPCM = audioBuffer.getChannelData(0);
+				audioBuffer = null;
+				audioContext = null;
+				
 				const reconstructedImageData = new Uint8ClampedArray(imageData.length);
 				const len2 = imageData.length;
 
 				for (let i = 0; i < len2; i++) {
 					reconstructedImageData[i] = Math.min(255, Math.max(0, (decodedPCM[i] / 256) + 128));
 				}
+				decodedPCM = null;
 
-				imageData = new ImageData(reconstructedImageData, currentImageData.width, currentImageData.height);
+				currentImageData = new ImageData(reconstructedImageData, currentImageData.width, currentImageData.height);
 				break;
 			}
 		}
