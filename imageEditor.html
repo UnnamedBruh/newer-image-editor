@@ -924,6 +924,9 @@ if (!context) {
 				break;
 			}
 			case "jpegd": {
+				if (+effectParams[0].value < 0.4) {
+					if (!confirm("THIS IMAGE EFFECT MAY CAUSE A SEIZURE FOR THOSE WITH EPILEPSY CONDITIONS FOR RAPID INTERVAL RATES. ARE YOU SURE YOU WANT TO ENABLE THIS?")) break;
+				}
 				if (+canvas.width > 1000 && +canvas.height > 1000) alert("The fascinating effect must require the image to be smaller than the current dimensions."); else {
 					if (+effectParams[0].value < 0.05) alert("PERFORMANCE WARNING: It is not recommended to use intervals with that pausing time! Performance degradations can easily occur, and effects can sometimes overlap with each other, breaking functionality for the time of this animation (10 seconds).");
 					const int = setInterval(function() {
