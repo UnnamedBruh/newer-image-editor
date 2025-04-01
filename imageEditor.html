@@ -1002,11 +1002,12 @@ if (!context) {
 
 				currentImageData = new ImageData(reconstructedImageData, originalWidth, newHeight);
 				canvas.height = Math.ceil(newHeight / 4);
+				context.putImageData(currentImageData, 0, 0);
 				currentImageData = context.getImageData(0, 0, originalWidth, +canvas.height);
 				break;
 			}
 		}
-		context.putImageData(currentImageData, 0, 0);
+		if (effects.value !== "mp3") context.putImageData(currentImageData, 0, 0);
 		if (effects.value === "resid") currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
 	}
 	const css = document.getElementById("css"), bg = document.getElementById("bgcolor");
