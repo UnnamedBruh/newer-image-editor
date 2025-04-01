@@ -988,15 +988,19 @@ if (!context) {
 				audioBuffer = null;
 				audioContext = null;
 
-				const reconstructedImageData = new Uint8ClampedArray(Math.ceil(decodedPCM.length / currentImageData.width / 4) * currentImageData.width * 4);
-				const len2 = Math.ceil(decodedPCM.length / 4) * 4;
+				const originalHeight = currentImageData.height;
+				const originalWidth = currentImageData.width;
 
-				for (let i = 0; i < len2; i++) { // This MP3 effect is difficult to implement
+				const totalPixels = originalWidth * originalHeight;
+				const newHeight = Math.ceil(decodedPCM.length / originalWidth);
+
+				const reconstructedImageData = new Uint8ClampedArray(newHeight * originalWidth * 4);
+
+				for (let i = 0; i < decodedPCM.length; i++) {
 					reconstructedImageData[i] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
 				}
-				decodedPCM = null;
 
-				currentImageData = new ImageData(reconstructedImageData, currentImageData.width, len2);
+				currentImageData = new ImageData(reconstructedImageData, originalWidth, newHeight);
 				break;
 			}
 		}
