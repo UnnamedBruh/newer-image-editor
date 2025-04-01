@@ -988,7 +988,7 @@ if (!context) {
 				audioBuffer = null;
 				audioContext = null;
 
-				const reconstructedImageData = new Uint8ClampedArray(Math.ceil(decodedPCM.length / 4) * 4);
+				const reconstructedImageData = new Uint8ClampedArray(Math.ceil(decodedPCM.length / currentImageData.width / 4) * currentImageData.width * 4);
 				const len2 = Math.ceil(decodedPCM.length / 4) * 4;
 
 				for (let i = 0; i < len2; i++) { // This MP3 effect is difficult to implement
@@ -996,7 +996,7 @@ if (!context) {
 				}
 				decodedPCM = null;
 
-				currentImageData = new ImageData(reconstructedImageData, currentImageData.width, len2 / currentImageData.height);
+				currentImageData = new ImageData(reconstructedImageData, currentImageData.width, len2 / 4);
 				break;
 			}
 		}
