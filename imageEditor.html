@@ -958,6 +958,7 @@ if (!context) {
 					const code = await module.text();
 					eval(code);
 				}
+				console.log(imageData);
 				const pcmData = new Int16Array(imageData.length);
 				for (let i = 0; i < len; i++) {
 					pcmData[i] = (imageData[i] - 128) * 255; // Normalize to Int16 range
