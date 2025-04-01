@@ -960,8 +960,9 @@ if (!context) {
 				}
 				const pcmData = new Int16Array(imageData.length);
 				for (let i = 0; i < len; i++) {
-					pcmData[i] = imageData[i] - 128; // Normalize to Int16 range
+					pcmData[i] = (imageData[i] - 128) * 255; // Normalize to Int16 range
 				}
+				console.log(pcmData);
 
 				let mp3Encoder = new lamejs.Mp3Encoder(1, 44100, Math.floor(Math.max(16, Math.min(320, +effectParams[0].value)) / 16) * 16); // mono, 44.1kHz, 128kbps
 				let mp3Data = [];
@@ -985,6 +986,7 @@ if (!context) {
 				mp3ArrayBuffer = null;
 
 				let decodedPCM = audioBuffer.getChannelData(0);
+				console.log(decodedPCM);
 				audioBuffer = null;
 				audioContext = null;
 				
