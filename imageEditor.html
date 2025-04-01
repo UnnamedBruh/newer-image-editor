@@ -1001,7 +1001,8 @@ if (!context) {
 				}
 
 				currentImageData = new ImageData(reconstructedImageData, originalWidth, newHeight);
-				canvas.height = newHeight;
+				canvas.height = Math.ceil(newHeight / 4);
+				currentImageData = context.getImageData(0, 0, originalWidth, +canvas.height);
 				break;
 			}
 		}
