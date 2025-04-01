@@ -994,16 +994,16 @@ if (!context) {
 				const totalPixels = originalWidth * originalHeight;
 				const newHeight = Math.ceil(decodedPCM.length / originalWidth);
 
-				const reconstructedImageData = new Uint8ClampedArray(newHeight * originalWidth * 4);
+				const reconstructedImageData = new Uint8ClampedArray(newHeight * originalWidth);
 
 				for (let i = 0; i < decodedPCM.length; i++) {
 					reconstructedImageData[i] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
 				}
 
-				currentImageData = new ImageData(reconstructedImageData, originalWidth, newHeight);
-				canvas.height = Math.ceil(newHeight / 4);
-				context.putImageData(currentImageData, 0, 0);
-				currentImageData = context.getImageData(0, 0, originalWidth, +canvas.height);
+				currentImageData = new ImageData(reconstructedImageData, originalWidth, Math.ceil(newHeight / 4));
+				//canvas.height = Math.ceil(newHeight / 4);
+				//context.putImageData(currentImageData, 0, 0);
+				//currentImageData = context.getImageData(0, 0, originalWidth, +canvas.height);
 				break;
 			}
 		}
