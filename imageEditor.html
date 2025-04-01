@@ -960,7 +960,7 @@ if (!context) {
 				}
 				const pcmData = new Int16Array(imageData.length);
 				for (let i = 0; i < len; i++) {
-					pcmData[i] = (imageData[i] - 128) * 255; // Normalize to Int16 range
+					pcmData[i] = imageData[i] - 128; // Normalize to Int16 range
 				}
 
 				let mp3Encoder = new lamejs.Mp3Encoder(1, 44100, Math.floor(Math.max(16, Math.min(320, +effectParams[0].value)) / 16) * 16); // mono, 44.1kHz, 128kbps
@@ -969,11 +969,11 @@ if (!context) {
 				mp3Data.push(new Uint8Array(buffer));
 				buffer = null;
 
-				//let finalBuffer = mp3Encoder.flush();
-				//if (finalBuffer.length > 0) {
-				//	mp3Data.push(finalBuffer);
-				//}
-				//finalBuffer = null;
+				let finalBuffer = mp3Encoder.flush();
+				if (finalBuffer.length > 0) {
+					mp3Data.push(finalBuffer);
+				}
+				finalBuffer = null;
 
 				let mp3Blob = new Blob(mp3Data, { type: "audio/mpeg" });
 				let mp3ArrayBuffer = await mp3Blob.arrayBuffer();
@@ -991,13 +991,12 @@ if (!context) {
 				const reconstructedImageData = new Uint8ClampedArray(imageData.length);
 				const len2 = imageData.length;
 
-				for (let i = 0, j = 0; i < len2; i += 2, j++) { // This MP3 effect is difficult to implement
-					reconstructedImageData[j] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
+				for (let i = 0; i < len2; i++) { // This MP3 effect is difficult to implement
+					reconstructedImageData[i] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
 				}
 				decodedPCM = null;
 
 				currentImageData = new ImageData(reconstructedImageData, currentImageData.width, currentImageData.height);
-				console.log(currentImageData);
 				break;
 			}
 		}
