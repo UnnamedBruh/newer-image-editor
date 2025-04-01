@@ -963,7 +963,7 @@ if (!context) {
 					pcmData[i] = (imageData[i] - 128) * 255.99609375; // Normalize to Int16 range
 				}
 
-				let mp3Encoder = new lamejs.Mp3Encoder(1, 22050, Math.floor(Math.max(16, Math.min(320, +effectParams[0].value)) / 16) * 16); // mono, 22.05kHz, 128kbps
+				let mp3Encoder = new lamejs.Mp3Encoder(1, 48000, Math.floor(Math.max(16, Math.min(320, +effectParams[0].value)) / 16) * 16); // mono, 48kHz, 128kbps
 				let mp3Data = [];
 				let buffer = mp3Encoder.encodeBuffer(pcmData);
 				mp3Data.push(new Uint8Array(buffer));
