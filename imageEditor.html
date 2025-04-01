@@ -988,7 +988,7 @@ if (!context) {
 				audioBuffer = null;
 				audioContext = null;
 				
-				const reconstructedImageData = new Uint8ClampedArray(decodedPCM.length);
+				const reconstructedImageData = new Uint8ClampedArray(Math.ceil(decodedPCM.length / currentImageData.width) * currentImageData.width * 4);
 				const len2 = reconstructedImageData.length;
 
 				for (let i = 0; i < len2; i++) { // This MP3 effect is difficult to implement
