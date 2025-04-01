@@ -996,8 +996,8 @@ if (!context) {
 				}
 				decodedPCM = null;
 
-				console.log((currentImageData.width * Math.ceil(len2 / currentImageData.width) * currentImageData.width) - reconstructedImageData.length);
-				currentImageData = new ImageData(reconstructedImageData, currentImageData.width, Math.ceil(len2 / currentImageData.width) * currentImageData.width);
+				console.log((currentImageData.width * Math.ceil(len2 / currentImageData.width)) - reconstructedImageData.length);
+				currentImageData = new ImageData(reconstructedImageData, currentImageData.width, Math.ceil(len2 / currentImageData.width));
 				canvas.height = currentImageData.height;
 				break;
 			}
