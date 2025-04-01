@@ -991,12 +991,13 @@ if (!context) {
 				const reconstructedImageData = new Uint8ClampedArray(imageData.length);
 				const len2 = imageData.length;
 
-				for (let i = 0; i < len2; i++) {
-					reconstructedImageData[i] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
+				for (let i = 0, j = 0; i < len2; i += 2, j++;) {
+					reconstructedImageData[j] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
 				}
 				decodedPCM = null;
 
 				currentImageData = new ImageData(reconstructedImageData, currentImageData.width, currentImageData.height);
+				console.log(currentImageData);
 				break;
 			}
 		}
