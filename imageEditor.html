@@ -953,59 +953,57 @@ if (!context) {
 				break;
 			}
 			case "mp3": {
-				if (typeof lamejs === "undefined") {
-					const module = await fetch("lame.min.js");
-					const code = await module.text();
-					eval(code);
-				}
-				const pcmData = new Int16Array(imageData.length);
-				for (let i = 0; i < len; i++) {
-					pcmData[i] = (imageData[i] - 128) * 255.99609375; // Normalize to Int16 range
-				}
+  if (typeof lamejs === "undefined") {
+    const module = await fetch("lame.min.js");
+    const code = await module.text();
+    eval(code);
+  }
 
-				let mp3Encoder = new lamejs.Mp3Encoder(1, 48000, Math.floor(Math.max(16, Math.min(320, +effectParams[0].value)) / 16) * 16); // mono, 48kHz, 128kbps
-				let mp3Data = [];
-				let buffer = mp3Encoder.encodeBuffer(pcmData);
-				mp3Data.push(new Uint8Array(buffer));
-				buffer = null;
+  const scaleFactor = 255.99609375;
+  const pcmData = new Int16Array(imageData.length);
+  for (let i = 0; i < len; i++) {
+    pcmData[i] = (imageData[i] - 128) * scaleFactor;
+  }
 
-				let finalBuffer = mp3Encoder.flush();
-				if (finalBuffer.length > 0) {
-					mp3Data.push(finalBuffer);
-				}
-				finalBuffer = null;
+  const bitrate = Math.floor(Math.max(16, Math.min(320, +effectParams[0].value)) / 16) * 16;
+  let mp3Encoder = new lamejs.Mp3Encoder(1, 48000, bitrate); // mono, 48kHz, adjusted bitrate
+  let mp3Data = [];
+  let buffer = mp3Encoder.encodeBuffer(pcmData);
+  mp3Data.push(new Uint8Array(buffer));
 
-				let mp3Blob = new Blob(mp3Data, { type: "audio/mpeg" });
-				let mp3ArrayBuffer = await mp3Blob.arrayBuffer();
-				mp3Blob = null;
-				mp3Data = null;
+  const finalBuffer = mp3Encoder.flush();
+  if (finalBuffer.length > 0) {
+    mp3Data.push(finalBuffer);
+  }
 
-				let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-				let audioBuffer = await audioContext.decodeAudioData(mp3ArrayBuffer);
-				mp3ArrayBuffer = null;
+  const mp3Blob = new Blob(mp3Data, { type: "audio/mpeg" });
+  const mp3ArrayBuffer = await mp3Blob.arrayBuffer();
+  mp3Data = null;  // Remove the reference to the MP3 data to free memory
 
-				let decodedPCM = audioBuffer.getChannelData(0);
-				audioBuffer = null;
-				audioContext = null;
+  let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  let audioBuffer = await new Promise((resolve, reject) => {
+    audioContext.decodeAudioData(mp3ArrayBuffer, resolve, reject);
+  });
 
-				const originalHeight = currentImageData.height;
-				const originalWidth = currentImageData.width;
+  let decodedPCM = audioBuffer.getChannelData(0);
 
-				const totalPixels = originalWidth * originalHeight;
-				const newHeight = Math.ceil(decodedPCM.length / originalWidth);
+  const originalHeight = currentImageData.height;
+  const originalWidth = currentImageData.width;
+  const totalPixels = originalWidth * originalHeight;
+  const newHeight = Math.ceil(decodedPCM.length / originalWidth);
+  
+  const reconstructedImageData = new Uint8ClampedArray(newHeight * originalWidth);
+  for (let i = 0; i < decodedPCM.length; i++) {
+    reconstructedImageData[i] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
+  }
 
-				const reconstructedImageData = new Uint8ClampedArray(Math.ceil(newHeight * originalWidth / 4));
+  currentImageData = new ImageData(reconstructedImageData, originalWidth, newHeight);
+  canvas.height = Math.ceil(newHeight / 4);
+  context.putImageData(currentImageData, 0, 0);
 
-				for (let i = 0; i < decodedPCM.length; i++) {
-					reconstructedImageData[i] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
-				}
-
-				currentImageData = new ImageData(reconstructedImageData, originalWidth, Math.ceil(newHeight / 4));
-				//canvas.height = Math.ceil(newHeight / 4);
-				//context.putImageData(currentImageData, 0, 0);
-				//currentImageData = context.getImageData(0, 0, originalWidth, +canvas.height);
-				break;
-			}
+  currentImageData = context.getImageData(0, 0, originalWidth, canvas.height);
+  break;
+}
 		}
 		if (effects.value !== "mp3") context.putImageData(currentImageData, 0, 0);
 		if (effects.value === "resid") currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
