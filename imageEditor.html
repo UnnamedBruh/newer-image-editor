@@ -1007,10 +1007,10 @@ if (!context) {
 				let k = 0, j = 0;
 				for (; j < width; j += 4) {
 					for (let i = 0; i < len; i += width) {
-						da[k] = data[j + i]; k++;
-						da[k] = data[j + i + 1]; k++;
-						da[k] = data[j + i + 2]; k++;
-						da[k] = data[j + i + 3]; k++;
+						da[k] = imageData[j + i]; k++;
+						da[k] = imageData[j + i + 1]; k++;
+						da[k] = imageData[j + i + 2]; k++;
+						da[k] = imageData[j + i + 3]; k++;
 					}
 				}
 				currentImageData = im;
