@@ -4,7 +4,7 @@
 <title>Image Editor</title>
 <style id="css">
 button, body, select, input {
-	background-color: rgb(40, 40, 40);
+	background-color: rgb(0, 0, 0);
 }
 button, body, a, p, h1, select, option, input {
 	color: white;
@@ -500,6 +500,7 @@ if (!context) {
 		let result = x % y;
 		return result < 0 ? result + y : result;
 	}
+	let customModdedEffects = [];
 	function chooseEffect() {
 		effectSettings.innerHTML = "";
 		if (effects.value === "tint") {
@@ -567,8 +568,14 @@ if (!context) {
 			effectSettings.innerHTML = "<a>Bitrate:</a><input type=\"number\" value=\"128\" step=\"16\" min=\"32\" max=\"320\" id=\"e-mp3bitrate\"><br><a>This effect is unconventional. First, the image data is directly encoded using <a href=\"https://github.com/webpack-contrib/lamejs\">lamejs</a> with the chosen bitrate, then the MP3 data is decoded back into the image. THIS PROCESS MAY BE COMPUTATIONALLY EXPENSIVE FOR LARGER IMAGES!</a>";
 			effectParams = [document.getElementById("e-mp3bitrate")];
 		} else {
-			effectSettings.innerHTML = "";
-			effectParams = [];
+			const x = customModdedEffects.find(x => x[0] === effects.value);
+			if (x) {
+				effectSettings.innerHTML = x[1];
+				effectParams = x[2]();
+			} else {
+				effectSettings.innerHTML = "";
+				effectParams = [];
+			}
 		}
 	}
 	effects.oninput = chooseEffect;
@@ -1018,6 +1025,12 @@ if (!context) {
 				currentImageData = im;
 				break;
 			}
+			default: {
+				const x = customModdedEffects.find(x => x[0] === effects.value);
+				x[3](len, imageData, currentImageData, function(x) {
+					currentImageData = x;
+				});
+			}
 		}
 		if (effects.value !== "mp3") context.putImageData(currentImageData, 0, 0);
 		if (effects.value === "resid") currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
@@ -1032,5 +1045,6 @@ button, body, a, p, h1, select, option, input {
 }`;
 	}
 </script>
+<script src="otherEffects.js"></script>
 </body>
 </html>
