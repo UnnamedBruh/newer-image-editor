@@ -9,10 +9,11 @@
 		const data = imgD.data;
 		let i = 4;
 
-		for (; i < len; i++) {
+		for (; i < len;) {
 			data[i] = imageData[i] - imageData[i - 4]; i++;
 			data[i] = imageData[i] - imageData[i - 4]; i++;
 			data[i] = imageData[i] - imageData[i - 4]; i++;
+			data[i] = imageData[i]; i++;
 		}
 		x(imgD);
 	}
