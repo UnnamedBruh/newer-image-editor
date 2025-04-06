@@ -1004,8 +1004,8 @@ if (!context) {
 			case "rotate": {
 				const width = currentImageData.width * 4, im = new ImageData(new Uint8ClampedArray(len), currentImageData.height, currentImageData.width);
 				const da = im.data;
-				let k = 0, j = 0;
-				for (; j < width; j += 4) {
+				let k = 0, j = width;
+				for (; j >= 0; j -= 4) {
 					for (let i = 0; i < len; i += width) {
 						da[k] = imageData[j + i]; k++;
 						da[k] = imageData[j + i + 1]; k++;
@@ -1013,6 +1013,8 @@ if (!context) {
 						da[k] = imageData[j + i + 3]; k++;
 					}
 				}
+				canvas.width = im.width;
+				canvas.height = im.height;
 				currentImageData = im;
 				break;
 			}
