@@ -7,12 +7,13 @@
 		if (effectParams[0].value == 0) return;
 		const imgD = new ImageData(new Uint8ClampedArray(len), currentImageData.width, currentImageData.height);
 		const data = imgD.data;
+		const perc = +effectParams[0].value / 100;
 		let i = 4;
 
 		for (; i < len;) {
-			data[i] = imageData[i] - imageData[i - 4]; i++;
-			data[i] = imageData[i] - imageData[i - 4]; i++;
-			data[i] = imageData[i] - imageData[i - 4]; i++;
+			data[i] = interpolate(imageData[i], imageData[i] - imageData[i - 4], perc); i++;
+			data[i] = interpolate(imageData[i], imageData[i] - imageData[i - 4], perc); i++;
+			data[i] = interpolate(imageData[i], imageData[i] - imageData[i - 4], perc); i++;
 			data[i] = imageData[i]; i++;
 		}
 		x(imgD);
