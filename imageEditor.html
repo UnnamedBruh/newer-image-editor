@@ -1044,7 +1044,35 @@ button, body, a, p, h1, select, option, input {
 	color: ${extractRGBA2(bg.value, 0).reduce((a, b) => a + b) > 382 ? "black" : "white"};
 }`;
 	}
+	function exportI() {
+		const choice = [
+			["image/png", "PNG", false, "png"], ["image/jpeg", "JPEG", true, "jpeg"], ["image/webp", "WebP", true, "webp"], ["image/bmp", "Bitmap", false, "bmp"]
+		];
+		const index = prompt("What is the image format you want to export in? So far, we only support " + choice.map(x => x[1]).join(", ") + ". Choose by typing in their format (case-insensitive), or typing in the index (zero-based).");
+		let format;
+		if (isNaN(+index.trim())) {
+			const e = index.toLowerCase();
+			format = choice.find(x => x[1].toLowerCase() === e);
+		} else {
+			format = choice[+index.trim()];
+		}
+		if (!format) {
+			alert("Neither of the formats are selected; defaulting to PNG instead.");
+			format = choice[0];
+		}
+		canvas.toBlob((blob) => {
+			const link = document.createElement('a');
+			link.href = URL.createObjectURL(blob);
+			link.download = 'exportedImage.' + format[3];
+			if (!link.href.slice(0, 50).includes(format[0])) {
+				alert("The selected image format is not able to be exported by your browser; defaulting to PNG instead");
+				link.download = 'exportedImage.png';
+			}
+			link.click();
+		}, format[0], format[2] ? +Math.min(1, Math.max(0, +prompt("What should the quality of the exported image be? (0 = worst quality, 1 = best quality, 0.8 = balanced)"))) : 0);
+	}
 </script>
 <script src="otherEffects.js"></script>
+<button onclick="exportI();">Export Image</button>
 </body>
 </html>
