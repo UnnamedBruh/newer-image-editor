@@ -1064,11 +1064,6 @@ button, body, a, p, h1, select, option, input {
 			const link = document.createElement('a');
 			link.href = URL.createObjectURL(blob);
 			link.download = 'exportedImage.' + format[3];
-			console.log(link.href);
-			if (!link.href.slice(0, 50).includes(format[0])) {
-				alert("The selected image format is not able to be exported by your browser; defaulting to PNG instead");
-				link.download = 'exportedImage.png';
-			}
 			link.click();
 		}, format[0], format[2] ? +Math.min(1, Math.max(0, +prompt("What should the quality of the exported image be? (0 = worst quality, 1 = best quality, 0.8 = balanced)"))) : 0);
 	}
