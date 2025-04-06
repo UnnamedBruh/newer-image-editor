@@ -18,7 +18,7 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -383,13 +383,10 @@ if (!context) {
 					video.oncanplaythrough = function() {
 						video.oncanplaythrough = function() {}
 						setTimeout(function() {
-							canvas.width = video.width;
-							canvas.height = video.height;
+							canvas.width = video.videoWidth;
+							canvas.height = video.videoHeight;
 							canvas.style.display = "none";
 							context.clearRect(0, 0, +canvas.width, +canvas.height);
-							video.ontimeupdate = function() {
-								context.drawImage(video, 0, 0, +canvas.width, +canvas.height);
-							}
 							document.body.appendChild(video);
 							const bounding = video.getBoundingClientRect();
 							if (canvas.width == 0 || canvas.height == 0) {
@@ -417,7 +414,7 @@ if (!context) {
 									confirm.remove();
 								}, 200);
 							}
-						}, 1000);
+						}, 10);
 					}
 					video.src = res.target.result;
 				}
@@ -1004,6 +1001,21 @@ if (!context) {
   currentImageData = context.getImageData(0, 0, originalWidth, canvas.height);
   break;
 }
+			case "rotate": {
+				const width = currentImageData.width * 4, im = new ImageData(new Uint8ClampedArray(len), currentImageData.height, currentImageData.width);
+				const da = im.data;
+				let k = 0, j = 0;
+				for (; j < width; j += 4) {
+					for (let i = 0; i < len; i += width) {
+						da[k] = data[j + i]; k++;
+						da[k] = data[j + i + 1]; k++;
+						da[k] = data[j + i + 2]; k++;
+						da[k] = data[j + i + 3]; k++;
+					}
+				}
+				currentImageData = im;
+				break;
+			}
 		}
 		if (effects.value !== "mp3") context.putImageData(currentImageData, 0, 0);
 		if (effects.value === "resid") currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
