@@ -51,7 +51,7 @@ function loadTgaFromUint8Array(tgaData) {
 			]
 		];
 		let instructions = possibleInstructions.find(x => x[0])[1];
-		alert("Proper handling for the TGA origins and different color orders will come in a future update. For now, you must " + instructions + (instructions === "reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
+		alert("Proper handling for the TGA origins and different color orders should be handled manually. To get the original image, you must " + instructions + (instructions === "reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
 		if (loader.header.pixelDepth === 24) {
 			buffer = new Uint8ClampedArray(loader.header.width * loader.header.height * 4);
 			for (let i = 0, j = 0; i < buffer.length;) {
@@ -400,7 +400,7 @@ if (!context) {
 			context.stroke();
 		}
 	}
-	canvas.onmouseup = function(event) {
+	document.body.onmouseup = function(event) {
 		if (isDrawing) {
 			isMouseDown = false;
 		}
@@ -854,9 +854,11 @@ if (!context) {
 			}
 			default: {
 				const x = customModdedEffects.find(x => x[0] === effects.value);
-				x[3](len, imageData, currentImageData, function(x) {
-					currentImageData = x;
-				});
+				if (x) {
+					x[3](len, imageData, currentImageData, function(x) {
+						currentImageData = x;
+					});
+				}
 			}
 		}
 		if (effects.value !== "mp3") context.putImageData(currentImageData, 0, 0);
@@ -891,7 +893,7 @@ button, body, a, p, h1, select, option, input {
 			const link = document.createElement('a');
 			link.href = URL.createObjectURL(blob);
 			if (format[3] !== "png" && (blob.type === "image/png" || blob.type === "application/octet-stream" || blob.type === "")) {
-				alert("Your browser does not yet support the selected image format. The browser will default to PNG instead");
+				alert("Your browser does not yet support the selected image format. The browser will default to export using PNG instead");
 				format = choice[0];
 			}
 			link.download = 'exportedImage.' + format[3];
