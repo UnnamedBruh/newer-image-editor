@@ -387,7 +387,6 @@ if (!context) {
 			context.moveTo(lastX, lastY);
 			context.lineTo(lastX + 0.001, lastY + 0.001);
 			context.stroke();
-			context.endPath();
 		}
 	}
 	canvas.onmousemove = function(event) {
@@ -399,7 +398,6 @@ if (!context) {
 			lastY = event.clientY - bs.y;
 			context.lineTo(lastX, lastY);
 			context.stroke();
-			context.endPath();
 		}
 	}
 	canvas.onmouseup = function(event) {
