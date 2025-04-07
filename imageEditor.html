@@ -211,7 +211,7 @@ if (!context) {
 				}
 			}
 		}
-		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga") /*&& !file.name.endsWith(".dds")*/) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
+		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga")) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
 	});
 	treatFile.oninput = function() {
 		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
@@ -358,6 +358,9 @@ if (!context) {
 		} else if (effects.value === "mp3") {
 			effectSettings.innerHTML = "<a>Bitrate:</a><input type=\"number\" value=\"128\" step=\"16\" min=\"32\" max=\"320\" id=\"e-mp3bitrate\"><br><a>This effect is unconventional. First, the image data is directly encoded using <a href=\"https://github.com/webpack-contrib/lamejs\">lamejs</a> with the chosen bitrate, then the MP3 data is decoded back into the image. THIS PROCESS MAY BE COMPUTATIONALLY EXPENSIVE FOR LARGER IMAGES!</a>";
 			effectParams = [document.getElementById("e-mp3bitrate")];
+		} else if (effects.value === "draw") {
+			effectSettings.innerHTML = "<a>Size (in pixels):</a><input type=\"number\" value=\"2\" step=\"0.5\" min=\"0.01\" max=\"4096\" id=\"e-drawwidth\"><br><a>Color:</a><input type=\"color\" value=\"#000000\" id=\"e-drawcolor\"><br>";
+			effectParams = [document.getElementById("e-drawwidth"), document.getElementById("e-drawcolor")];
 		} else {
 			const x = customModdedEffects.find(x => x[0] === effects.value);
 			if (x) {
@@ -377,8 +380,8 @@ if (!context) {
 			const bs = canvas.getBoundingClientRect();
 			lastX = event.clientX - bs.x;
 			lastY = event.clientY - bs.y;
-			context.lineWidth = 2;
-			context.strokeStyle = "black";
+			context.lineWidth = +effectParams[0].value;
+			context.strokeStyle = effectParams[1].value;
 			context.moveTo(lastX, lastY);
 			context.lineTo(lastX + 0.001, lastY + 0.001);
 			context.stroke();
@@ -390,7 +393,7 @@ if (!context) {
 			context.moveTo(lastX, lastY);
 			lastX = event.clientX - bs.x;
 			lastY = event.clientY - bs.y;
-			context.lineTo(lastX + 0.001, lastY + 0.001);
+			context.lineTo(lastX, lastY);
 			context.stroke();
 		}
 	}
