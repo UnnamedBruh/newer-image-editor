@@ -18,147 +18,13 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
 const TYPE_NO_DATA=0,TYPE_INDEXED=1,TYPE_RGB=2,TYPE_GREY=3,TYPE_RLE_INDEXED=9,TYPE_RLE_RGB=10,TYPE_RLE_GREY=11,ORIGIN_BOTTOM_LEFT=0,ORIGIN_BOTTOM_RIGHT=1,ORIGIN_TOP_LEFT=2,ORIGIN_TOP_RIGHT=3,ORIGIN_SHIFT=4,ORIGIN_MASK=48;class TgaLoader{_checkHeader(){const e=this.header;if(0===e.imageType)throw new Error("No data");if(e.hasColorMap){if(e.colorMapLength>256||24!==e.colorMapDepth||1!==e.colorMapType)throw new Error("Invalid colormap for indexed type")}else if(e.colorMapType)throw new Error("Why does the image contain a palette?");if(!e.width||!e.height)throw new Error("Invalid image size");if(8!==e.pixelDepth&&16!==e.pixelDepth&&24!==e.pixelDepth&&32!==e.pixelDepth)throw new Error('Invalid pixel size "'+e.pixelDepth+'"')}_decodeRLE(e,t,a,r){const o=new Uint8Array(r),i=new Uint8Array(a);let s=0;for(;s<r;){const r=e[t++];let h=1+(127&r);if(128&r){for(let r=0;r<a;++r)i[r]=e[t+r];t+=a;for(let e=0;e<h;++e)o.set(i,s),s+=a}else{h*=a;for(let a=0;a<h;++a)o[s+a]=e[t+a];s+=h,t+=h}}return o}_getImageData8bits(e,t,a,r,o,i,s,h,n,g){for(let l=0,p=o;p!==s;p+=i)for(let o=h;o!==g;o+=n,l++){const i=t[l];e[4*(o+r*p)+3]=255,e[4*(o+r*p)+2]=a[3*i+0],e[4*(o+r*p)+1]=a[3*i+1],e[4*(o+r*p)+0]=a[3*i+2]}return e}_getImageData16bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=2){const i=t[a+0]|t[a+1]<<8;e[4*(o+r*l)+0]=(31744&i)>>7,e[4*(o+r*l)+1]=(992&i)>>2,e[4*(o+r*l)+2]=(31&i)>>3,e[4*(o+r*l)+3]=32768&i?0:255}return e}_getImageData24bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=3)e[4*(o+r*l)+3]=255,e[4*(o+r*l)+2]=t[a+0],e[4*(o+r*l)+1]=t[a+1],e[4*(o+r*l)+0]=t[a+2];return e}_getImageData32bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=4)e[4*(o+r*l)+2]=t[a+0],e[4*(o+r*l)+1]=t[a+1],e[4*(o+r*l)+0]=t[a+2],e[4*(o+r*l)+3]=t[a+3];return e}_getImageDataGrey8bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a++){const i=t[a];e[4*(o+r*l)+0]=i,e[4*(o+r*l)+1]=i,e[4*(o+r*l)+2]=i,e[4*(o+r*l)+3]=255}return e}_getImageDataGrey16bits(e,t,a,r,o,i,s,h,n,g){for(let a=0,l=o;l!==s;l+=i)for(let o=h;o!==g;o+=n,a+=2)e[4*(o+r*l)+0]=t[a+0],e[4*(o+r*l)+1]=t[a+0],e[4*(o+r*l)+2]=t[a+0],e[4*(o+r*l)+3]=t[a+1];return e}open(e,t){const a=new XMLHttpRequest;a.responseType="arraybuffer",a.open("GET",e,!0),a.onload=()=>{200===a.status&&(this.load(new Uint8Array(a.response)),t&&t())},a.send(null)}load(e){let t=0;if(e.length<18)throw new Error("Not enough data to contain header");const a={idLength:e[t++],colorMapType:e[t++],imageType:e[t++],colorMapIndex:e[t++]|e[t++]<<8,colorMapLength:e[t++]|e[t++]<<8,colorMapDepth:e[t++],offsetX:e[t++]|e[t++]<<8,offsetY:e[t++]|e[t++]<<8,width:e[t++]|e[t++]<<8,height:e[t++]|e[t++]<<8,pixelDepth:e[t++],flags:e[t++]};if(a.hasEncoding=9===a.imageType||10===a.imageType||11===a.imageType,a.hasColorMap=9===a.imageType||1===a.imageType,a.isGreyColor=11===a.imageType||3===a.imageType,this.header=a,this._checkHeader(),t+=a.idLength,t>=e.length)throw new Error("No data");if(a.hasColorMap){const r=a.colorMapLength*(a.colorMapDepth>>3);this.palette=e.subarray(t,t+r),t+=r}const r=a.pixelDepth>>3,o=a.width*a.height,i=o*r;a.hasEncoding?this.imageData=this._decodeRLE(e,t,r,i):this.imageData=e.subarray(t,t+(a.hasColorMap?o:i))}getImageData(e){const{width:t,height:a,flags:r,pixelDepth:o,isGreyColor:i}=this.header,s=(48&r)>>4;let h,n,g,l,p,c,d;switch(e||(e=document?document.createElement("canvas").getContext("2d").createImageData(t,a):{width:t,height:a,data:new Uint8ClampedArray(t*a*4)}),2===s||3===s?(l=0,p=1,c=a):(l=a-1,p=-1,c=-1),2===s||0===s?(h=0,n=1,g=t):(h=t-1,n=-1,g=-1),o){case 8:d=i?this._getImageDataGrey8bits:this._getImageData8bits;break;case 16:d=i?this._getImageDataGrey16bits:this._getImageData16bits;break;case 24:d=this._getImageData24bits;break;case 32:d=this._getImageData32bits}return d.call(this,e.data,this.imageData,this.palette,t,l,p,c,h,n,g),e}getCanvas(){const{width:e,height:t}=this.header,a=document.createElement("canvas"),r=a.getContext("2d"),o=r.createImageData(e,t);return a.width=e,a.height=t,r.putImageData(this.getImageData(o),0,0),a}getDataURL(e){return this.getCanvas().toDataURL(e||"image/png")}};
 
-/* dds.js
-const gl = document.createElement("canvas").getContext("webgl");
-
-const DDS_MAGIC = "DDS ";
-const DX10_MAGIC = "DX10";  // Added DX10 magic constant
-const DDS_HEADER_SIZE = 124; // Fixed size for standard DDS header
-
-// Constants for DDS flags and formats
-const DDSF_CAPS = 1;
-const DDSF_HEIGHT = 2;
-const DDSF_WIDTH = 4;
-const DDSF_PIXELFORMAT = 4096;
-const DDSF_MIPMAPCOUNT = 131072;
-const DDSF_FOURCC = 4;
-const DDSF_RGBA = 65;
-const DDSF_RGB = 64;
-
-const FOURCC = {
-  DXT1: 827611204, DXT5: 894720068, R8G8B8: 20, RGB32: 1145194322, 
-  RGBA32: 1178748754, RGB24: 910313298
-};
-
-const fourccFormats = {
-  [FOURCC.DXT1]: compressedFormat(gl.COMPRESSED_RGBA_S3TC_DXT1_EXT, 8),
-  [FOURCC.DXT5]: compressedFormat(gl.COMPRESSED_RGBA_S3TC_DXT5_EXT, 16),
-  [FOURCC.R8G8B8]: format(gl.BGR, gl.RGB8, gl.UNSIGNED_BYTE, 3),
-  [FOURCC.RGB32]: format(gl.RGB, gl.RGBA8, gl.UNSIGNED_BYTE, 4),
-  [FOURCC.RGBA32]: format(gl.RGBA, gl.RGBA8, gl.UNSIGNED_BYTE, 4),
-  [FOURCC.RGB24]: format(gl.BGR, gl.RGB8, gl.UNSIGNED_BYTE, 3)
-};
-
-// Helper functions to define format and compressed format
-function format(t, e, r, a) {
-  return { format: t, internal_format: e, type: r, bytesPerElement: a, compressed: false };
-}
-
-function compressedFormat(t, e) {
-  return { format: t, internal_format: t, type: t, bytesPerElement: e, compressed: true };
-}
-
-// Main function to parse DDS file
-function parseDDS(arrayBuffer) {
-  if (!(arrayBuffer instanceof ArrayBuffer)) {
-    throw new Error("Expected ArrayBuffer");
-  }
-
-  const bytes = new Uint8Array(arrayBuffer);
-
-  // Validate DDS Magic String
-  if (new TextDecoder().decode(bytes.slice(0, 4)) !== DDS_MAGIC) {
-    return {error: Error("Not a valid DDS file")};
-  }
-
-  const header = unpackDDSHeader(bytes);
-  const formatInfo = getFormatInfo(header);
-  
-  let result = {
-    width: header.width,
-    height: header.height,
-    depth: header.caps2 & 1 ? header.depth : 0,
-    levels: (header.flags & DDSF_MIPMAPCOUNT) ? header.mipMapCount : 1,
-    parts: []
-  };
-
-  Object.assign(result, formatInfo);
-
-  // Calculate mipmap levels
-  let width = result.width;
-  let height = result.height;
-  let depth = result.depth || 1;
-  let offset = 4 + DDS_HEADER_SIZE;  // Start offset after the header
-
-  for (let level = 0; level < result.levels; level++) {
-    const size = Math.max(1, Math.floor(width / 2)) * Math.max(1, Math.floor(height / 2)) * depth * result.bytesPerElement;
-    result.parts.push({ offset, size });
-    offset += size;
-    width = Math.max(1, Math.floor(width / 2));
-    height = Math.max(1, Math.floor(height / 2));
-  }
-
-  return result;
-}
-
-// Unpack the DDS header
-function unpackDDSHeader(bytes) {
-  const view = new DataView(bytes.buffer);
-  const header = {
-    width: view.getUint32(4, false),
-    height: view.getUint32(8, false),
-    flags: view.getUint32(12, true),
-    pf_flags: view.getUint32(20, true),
-    pf_fourCC: view.getUint32(84, true),
-    pf_rgbBitCount: view.getUint32(28, true),
-    mipMapCount: view.getUint32(104, true),
-    caps1: view.getUint32(108, true),
-    caps2: view.getUint32(112, true),
-    size: view.getUint32(0, true)
-  };
-
-  // Check for DX10 extended header
-  if (new TextDecoder().decode(bytes.slice(0, 4)) === DX10_MAGIC) {
-    // Parse DX10 header (additional fields)
-    header.isDX10 = true;
-    // For simplicity, let's assume DX10 header starts at byte 124
-    const dx10View = new DataView(bytes.buffer, DDS_HEADER_SIZE);
-    header.dx10Format = dx10View.getUint32(0, true);
-    header.arraySize = dx10View.getUint32(4, true);
-    header.miscFlags = dx10View.getUint32(8, true);
-    // Any other DX10-specific parsing can go here...
-  }
-
-  return header;
-}
-
-// Interpret the format based on flags and FOURCC
-function getFormatInfo(header) {
-  let formatInfo = null;
-
-  if (header.pf_flags & DDSF_FOURCC) {
-    formatInfo = fourccFormats[header.pf_fourCC];
-  } else if (header.pf_flags === DDSF_RGBA && header.pf_rgbBitCount === 32) {
-    formatInfo = fourccFormats[FOURCC.RGBA32];
-  } else if (header.pf_flags === DDSF_RGB && header.pf_rgbBitCount === 32) {
-    formatInfo = fourccFormats[FOURCC.RGB32];
-  } else if (header.pf_flags === DDSF_RGB && header.pf_rgbBitCount === 24) {
-    formatInfo = fourccFormats[FOURCC.RGB24];
-  }
-
-  if (!formatInfo) {
-     return {...formatInfo, error: Error(`Unknown DDS format: pf_flags=${header.pf_flags}, pf_fourCC=${header.pf_fourCC}, pf_rgbBitCount=${header.pf_rgbBitCount}`)};
-  }
-
-  return formatInfo;
-}
-*/ // end dds.js
+let isDrawing, lastX, lastY;
 
 function loadTgaFromUint8Array(tgaData) {
 	let buffer, image;
@@ -227,73 +93,6 @@ function loadTgaFromUint8Array(tgaData) {
 	}
 }
 
-/* function loadDdsFromUint8Array(ddsData) {
-	let buffer, image, ddsFileInfo;
-	try {
-		// Parse DDS file
-		ddsFileInfo = parseDDS(ddsData);
-		if (ddsFileInfo.error) throw ddsFileInfo.error;
-
-		// User selects mipmap level
-		const mipmapIndex = Math.floor(Math.max(0, Math.min(ddsFileInfo.parts.length - 1, +prompt(
-			`Select a mipmap level (there are ${ddsFileInfo.parts.length} mipmaps available). ` +
-			`Select an index (zero-based) or use 0 for the highest resolution level.`)) || 0));
-		
-		image = ddsFileInfo.parts[mipmapIndex];
-		
-		// Handle specific DDS formats
-		if (ddsFileInfo.pf_rgbBitCount === 24 && (ddsFileInfo.format === gl.BGR && ddsFileInfo.internal_format === gl.RGB8)) {
-			// Convert BGR to RGBA (add alpha channel)
-			buffer = new Uint8ClampedArray(ddsFileInfo.header.width * ddsFileInfo.header.height * 4);
-			let i = 0;
-			for (let j = 0; i < buffer.length; j += 3) {
-				// Swap R and B channels (since it's BGR) and add alpha channel as 255
-				buffer[i] = image[j + 2]; i++;  // R
-				buffer[i] = image[j + 1]; i++;  // G
-				buffer[i] = image[j]; i++;      // B
-				buffer[i] = 255; i++;           // Alpha (fully opaque)
-			}
-			return new ImageData(buffer, ddsFileInfo.header.width, ddsFileInfo.header.height);
-
-		} else if (ddsFileInfo.pf_rgbBitCount === 32 && (ddsFileInfo.format === gl.RGB && ddsFileInfo.internal_format === gl.RGBA8)) {
-			// No conversion needed for RGBA8 format
-			return new ImageData(image, ddsFileInfo.header.width, ddsFileInfo.header.height);
-
-		} else {
-			// Handle unsupported formats
-			alert("Unknown colorspace for the DDS image - this case will be handled in the future.");
-		}
-	} catch (err) {
-		alert("Error decoding the DDS image: " + err.message);
-
-		console.log(ddsFileInfo);
-		
-		// Specific checks for potential issues
-		if (ddsData.length === 0) {
-			alert("The DDS file is empty. This image requires data for width, height, channels, etc.");
-		} else if ((ddsFileInfo.pf_rgbBitCount === 24 && image.length !== ddsFileInfo.width * ddsFileInfo.height * 3) || 
-			(ddsFileInfo.pf_rgbBitCount === 32 && image.length !== ddsFileInfo.width * ddsFileInfo.height * 4)) {
-			alert("Image data overflow or underflow: the provided pixel data does not match the expected dimensions.");
-		} else if (![24, 32].includes(ddsFileInfo.pf_rgbBitCount)) {
-			// Handle unexpected pixel depth
-			if (confirm("Unexpected pixel depth in DDS image (" + ddsFileInfo.pf_rgbBitCount + "). Would you like to provide the pixel depth?")) {
-				let pixelDepth = +prompt("Provide the pixel depth (default is 24).") || 24;
-				while (![24, 32].includes(pixelDepth)) {
-					alert("Unsupported pixel depth. Please choose 24 or 32.");
-					pixelDepth = +prompt("Provide the pixel depth (default is 24).") || 24;
-				}
-				// Update the pixel depth
-				ddsData[28] = Math.round(pixelDepth & 256);
-				ddsData[29] = 0;
-				ddsData[30] = 0;
-				ddsData[31] = 0;
-				// Assuming this function exists
-				loadDdsFromUint8Array(ddsData);
-			}
-		}
-	}
-} */
-
 const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
 const context = canvas.getContext("2d");
 if (!context) {
@@ -313,15 +112,7 @@ if (!context) {
 					canvas.height = currentImageData.height;
 					context.clearRect(0, 0, +canvas.width, +canvas.height);
 					context.putImageData(currentImageData, 0, 0);
-				}/* else if (file.name.endsWith(".dds")) {
-					alert("DDS.js (browser port) is being used to decode the image.");
-					currentImageData = loadDdsFromUint8Array(res.target.result);
-					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-					canvas.width = currentImageData.width;
-					canvas.height = currentImageData.height;
-					context.clearRect(0, 0, +canvas.width, +canvas.height);
-					context.putImageData(currentImageData, 0, 0);
-				}*/ else {
+				} else {
 					const img = new Image();
 					img.onload = function() {
 						canvas.width = img.width;
@@ -576,6 +367,36 @@ if (!context) {
 				effectSettings.innerHTML = "";
 				effectParams = [];
 			}
+		}
+		isDrawing = effects.value === "draw";
+	}
+	let isMouseDown;
+	canvas.onmousedown = function(event) {
+		if (isDrawing) {
+			isMouseDown = true;
+			const bs = canvas.getBoundingClientRect();
+			lastX = event.clientX - bs.x;
+			lastY = event.clientY - bs.y;
+			context.lineWidth = 2;
+			context.strokeStyle = "black";
+			context.moveTo(lastX, lastY);
+			context.lineTo(lastX + 0.001, lastY + 0.001);
+			context.stroke();
+		}
+	}
+	canvas.onmousemove = function(event) {
+		if (isDrawing && isMouseDown) {
+			const bs = canvas.getBoundingClientRect();
+			context.moveTo(lastX, lastY);
+			lastX = event.clientX - bs.x;
+			lastY = event.clientY - bs.y;
+			context.lineTo(lastX + 0.001, lastY + 0.001);
+			context.stroke();
+		}
+	}
+	canvas.onmouseup = function(event) {
+		if (isDrawing) {
+			isMouseDown = false;
 		}
 	}
 	effects.oninput = chooseEffect;
