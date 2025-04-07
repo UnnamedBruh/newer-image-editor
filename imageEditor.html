@@ -380,6 +380,7 @@ if (!context) {
 			const bs = canvas.getBoundingClientRect();
 			lastX = event.clientX - bs.x;
 			lastY = event.clientY - bs.y;
+			context.beginPath();
 			context.lineWidth = +effectParams[0].value;
 			context.strokeStyle = effectParams[1].value;
 			context.moveTo(lastX, lastY);
@@ -390,6 +391,7 @@ if (!context) {
 	canvas.onmousemove = function(event) {
 		if (isDrawing && isMouseDown) {
 			const bs = canvas.getBoundingClientRect();
+			context.beginPath();
 			context.moveTo(lastX, lastY);
 			lastX = event.clientX - bs.x;
 			lastY = event.clientY - bs.y;
