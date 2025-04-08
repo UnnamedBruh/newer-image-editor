@@ -893,7 +893,7 @@ function exportTGA() {
         }
         header[16] = header[16] === 1 ? 32 : 24;
     }
-    header[17] = +(header[16] === 32);
+    header[17] = ORIGIN_TOP_LEFT;
 
     // Pixel data (24-bit RGB format)
     const pixelData = new Uint8Array(currentImageData.width * currentImageData.height * (header[16] / 8));
