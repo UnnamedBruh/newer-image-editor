@@ -867,12 +867,7 @@ if (!context) {
 	}
 	const css = document.getElementById("css"), bg = document.getElementById("bgcolor");
 	bg.oninput = function() {
-		css.textContent = `button, body, select, input {
-	background-color: ${bg.value};
-}
-button, body, a, p, h1, select, option, input {
-	color: ${extractRGBA2(bg.value, 0).reduce((a, b) => a + b) > 382 ? "black" : "white"};
-}`;
+		css.textContent = `button,body,select,input{background-color:${bg.value};}button,body,a,p,h1,select,option,input{color:${extractRGBA2(bg.value, 0).reduce((a, b) => a + b) > 382 ? "black" : "white"};}`;
 	}
 function exportTGA() {
     let header = new Uint8Array(18);
@@ -905,7 +900,7 @@ function exportTGA() {
             pixelData[idx++] = imgData[i++];   // Blue
         }
     } else {
-        for (; i < len; i) {
+        for (; i < len;) {
             pixelData[i] = imgData[i]; i++;   // Red
             pixelData[i] = imgData[i]; i++;   // Green
             pixelData[i] = imgData[i]; i++;   // Blue
