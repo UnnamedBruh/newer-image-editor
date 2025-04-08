@@ -893,16 +893,16 @@ function exportTGA() {
         }
         header[16] = header[16] === 1 ? 32 : 24;
     }
-    header[17] = header[16] === 32;
+    header[17] = +(header[16] === 32);
 
     // Pixel data (24-bit RGB format)
     const pixelData = new Uint8Array(currentImageData.width * currentImageData.height * (header[16] / 8));
     let idx = 0;
     if (header[16] === 24) {
-        for (let i = 0; i < len; i += 4) {
-            pixelData[idx++] = imgData[i + 2];   // Red
-            pixelData[idx++] = imgData[i + 1];   // Green
-            pixelData[idx++] = imgData[i];       // Blue
+        for (let i = 0; i < len; i++) {
+            pixelData[idx++] = imgData[i++];   // Red
+            pixelData[idx++] = imgData[i++];   // Green
+            pixelData[idx++] = imgData[i++];   // Blue
         }
     } else {
         for (let i = 0; i < len; i += 4) {
