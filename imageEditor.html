@@ -30,6 +30,7 @@ function loadTgaFromUint8Array(tgaData) {
 	let buffer, image;
 	try {
 		const loader = new TgaLoader();
+		console.log(tgaData);
 		loader.load(tgaData);
 		image = loader.imageData;
 		const possibleInstructions = [
@@ -876,40 +877,39 @@ button, body, a, p, h1, select, option, input {
 function exportTGA() {
     let header = new Uint8Array(18);
     header[2] = 2;  // Image type: uncompressed RGB
-    header[12] = canvas.width & 0xFF;
-    header[13] = (canvas.width >> 8) & 0xFF;
-    header[14] = canvas.height & 0xFF;
-    header[15] = (canvas.height >> 8) & 0xFF;
+    header[12] = +canvas.width & 0xFF;
+    header[13] = (+canvas.width >> 8) & 0xFF;
+    header[14] = +canvas.height & 0xFF;
+    header[15] = (+canvas.height >> 8) & 0xFF;
     const choice = prompt("Should the exported TGA image use the alpha channel? (yes = RGBA is used, no = RGB is used, other choice = encoder decides the color depth)");
     header[16] = choice === "yes" ? 32 : (choice === "no" ? 24 : 0);  // Pixel depth: 24 bits (RGB), 32 bits (RGBA)
-    header[17] = 0;   // Image descriptor (no alpha)
+    header[17] = ORIGIN_TOP_LEFT;   // Image descriptor (no alpha)
     const imgData = currentImageData.data, len = currentImageData.data.length;
     if (header[16] === 0) {
+        header[16] = 24;
         for (let i = 3; i < len; i += 4) {
             if (imgData[i] !== 255) {
-                header[16] = 1;
+                header[16] = 32;
                 break;
             }
         }
-        header[16] = header[16] === 1 ? 32 : 24;
     }
-    header[17] = ORIGIN_TOP_LEFT;
 
     // Pixel data (24-bit RGB format)
     const pixelData = new Uint8Array(currentImageData.width * currentImageData.height * (header[16] / 8));
-    let idx = 0;
+    let idx = 0, i = 0;
     if (header[16] === 24) {
-        for (let i = 0; i < len; i++) {
+        for (; i < len; i++) {
             pixelData[idx++] = imgData[i++];   // Red
             pixelData[idx++] = imgData[i++];   // Green
             pixelData[idx++] = imgData[i++];   // Blue
         }
     } else {
-        for (let i = 0; i < len; i += 4) {
-            pixelData[idx++] = imgData[i + 2];   // Red
-            pixelData[idx++] = imgData[i + 1];   // Green
-            pixelData[idx++] = imgData[i];       // Blue
-            pixelData[idx++] = imgData[i + 3];   // Alpha
+        for (; i < len; i) {
+            pixelData[i] = imgData[i]; i++;   // Red
+            pixelData[i] = imgData[i]; i++;   // Green
+            pixelData[i] = imgData[i]; i++;   // Blue
+            pixelData[i] = imgData[i]; i++;   // Alpha
         }
     }
 
