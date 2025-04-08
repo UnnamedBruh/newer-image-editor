@@ -873,9 +873,60 @@ button, body, a, p, h1, select, option, input {
 	color: ${extractRGBA2(bg.value, 0).reduce((a, b) => a + b) > 382 ? "black" : "white"};
 }`;
 	}
+function exportTGA() {
+    let header = new Uint8Array(18);
+    header[2] = 2;  // Image type: uncompressed RGB
+    header[12] = canvas.width & 0xFF;
+    header[13] = (canvas.width >> 8) & 0xFF;
+    header[14] = canvas.height & 0xFF;
+    header[15] = (canvas.height >> 8) & 0xFF;
+    const choice = prompt("Should the exported TGA image use the alpha channel? (yes = RGBA is used, no = RGB is used, other choice = encoder decides the color depth)");
+    header[16] = choice === "yes" ? 32 : (choice === "no" ? 24 : 0);  // Pixel depth: 24 bits (RGB), 32 bits (RGBA)
+    header[17] = 0;   // Image descriptor (no alpha)
+    const imgData = currentImageData.data, len = currentImageData.data.length;
+    if (header[16] === 0) {
+        for (let i = 3; i < len; i += 4) {
+            if (imgData[i] !== 255) {
+                header[16] = 1;
+                break;
+            }
+        }
+        header[16] = header[16] === 1 ? 32 : 24;
+    }
+    header[17] = header[16] === 32;
+
+    // Pixel data (24-bit RGB format)
+    const pixelData = new Uint8Array(currentImageData.width * currentImageData.height * (header[16] / 8));
+    let idx = 0;
+    if (header[16] === 24) {
+        for (let i = 0; i < len; i += 4) {
+            pixelData[idx++] = imgData[i + 2];   // Red
+            pixelData[idx++] = imgData[i + 1];   // Green
+            pixelData[idx++] = imgData[i];       // Blue
+        }
+    } else {
+        for (let i = 0; i < len; i += 4) {
+            pixelData[idx++] = imgData[i + 2];   // Red
+            pixelData[idx++] = imgData[i + 1];   // Green
+            pixelData[idx++] = imgData[i];       // Blue
+            pixelData[idx++] = imgData[i + 3];   // Alpha
+        }
+    }
+
+    // Create the TGA file as a Blob
+    const blob = new Blob([header, pixelData], { type: 'image/tga' });
+
+    // Create a download link and trigger the download
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'exportedImage.tga';
+    link.click();
+    link.remove();
+}
+
 	function exportI() {
 		const choice = [
-			["image/png", "PNG", false, "png"], ["image/jpeg", "JPEG", true, "jpeg"], ["image/webp", "WebP", true, "webp"], ["image/bmp", "Bitmap", false, "bmp"]
+			["image/png", "PNG", false, "png"], ["image/jpeg", "JPEG", true, "jpeg"], ["image/webp", "WebP", true, "webp"], ["image/bmp", "Bitmap", false, "bmp"], ["image/tga", "Targa", false, "tga"]
 		];
 		const index = prompt("What is the image format you want to export in? So far, we only support " + choice.map(x => x[1]).join(", ") + ". Choose by typing in their format (case-insensitive), or typing in the index (zero-based).");
 		let format;
@@ -889,16 +940,21 @@ button, body, a, p, h1, select, option, input {
 			alert("Neither of the formats are selected; defaulting to PNG instead.");
 			format = choice[0];
 		}
-		canvas.toBlob((blob) => {
-			const link = document.createElement('a');
-			link.href = URL.createObjectURL(blob);
-			if (format[3] !== "png" && (blob.type === "image/png" || blob.type === "application/octet-stream" || blob.type === "")) {
-				alert("Your browser does not yet support the selected image format. The browser will default to export using PNG instead");
-				format = choice[0];
-			}
-			link.download = 'exportedImage.' + format[3];
-			link.click();
-		}, format[0], format[2] ? +Math.min(1, Math.max(0, +prompt("What should the quality of the exported image be? (0 = worst quality, 1 = best quality, 0.8 = balanced)"))) : 0);
+		if (format[3] === "tga") {
+			exportTGA();
+		} else {
+			canvas.toBlob((blob) => {
+				const link = document.createElement('a');
+				link.href = URL.createObjectURL(blob);
+				if (format[3] !== "png" && (blob.type === "image/png" || blob.type === "application/octet-stream" || blob.type === "")) {
+					alert("Your browser does not yet support the selected image format. The browser will default to export using PNG instead");
+					format = choice[0];
+				}
+				link.download = 'exportedImage.' + format[3];
+				link.click();
+				link.remove();
+			}, format[0], format[2] ? +Math.min(1, Math.max(0, +prompt("What should the quality of the exported image be? (0 = worst quality, 1 = best quality, 0.8 = balanced)"))) : 0);
+		}
 	}
 </script>
 <script src="otherEffects.js"></script>
