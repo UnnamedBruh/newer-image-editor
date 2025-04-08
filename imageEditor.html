@@ -27,9 +27,9 @@ const TYPE_NO_DATA=0,TYPE_INDEXED=1,TYPE_RGB=2,TYPE_GREY=3,TYPE_RLE_INDEXED=9,TY
 let isDrawing, lastX, lastY;
 
 function loadTgaFromUint8Array(tgaData) {
-	let buffer, image;
+	let buffer, image, loader;
 	try {
-		const loader = new TgaLoader();
+		loader = new TgaLoader();
 		console.log(tgaData);
 		loader.load(tgaData);
 		image = loader.imageData;
