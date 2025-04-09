@@ -30,10 +30,8 @@ function loadTgaFromUint8Array(tgaData) {
 	let buffer, image, loader;
 	try {
 		loader = new TgaLoader();
-		console.log(tgaData);
 		loader.load(tgaData);
 		image = loader.imageData;
-		console.log(image);
 		const possibleInstructions = [
 			[
 				(loader.header.flags & ORIGIN_MASK) === ORIGIN_BOTTOM_LEFT,
@@ -54,7 +52,7 @@ function loadTgaFromUint8Array(tgaData) {
 		];
 		let instructions = possibleInstructions.find(x => x[0])[1];
 		alert("Proper handling for the TGA origins and different color orders should be handled manually. To get the original image, you must " + instructions + (instructions === "reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
-		
+
 		return new ImageData(
 			new Uint8ClampedArray(image),
 			loader.header.width,
