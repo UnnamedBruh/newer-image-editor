@@ -200,7 +200,7 @@ function loadTgaFromUint8Array(tgaData) {
 		alert("Proper handling for the TGA origins and different color orders should be handled manually. To get the original image, you must " + instructions + (instructions === "reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
 		if (loader.header.pixelDepth === 24) {
 			buffer = new Uint8ClampedArray(loader.header.width * loader.header.height * 4);
-			for (let i = 0, j = 0; i < buffer.length) {
+			for (let i = 0, j = 0; i < buffer.length;) {
 				buffer[i] = image[j]; i++, j++;
 				buffer[i] = image[j]; i++, j++;
 				buffer[i] = image[j]; i++, j++;
