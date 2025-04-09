@@ -31,6 +31,7 @@ function loadTgaFromUint8Array(tgaData) {
 	try {
 		loader = new TgaLoader();
 		loader.load(tgaData);
+		console.log(tgaData);
 		image = loader.imageData;
 		console.log(image);
 		const possibleInstructions = [
