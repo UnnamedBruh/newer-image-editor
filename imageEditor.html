@@ -56,11 +56,28 @@ function loadTgaFromUint8Array(tgaData) {
 		let instructions = possibleInstructions.find(x => x[0])[1];
 		alert("Proper handling for the TGA origins and different color orders should be handled manually. To get the original image, you must " + instructions + (instructions === "reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
 
-		return new ImageData(
-			new Uint8ClampedArray(image),
-			loader.header.width,
-			loader.header.height
-		);
+		if (leader.header.pixelDepth === 24) {
+			const f = new Uint8ClampedArray(loader.header.width * loader.header.height * 4);
+			const len = f.length;
+			let index = 0, i = 0;
+			for (; i < len; i++) {
+				f[i] = image[index]; i++, index++;
+				f[i] = image[index]; i++, index++;
+				f[i] = image[index]; i++, index++;
+				f[i] = 255;
+			}
+			return new ImageData(
+				f,
+				loader.header.width,
+				loader.header.height
+			);
+		} else {
+			return new ImageData(
+				new Uint8ClampedArray(image),
+				loader.header.width,
+				loader.header.height
+			);
+		}
 	} catch (err) {
 		alert("There has been an error trying to decode the TGA image: " + err.message);
 		if (tgaData.length === 0) alert("The TGA image contains no file data at all. This is needed to provide the context of the image (e.g. the width, height, color channels, etc), and the image data itself.");
