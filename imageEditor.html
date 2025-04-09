@@ -34,6 +34,7 @@ function loadTgaFromUint8Array(tgaData) {
 		console.log(tgaData);
 		image = loader.imageData;
 		console.log(image);
+		console.log(loader.header);
 		const possibleInstructions = [
 			[
 				(loader.header.flags & ORIGIN_MASK) === ORIGIN_BOTTOM_LEFT,
