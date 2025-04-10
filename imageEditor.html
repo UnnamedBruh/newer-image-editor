@@ -329,7 +329,7 @@ if (!context) {
 				}
 			}
 		} else if (effects.value === "inv" || effects.value === "sepia" || effects.value === "graya" || effects.value === "grayb" || effects.value === "rgbsh" || effects.value === "rgbre" || effects.value === "smudge") {
-			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%" + (effects.value === "smudge" ? "<br><a>Smudging factor (as a percentage):</a><input type=\"number\" value=\"5\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-smudgepro\">%");
+			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%" + (effects.value === "smudge" ? "<br><a>Smudging factor (as a percentage):</a><input type=\"number\" value=\"5\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-smudgepro\">%" : "");
 			effectParams = [document.getElementById("e-invpro"), document.getElementById("e-smudgepro")];
 		} else if (effects.value === "resi" || effects.value === "parag" || effects.value === "resid") {
 			effectSettings.innerHTML = "<a>Width:</a><input type=\"number\" value=\"\" id=\"e-resiw\"><br><a>Height:</a><input type=\"number\" value=\"\" id=\"e-resih\">" + (effects.value === "resi" ? "<br><a>Anti-aliasing:</a><input type=\"checkbox\" checked id=\"e-resia\">" : "");
