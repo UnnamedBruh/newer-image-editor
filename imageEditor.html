@@ -18,7 +18,7 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option><option value="smudge">Smudge Right</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -328,9 +328,9 @@ if (!context) {
 					context.fillRect(+effectParams[0].value, +effectParams[1].value, +effectParams[2].value, +effectParams[3].value);
 				}
 			}
-		} else if (effects.value === "inv" || effects.value === "sepia" || effects.value === "graya" || effects.value === "grayb" || effects.value === "rgbsh" || effects.value === "rgbre") {
-			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%";
-			effectParams = [document.getElementById("e-invpro")];
+		} else if (effects.value === "inv" || effects.value === "sepia" || effects.value === "graya" || effects.value === "grayb" || effects.value === "rgbsh" || effects.value === "rgbre" || effects.value === "smudge") {
+			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%" + (effects.value === "smudge" ? "<br><a>Smudging factor (as a percentage):</a><input type=\"number\" value=\"5\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-smudgepro\">%");
+			effectParams = [document.getElementById("e-invpro"), document.getElementById("e-smudgepro")];
 		} else if (effects.value === "resi" || effects.value === "parag" || effects.value === "resid") {
 			effectSettings.innerHTML = "<a>Width:</a><input type=\"number\" value=\"\" id=\"e-resiw\"><br><a>Height:</a><input type=\"number\" value=\"\" id=\"e-resih\">" + (effects.value === "resi" ? "<br><a>Anti-aliasing:</a><input type=\"checkbox\" checked id=\"e-resia\">" : "");
 			effectParams = [document.getElementById("e-resiw"), document.getElementById("e-resih"), effects.value === "resi" ? document.getElementById("e-resia") : null];
@@ -857,6 +857,20 @@ if (!context) {
 				canvas.height = im.height;
 				currentImageData = im;
 				break;
+			}
+			case "smudge": {
+				let i, n = currentImageData.width * 4;
+				const width = currentImageData.width * 4, smudge = +effectParams[1].value / 100, prog = +effectParams[0].value / 100;
+				if (smudge === 0) return;
+				for (let j = 4; j < len; j = n + 4) {
+					n = j + width - 4;
+					for (i = j; i < n;) {
+						imageData[i] = interpolate(imageData[i], interpolate(imageData[i], imageData[i - 4], smudge), prog); i++;
+						imageData[i] = interpolate(imageData[i], interpolate(imageData[i], imageData[i - 4], smudge), prog); i++;
+						imageData[i] = interpolate(imageData[i], interpolate(imageData[i], imageData[i - 4], smudge), prog); i++;
+						imageData[i] = interpolate(imageData[i], interpolate(imageData[i], imageData[i - 4], smudge), prog); i++;
+					}
+				}
 			}
 			default: {
 				const x = customModdedEffects.find(x => x[0] === effects.value);
