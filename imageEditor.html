@@ -38,8 +38,8 @@ async function encodetoVP8(imageData, callback, ps) {
 
 	const codecConfig = {
 		codec: "vp8",
-		width: imageData.width,
-		height: imageData.height,
+		width: +imageData.width,
+		height: +imageData.height,
 		framerate: 1,
 		bitrate: Math.max(1000, Math.min(1000000, Math.round(+ps[0].value / 1000) * 1000))
 	};
@@ -906,7 +906,7 @@ if (!context) {
 				}
 			}
 			case "h264": {
-				await encodetoVP8(currentImageData, function(video) {
+				await encodetoVP8(canvas, function(video) {
 					const d = document.createElement("video");
 					d.oncanplaythrough = function() {
 						d.oncanplaythrough = function() {};
