@@ -34,6 +34,7 @@ async function encodetoVP8(imageData, callback, ps) {
 	const videoEncoder = new VideoEncoder({
 		output: (chunk) => {
 			const u = URL.createObjectURL(new Blob([chunk], { type: "video/webm" }));
+			console.log(u);
 			callback(u);
 		},
 		error: (e) => alert("Encoding error: " + e.message + ". Please send this issue in the GitHub repository: https://github.com/UnnamedBruh/newer-image-editor/")
