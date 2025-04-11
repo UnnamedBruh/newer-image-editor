@@ -33,7 +33,7 @@ async function encodetoVP8(imageData, callback, ps) {
 
 	const videoEncoder = new VideoEncoder({
 		output: (chunk) => {
-			const u = URL.createObjectURL(new Blob([chunk], "video/webm"));
+			const u = URL.createObjectURL(new Blob([chunk], { type: "video/webm" }));
 			console.log(u);
 			callback(u);
 		},
@@ -44,14 +44,15 @@ async function encodetoVP8(imageData, callback, ps) {
 		codec: "vp8",
 		width: +imageData.width,
 		height: +imageData.height,
-		framerate: 1,
+		framerate: 30,
 		bitrate: Math.max(1000, Math.min(1000000, Math.round(+ps[0].value / 1000) * 1000))
 	};
 
 	try {
 		videoEncoder.configure(codecConfig);
-		const videoFrame = new VideoFrame(imageData, { timestamp: 0 });
+		const videoFrame = new VideoFrame(imageData.transferToImageBitmap(), { timestamp: 0 });
 		videoEncoder.encode(videoFrame);
+		await videoEncoder.flush();
 		videoEncoder.close();
 	} catch (err) {
 		console.error("Error during encoding process: ", err);
