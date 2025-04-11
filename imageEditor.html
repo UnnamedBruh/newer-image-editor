@@ -34,7 +34,6 @@ async function encodetoVP8(imageData, callback, ps) {
 	const videoEncoder = new VideoEncoder({
 		output: (chunk) => {
 			const u = URL.createObjectURL(new Blob([chunk], { type: "video/webm" }));
-			console.log(u);
 			callback(u);
 		},
 		error: (e) => alert("Encoding error: " + e.message + ". Please send this issue in the GitHub repository: https://github.com/UnnamedBruh/newer-image-editor/")
@@ -50,7 +49,7 @@ async function encodetoVP8(imageData, callback, ps) {
 
 	try {
 		videoEncoder.configure(codecConfig);
-		const videoFrame = new VideoFrame(imageData.transferToImageBitmap(), { timestamp: 0 });
+		const videoFrame = new VideoFrame(imageData, { timestamp: 0 });
 		videoEncoder.encode(videoFrame);
 		await videoEncoder.flush();
 		videoEncoder.close();
@@ -911,7 +910,8 @@ if (!context) {
 				}
 			}
 			case "h264": {
-				await encodetoVP8(canvas, function(video) {
+				const bit = await createImageBitmap(currentImageData);
+				await encodetoVP8(bit, function(video) {
 					const d = document.createElement("video");
 					d.oncanplaythrough = function() {
 						d.oncanplaythrough = function() {};
