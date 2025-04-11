@@ -918,7 +918,7 @@ if (!context) {
 						d.oncanplaythrough = function() {};
 						context.drawImage(d, 0, 0, currentImageData.width, currentImageData.height);
 						currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
-						URL.revokeObjectURL(video);
+						setTimeout(() => URL.revokeObjectURL(video), 10000);
 						d.src = "";
 					}
 					d.src = video;
