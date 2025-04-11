@@ -33,7 +33,7 @@ async function encodetoVP8(imageData, callback, ps) {
 
 	const videoEncoder = new VideoEncoder({
 		output: (chunk) => {
-			const u = URL.createObjectURL(new Blob([chunk], { type: "video/mp4" }));
+			const u = URL.createObjectURL(new Blob([chunk], { type: "video/mp4; codecs=vp8" }));
 			console.log(u);
 			callback(u);
 		},
