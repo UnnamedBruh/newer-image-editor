@@ -26,37 +26,22 @@ const TYPE_NO_DATA=0,TYPE_INDEXED=1,TYPE_RGB=2,TYPE_GREY=3,TYPE_RLE_INDEXED=9,TY
 
 // custom H.264 library (written by AI. specifically, ChatGPT. then modified)
 async function encodetoVP8(imageData, callback, ps) {
-	if (!window.VideoEncoder || !window.VideoFrame) {
-		alert('WebCodecs is not supported in this browser. Try upgrading to a newer version, or switch to a different modern browser');
-		return;
-	}
+const stream = imageData.captureStream(30);
+const chunks = [];
 
-	const videoEncoder = new VideoEncoder({
-		output: (chunk) => {
-			const u = URL.createObjectURL(new Blob([chunk], { type: "video/mp4; codecs=vp8" }));
-			console.log(u);
-			callback(u);
-		},
-		error: (e) => alert("Encoding error: " + e.message + ". Please send this issue in the GitHub repository: https://github.com/UnnamedBruh/newer-image-editor/")
-	});
+const recorder = new MediaRecorder(stream, {
+  mimeType: 'video/webm; codecs=vp8'
+});
 
-	const codecConfig = {
-		codec: "vp8",
-		width: +imageData.width,
-		height: +imageData.height,
-		framerate: 30,
-		bitrate: Math.max(1000, Math.min(1000000, Math.round(+ps[0].value / 1000) * 1000))
-	};
+recorder.ondataavailable = e => chunks.push(e.data);
+recorder.onstop = () => {
+  const blob = new Blob(chunks, { type: 'video/webm' });
+  const url = URL.createObjectURL(blob);
+  callback(url);
+};
 
-	try {
-		videoEncoder.configure(codecConfig);
-		const videoFrame = new VideoFrame(imageData, { timestamp: 0 });
-		videoEncoder.encode(videoFrame);
-		await videoEncoder.flush();
-		videoEncoder.close();
-	} catch (err) {
-		console.error("Error during encoding process: ", err);
-	}
+recorder.start();
+setTimeout(() => recorder.stop(), 100); // 1 frame, quick snapshot
 }
 
 let isDrawing, lastX, lastY;
@@ -911,8 +896,7 @@ if (!context) {
 				}
 			}
 			case "h264": {
-				const bit = await createImageBitmap(currentImageData);
-				await encodetoVP8(bit, function(video) {
+				await encodetoVP8(canvas, function(video) {
 					const d = document.createElement("video");
 					d.oncanplaythrough = function() {
 						d.oncanplaythrough = function() {};
