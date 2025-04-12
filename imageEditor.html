@@ -881,11 +881,13 @@ if (!context) {
 						imageData[i] = interpolate(imageData[i], interpolate(imageData[i], imageData[i - 4], smudge), prog); i++;
 					}
 				}
+				break;
 			}
 			case "text": {
 				context.fillStyle = "rgb(" + extractRGBA2(effectParams[1].value, 0).slice(0, 3).join(", ") + ")";
 				if (effectParams[6].checked) context.strokeText(effectParams[2].value, +effectParams[4].value, +effectParams[5].value); else context.fillText(effectParams[2].value, +effectParams[4].value, +effectParams[5].value);
 				currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+				break;
 			}
 			default: {
 				const x = customModdedEffects.find(x => x[0] === effects.value);
