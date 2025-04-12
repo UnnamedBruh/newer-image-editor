@@ -368,7 +368,7 @@ if (!context) {
 			effectSettings.innerHTML = "<a>Size (in pixels):</a><input type=\"number\" value=\"1\" step=\"1\" min=\"1\" max=\"1024\" id=\"e-textsize\"><br><a>Color:</a><input type=\"color\" value=\"#000000\" id=\"e-drawcolor\"><br><a>Text:</a><textarea id=\"e-texttext\"></textarea><br><a>Font:</a><select id=\"e-textfont\"><option value=\"sans-serif\">Sans Serif</option><option>Arial</option><option>Calibri</option><option>Comic Sans MS</option><option>Courier New</option></select><br><a>X:</a><input type=\"number\" value=\"40\" step=\"1\" min=\"0\" id=\"e-textx\"><br><a>Y:</a><input type=\"number\" value=\"40\" step=\"1\" min=\"0\" id=\"e-texty\"><br><a>Draw Outline:</a><input type=\"checkbox\" id=\"e-textout\"><br><a>Text Style:</a><select id=\"e-textdec\"><option value=\"normal\">Normal</option><option value=\"italic\">Italic</option><option value=\"oblique\">Oblique</option></select>";
 			effectParams = [document.getElementById("e-textsize"), document.getElementById("e-drawcolor"), document.getElementById("e-texttext"), document.getElementById("e-textfont"), document.getElementById("e-textx"), document.getElementById("e-texty"), document.getElementById("e-textout"), document.getElementById("e-textdec")];
 			for (const p of effectParams) {
-				p.onchange = function() {
+				p.oninput = function() {
 					const t = effectParams[3].value;
 					context.putImageData(currentImageData, 0, 0);
 					context.fillStyle = "rgba(" + extractRGBA2(effectParams[1].value, 0.3).join(", ") + ")";
