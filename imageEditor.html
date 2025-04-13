@@ -194,8 +194,10 @@ if (!context) {
 							confirm.onclick = function() {
 								video.pause();
 								video.muted = true;
+								video.controls = false;
 								confirm.onclick = function() {};
 								setTimeout(function() {
+									context.drawImage(video, 0, 0, +canvas.width, +canvas.height);
 									canvas.style.display = "";
 									currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
 									backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
