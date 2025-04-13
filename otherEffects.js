@@ -24,4 +24,10 @@
 	}, emboss]);
 
 	effects.appendChild(leftEmboss);
+
+	const barcodeFont = new FontFace('Barcode', 'url(./fonts/barcode.ttf)');
+
+	barcodeFont.load().then(function(loadedFont) {
+		document.fonts.add(loadedFont);
+	});
 })();
