@@ -306,8 +306,8 @@ if (!context) {
 	function chooseEffect() {
 		effectSettings.innerHTML = "";
 		if (effects.value === "tint") {
-			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\"><br><a>Add Instead Of Multiply:</a><input type=\"checkbox\" id=\"e-tintadd\"><br><a>Wrap Around Colors:</a><input type=\"checkbox\" id=\"e-tintmod\">";
-			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac"), document.getElementById("e-tintmult"), document.getElementById("e-tintadd"), document.getElementById("e-tintmod")];
+			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\"><br><a>Add Instead Of Multiply:</a><input type=\"checkbox\" id=\"e-tintadd\"><br><a>Wrap Around Colors:</a><input type=\"checkbox\" id=\"e-tintmod\"><br><a>Modify Opacity:</a><input type=\"checkbox\" checked id=\"e-tintopac\">";
+			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac"), document.getElementById("e-tintmult"), document.getElementById("e-tintadd"), document.getElementById("e-tintmod"), document.getElementById("e-tintopac")];
 		} else if (effects.value === "tintblend") {
 			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Blending Percentage:</a><input type=\"number\" value=\"20\" min=\"0\" max=\"100\" step=\"1\" id=\"e-tintopac\">";
 			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac")];
@@ -439,9 +439,12 @@ if (!context) {
 			case "tint": {
 				let i = 0, tintColor = extractRGBA(effectParams[0].value, Math.max(0, Math.min(1, +effectParams[1].value)));
 				tintColor = tintColor.map(x => x * +effectParams[2].value);
+				if (!effectParams[5].checked) {
+					if (effectParams[3].checked) tintColor[3] = 0;
+				}
 				if (tintColor[0] === 1 && tintColor[1] === 1 && tintColor[2] === 1) {
-					if (!effectParams[3].checked) {
-						if (!effectParams[4].checked) {
+					if (!effectParams[3].checked) { // Add
+						if (!effectParams[4].checked) { // Wrap
 							if (tintColor[3] !== 1) {
 								for (i = 3; i < len; i += 4) {
 									imageData[i] *= tintColor[3];
@@ -452,7 +455,7 @@ if (!context) {
 								for (i = 3; i < len; i += 4) {
 									imageData[i] = mod(imageData[i] * tintColor[3], 256);
 								}
-							}	
+							}
 						}
 					} else {
 						if (!effectParams[4].checked) {
