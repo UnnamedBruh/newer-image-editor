@@ -24,7 +24,7 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option><option value="smudge">Smudge Right</option><option value="text">Draw Text</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option><option value="smudge">Smudge Right</option><option value="text">Draw Text</option><option value="tintadd">Tint (Add Color Values)</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -305,9 +305,9 @@ if (!context) {
 	let customModdedEffects = [];
 	function chooseEffect() {
 		effectSettings.innerHTML = "";
-		if (effects.value === "tint") {
-			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\"><br><a>Add Instead Of Multiply:</a><input type=\"checkbox\" id=\"e-tintadd\"><br><a>Wrap Around Colors:</a><input type=\"checkbox\" id=\"e-tintmod\"><br><a>Modify Opacity:</a><input type=\"checkbox\" checked id=\"e-tintcopac\">";
-			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac"), document.getElementById("e-tintmult"), document.getElementById("e-tintadd"), document.getElementById("e-tintmod"), document.getElementById("e-tintcopac")];
+		if (effects.value === "tint" || effects.value === "tintadd") {
+			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\">";
+			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac"), document.getElementById("e-tintmult")];
 		} else if (effects.value === "tintblend") {
 			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Blending Percentage:</a><input type=\"number\" value=\"20\" min=\"0\" max=\"100\" step=\"1\" id=\"e-tintopac\">";
 			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac")];
@@ -439,72 +439,18 @@ if (!context) {
 			case "tint": {
 				let i = 0, tintColor = extractRGBA(effectParams[0].value, Math.max(0, Math.min(1, +effectParams[1].value)));
 				tintColor = tintColor.map(x => x * +effectParams[2].value);
-				if (!effectParams[5].checked) {
-					if (effectParams[3].checked) tintColor[3] = 0;
-				}
 				if (tintColor[0] === 1 && tintColor[1] === 1 && tintColor[2] === 1) {
-					if (!effectParams[3].checked) { // Add
-						if (!effectParams[4].checked) { // Wrap
-							if (tintColor[3] !== 1) {
-								for (i = 3; i < len; i += 4) {
-									imageData[i] *= tintColor[3];
-								}
-							}
-						} else {
-							if (tintColor[3] !== 1) {
-								for (i = 3; i < len; i += 4) {
-									imageData[i] = mod(imageData[i] * tintColor[3], 256);
-								}
-							}
-						}
-					} else {
-						if (!effectParams[4].checked) {
-							if (tintColor[3] !== 0) {
-								for (i = 3; i < len; i += 4) {
-									imageData[i] += tintColor[3];
-								}
-							}
-						} else {
-							if (tintColor[3] !== 1) {
-								for (i = 3; i < len; i += 4) {
-									imageData[i] = mod(imageData[i] + tintColor[3], 256);
-								}
-							}	
+					if (tintColor[3] !== 1) {
+						for (i = 3; i < len; i += 4) {
+							imageData[i] *= tintColor[3];
 						}
 					}
 				} else {
-					if (!effectParams[3].checked) {
-						if (!effectParams[4].checked) {
-							for (; i < len;) {
-								imageData[i] *= tintColor[0]; i++;
-								imageData[i] *= tintColor[1]; i++;
-								imageData[i] *= tintColor[2]; i++;
-								imageData[i] *= tintColor[3]; i++;
-							}
-						} else {
-							for (; i < len;) {
-								imageData[i] = mod(imageData[i] * tintColor[0], 256); i++;
-								imageData[i] = mod(imageData[i] * tintColor[1], 256); i++;
-								imageData[i] = mod(imageData[i] * tintColor[2], 256); i++;
-								imageData[i] = mod(imageData[i] * tintColor[3], 256); i++;
-							}
-						}
-					} else {
-						if (!effectParams[4].checked) {
-							for (; i < len;) {
-								imageData[i] += tintColor[0]; i++;
-								imageData[i] += tintColor[1]; i++;
-								imageData[i] += tintColor[2]; i++;
-								imageData[i] += tintColor[3]; i++;
-							}
-						} else {
-							for (; i < len;) {
-								imageData[i] = mod(imageData[i] + tintColor[0], 256); i++;
-								imageData[i] = mod(imageData[i] + tintColor[1], 256); i++;
-								imageData[i] = mod(imageData[i] + tintColor[2], 256); i++;
-								imageData[i] = mod(imageData[i] + tintColor[3], 256); i++;
-							}
-						}
+					for (; i < len;) {
+						imageData[i] *= tintColor[0]; i++;
+						imageData[i] *= tintColor[1]; i++;
+						imageData[i] *= tintColor[2]; i++;
+						imageData[i] *= tintColor[3]; i++;
 					}
 				}
 				break;
@@ -951,6 +897,16 @@ if (!context) {
 				context.fillStyle = "rgb(" + extractRGBA2(effectParams[1].value, 0).slice(0, 3).join(", ") + ")";
 				if (effectParams[6].checked) context.strokeText(effectParams[2].value, +effectParams[4].value, +effectParams[5].value); else context.fillText(effectParams[2].value, +effectParams[4].value, +effectParams[5].value);
 				currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+				break;
+			}
+			case "tintadd": {
+				let i = 0, tintColor = extractRGBA(effectParams[0].value, 1);
+				tintColor = tintColor.map(x => x * +effectParams[2].value);
+				for (; i < len;) {
+					imageData[i] += tintColor[0]; i++;
+					imageData[i] += tintColor[1]; i++;
+					imageData[i] += tintColor[2]; i++; i++;
+				}
 				break;
 			}
 			default: {
