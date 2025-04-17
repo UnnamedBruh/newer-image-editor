@@ -109,10 +109,10 @@ if (!context) {
 	alert("Your browser does not support the 2D canvas context yet. Either upgrade to a newer version of your browser, or try using a different one.");
 }
 	let currentImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), backupImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), originalImage;
-	fileInput.addEventListener("input", async function(event) {
+	fileInput.addEventListener("input", function(event) {
 		const file = event.target.files[0];
 		let fileReader = new FileReader();
-		fileReader.onload = function(res) {
+		fileReader.onload = async function(res) {
 			if (treatFile.value === "att") {
 				if (file.name.endsWith(".tga")) {
 					alert("TGA.js is being used to decode the image. (Borrowed code from https://github.com/vthibault/tga.js/blob/master/src/tga.js - later modified to fit this editor's standards)");
@@ -126,7 +126,7 @@ if (!context) {
 					alert("libheif-js is being used to decode the image. (Can be found at https://www.npmjs.com/package/libheif-js; code is loaded from a URL)");
 					const libheif = await initLibheif();
 					const decoder = new libheif.HeifDecoder();
-					const data = decoder.decode(res.target.result);
+					const data = decoder.decode(new Uint8Array(res.target.result));
 					const image = data[0];
 					const width = image.get_width();
 					const height = image.get_height();
