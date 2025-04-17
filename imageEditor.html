@@ -306,8 +306,8 @@ if (!context) {
 	function chooseEffect() {
 		effectSettings.innerHTML = "";
 		if (effects.value === "tint") {
-			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\">";
-			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac"), document.getElementById("e-tintmult")];
+			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\"><br><a>Add Instead Of Multiply:</a><input type=\"checkbox\" id=\"e-tintadd\"><br><a>Wrap Around Colors:</a><input type=\"checkbox\" id=\"e-tintmod\">";
+			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac"), document.getElementById("e-tintmult"), document.getElementById("e-tintadd"), document.getElementById("e-tintmod")];
 		} else if (effects.value === "tintblend") {
 			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Blending Percentage:</a><input type=\"number\" value=\"20\" min=\"0\" max=\"100\" step=\"1\" id=\"e-tintopac\">";
 			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac")];
@@ -440,17 +440,68 @@ if (!context) {
 				let i = 0, tintColor = extractRGBA(effectParams[0].value, Math.max(0, Math.min(1, +effectParams[1].value)));
 				tintColor = tintColor.map(x => x * +effectParams[2].value);
 				if (tintColor[0] === 1 && tintColor[1] === 1 && tintColor[2] === 1) {
-					if (tintColor[3] !== 1) {
-						for (i = 3; i < len; i += 4) {
-							imageData[i] *= tintColor[3];
+					if (!effectParams[3].checked) {
+						if (!effectParams[4].checked) {
+							if (tintColor[3] !== 1) {
+								for (i = 3; i < len; i += 4) {
+									imageData[i] *= tintColor[3];
+								}
+							}
+						} else {
+							if (tintColor[3] !== 1) {
+								for (i = 3; i < len; i += 4) {
+									imageData[i] = mod(imageData[i] * tintColor[3], 256);
+								}
+							}	
+						}
+					} else {
+						if (!effectParams[4].checked) {
+							if (tintColor[3] !== 0) {
+								for (i = 3; i < len; i += 4) {
+									imageData[i] += tintColor[3];
+								}
+							}
+						} else {
+							if (tintColor[3] !== 1) {
+								for (i = 3; i < len; i += 4) {
+									imageData[i] = mod(imageData[i] + tintColor[3], 256);
+								}
+							}	
 						}
 					}
 				} else {
-					for (; i < len;) {
-						imageData[i] *= tintColor[0]; i++;
-						imageData[i] *= tintColor[1]; i++;
-						imageData[i] *= tintColor[2]; i++;
-						imageData[i] *= tintColor[3]; i++;
+					if (!effectParams[3].checked) {
+						if (!effectParams[4].checked) {
+							for (; i < len;) {
+								imageData[i] *= tintColor[0]; i++;
+								imageData[i] *= tintColor[1]; i++;
+								imageData[i] *= tintColor[2]; i++;
+								imageData[i] *= tintColor[3]; i++;
+							}
+						} else {
+							for (; i < len;) {
+								imageData[i] = mod(imageData[i] * tintColor[0], 256); i++;
+								imageData[i] = mod(imageData[i] * tintColor[1], 256); i++;
+								imageData[i] = mod(imageData[i] * tintColor[2], 256); i++;
+								imageData[i] = mod(imageData[i] * tintColor[3], 256); i++;
+							}
+						}
+					} else {
+						if (!effectParams[4].checked) {
+							for (; i < len;) {
+								imageData[i] += tintColor[0]; i++;
+								imageData[i] += tintColor[1]; i++;
+								imageData[i] += tintColor[2]; i++;
+								imageData[i] += tintColor[3]; i++;
+							}
+						} else {
+							for (; i < len;) {
+								imageData[i] = mod(imageData[i] + tintColor[0], 256); i++;
+								imageData[i] = mod(imageData[i] + tintColor[1], 256); i++;
+								imageData[i] = mod(imageData[i] + tintColor[2], 256); i++;
+								imageData[i] = mod(imageData[i] + tintColor[3], 256); i++;
+							}
+						}
 					}
 				}
 				break;
