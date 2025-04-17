@@ -900,7 +900,7 @@ if (!context) {
 				break;
 			}
 			case "tintadd": {
-				let i = 0, tintColor = extractRGBA(effectParams[0].value, 1);
+				let i = 0, tintColor = extractRGBA2(effectParams[0].value, 1);
 				tintColor = tintColor.map(x => x * +effectParams[2].value);
 				for (; i < len;) {
 					imageData[i] += tintColor[0]; i++;
