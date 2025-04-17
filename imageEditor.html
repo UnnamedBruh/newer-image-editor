@@ -1041,8 +1041,13 @@ function exportTGA() {
 			}, format[0], format[2] ? +Math.min(1, Math.max(0, +prompt("What should the quality of the exported image be? (0 = worst quality + lower file size, 1 = best quality + higher file size, 0.8 = balanced quality + file size)"))) : 0);
 		}
 	}
+
+	(async function() {
+		let x = await fetch("otherEffects.js");
+		x = await x.text();
+		eval(x);
+	})();
 </script>
-<script src="otherEffects.js"></script>
 <button onclick="exportI();">Export Image</button>
 </body>
 </html>
