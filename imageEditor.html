@@ -125,15 +125,20 @@ if (!context) {
 					canvas.height = currentImageData.height;
 					context.clearRect(0, 0, +canvas.width, +canvas.height);
 					context.putImageData(currentImageData, 0, 0);
-				}/* else if (file.name.endsWith(".heif")) {
+				} else if (file.name.endsWith(".heif")) {
 					alert("libheif-js is being used to decode the image. (Can be found at https://www.npmjs.com/package/libheif-js; code is loaded from a URL)");
-					currentImageData = loadTgaFromUint8Array(new Uint8Array(res.target.result));
+					const decoder = new libheif.HeifDecoder();
+					const data = decoder.decode(res.target.result);
+					const image = data[0];
+					const width = image.get_width();
+					const height = image.get_height();
+					currentImageData = new ImageData(image.get_rgba(), width, height);
 					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
 					canvas.width = currentImageData.width;
 					canvas.height = currentImageData.height;
 					context.clearRect(0, 0, +canvas.width, +canvas.height);
 					context.putImageData(currentImageData, 0, 0);
-				}*/ else {
+				} else {
 					const img = new Image();
 					img.onload = function() {
 						canvas.width = img.width;
