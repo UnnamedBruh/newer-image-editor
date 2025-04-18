@@ -39,8 +39,7 @@
 		if (effectParams[0].value == 0) return;
 		const perc = +effectParams[0].value / 100;
 		let i = 0;
-		const imgD = new ImageData(new Uint8ClampedArray(len), currentImageData.width, currentImageData.height);
-		const data = imgD.data;
+		const data = currentImageData.data;
 
 		for (; i < len;) {
 			data[i] = interpolate(imageData[i], Math.random() * 255, perc); i++;
@@ -48,7 +47,7 @@
 			data[i] = interpolate(imageData[i], Math.random() * 255, perc); i++;
 			data[i] = imageData[i]; i++;
 		}
-		x(imgD);
+		// x(imgD);
 	}
 
 	customModdedEffects.push(["rand", "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%", function() {
