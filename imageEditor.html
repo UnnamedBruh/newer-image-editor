@@ -124,7 +124,8 @@ if (!context) {
 					context.putImageData(currentImageData, 0, 0);
 				} else if (file.name.endsWith(".heif")) {
 					alert("libheif-js is being used to decode the image. (Can be found at https://www.npmjs.com/package/libheif-js; code is loaded from a URL)");
-					const decoder = new x.mi().HeifDecoder();
+					const i = x.mi();
+					const decoder = new i.HeifDecoder();
 					const data = decoder.decode(new Uint8Array(res.target.result));
 					const image = data[0];
 					const width = image.get_width();
