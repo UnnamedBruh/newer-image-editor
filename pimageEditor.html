@@ -43,7 +43,29 @@ create.onclick = function() {
 		imageWidth.remove();
 		imageHeight.remove();
 		warning.remove();
-		alert("More will be coming soon!");
+		screen.textContent = "";
+		const canvas = document.createElement("canvas");
+		canvas.width = width * 4;
+		canvas.height = height * 4;
+		screen.appendChild(canvas);
+		const context = canvas.getContext("2d");
+		const currentImageData = new Uint8ClampedArray(width * height * 4);
+		const size = currentImageData.byteLength;
+		for (let i = 3; i < size; i += 4) {
+			currentImageData[i] = 255;
+		}
+		const nwidth = width * 4, nheight = height * 4;
+		context.fillStyle = "rgb(0, 0, 0)";
+		context.fillRect(0, 0, nwidth, nheight);
+		function renderImage() {
+			for (let y = 0, realY = 0; y < size; y += nheight, realY += 4) {
+				const future = y + nheight;
+				for (let x = y, realX = 0; x < future; x += 4, realX += 4) {
+					context.fillStyle = "rgb(" + String(currentImageData[x]) + "," + String(currentImageData[x + 1]) + "," + String(currentImageData[x + 2]) + ")";
+					context.fillRect(realX, realY, 4, 4);
+				}
+			}
+		}
 	}
 }
 		</script>
