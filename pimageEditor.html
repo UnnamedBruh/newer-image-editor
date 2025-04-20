@@ -4,7 +4,7 @@
 		<title>Image Editor (At Pixel Level)</title>
 		<style>
 			body, button, input, h1, p {
-				background-color: black;
+				background-color: rgb(40, 40, 40);
 				color: white;
 			}
 		</style>
@@ -66,7 +66,7 @@ create.onclick = function() {
 				}
 			}
 		}
-		let bounds = canvas.getBoundingClientRect();
+		let bounds = canvas.getBoundingClientRect(), mousedown = false;
 		function initInputs() {
 			let colorText = document.createElement("a");
 			let lineBreak = document.createElement("br");
@@ -78,7 +78,10 @@ create.onclick = function() {
 			return colorInput;
 		}
 		const pixelColor = initInputs();
-		canvas.onmousedown = function(e) {
+		canvas.onmousedown = () => mousedown = true;
+		canvas.onmouseup = () => mousedown = false;
+		canvas.onmousemove = function(e) {
+			if (!mousedown) return;
 			const x = Math.floor((e.clientX - canvas.getBoundingClientRect().x) / 4);
 			const y = Math.floor((e.clientY - canvas.getBoundingClientRect().y) / 4);
 			const pixelIndex = (y * width + x) * 4;
@@ -87,11 +90,10 @@ create.onclick = function() {
 			const g = parseInt(col.slice(3, 5), 16);
 			const b = parseInt(col.slice(5, 7), 16);
 
-			// Update the pixel color
 			currentImageData[pixelIndex] = r;
 			currentImageData[pixelIndex + 1] = g;
 			currentImageData[pixelIndex + 2] = b;
-			currentImageData[pixelIndex + 3] = 255;  // Full opacity
+			currentImageData[pixelIndex + 3] = 255;
 			renderImage();
 		}
 	}
