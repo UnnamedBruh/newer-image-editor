@@ -55,24 +55,28 @@ create.onclick = function() {
 		context.fillStyle = "rgb(0, 0, 0)";
 		context.fillRect(0, 0, nwidth, nheight);
 		context.strokeStyle = "rgb(255, 255, 255)"
-		function renderImage() {
+		function renderImage(st) {
 			for (let y = 0, realY = 0; y < size; y += nheight, realY += 8) {
 				const future = y + nheight;
 				for (let x = y, realX = 0; x < future; x += 4, realX += 8) {
 					context.fillStyle = "rgb(" + String(currentImageData[x]) + "," + String(currentImageData[x + 1]) + "," + String(currentImageData[x + 2]) + ")";
 					context.fillRect(realX, realY, 8, 8);
+					if (st) {
+						context.beginPath();
+						context.moveTo(realX, 0);
+						context.lineTo(realX, nheight);
+						context.stroke();
+					}
+				}
+				if (st) {
 					context.beginPath();
-					context.moveTo(realX, 0);
-					context.lineTo(realX, nheight);
+					context.moveTo(0, realY);
+					context.lineTo(nwidth, realY);
 					context.stroke();
 				}
-				context.beginPath();
-				context.moveTo(0, realY);
-				context.lineTo(nwidth, realY);
-				context.stroke();
 			}
 		}
-		renderImage();
+		renderImage(true);
 		let bounds = canvas.getBoundingClientRect(), mousedown = false;
 		setInterval(() => bounds = canvas.getBoundingClientRect(), 1000);
 		function initInputs() {
@@ -80,13 +84,25 @@ create.onclick = function() {
 			let lineBreak = document.createElement("br");
 			screen.appendChild(lineBreak);
 			colorText.textContent = "Pixel Color:";
+			srceen.appendChild(colorText);
 			let colorInput = document.createElement("input");
 			colorInput.type = "color";
 			screen.appendChild(colorInput);
-			return colorInput;
+			
+			let gridText = document.createElement("a");
+			lineBreak = document.createElement("br");
+			screen.appendChild(lineBreak);
+			gridText.textContent = "Gridlines:";
+			srceen.appendChild(gridText);
+			let gridInput = document.createElement("input");
+			gridInput.type = "checkbox";
+			gridInput.checked = true;
+			screen.appendChild(gridInput);
+			return [colorInput, gridInput];
 		}
 		let currentCol = [0, 0, 0];
-		const pixelColor = initInputs();
+		const p = initInputs();
+		const pixelColor = p[0], gridLines = p[1];
 		pixelColor.oninput = function() {
 			const col = pixelColor.value;
 			const r = parseInt(col.slice(1, 3), 16);
@@ -100,11 +116,12 @@ create.onclick = function() {
 			if (!mousedown) return;
 			const x = Math.floor((e.clientX - bounds.x) / 8);
 			const y = Math.floor((e.clientY - bounds.y) / 4);
+			const pixelIndex = y * nwidth + x * 4;
 			currentImageData[pixelIndex] = currentCol[0];
 			currentImageData[pixelIndex + 1] = currentCol[1];
 			currentImageData[pixelIndex + 2] = currentCol[2];
 			currentImageData[pixelIndex + 3] = 255;
-			renderImage();
+			renderImage(gridLines.checked);
 		}
 	}
 }
