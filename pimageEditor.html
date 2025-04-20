@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Image Editor (At Pixel Level)</title>
+		<style>
+			body, button, input, h1, p {
+				background-color: black;
+				color: white;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="screen">
+			Width: <input id="screen-width" value="32" type="number">px<br>
+			Height: <input id="screen-height" value="32" type="number">px<br>
+			<button id="screen-create">Start Creating!</button><p id="screen-warning" style="color: red; display: none;"></p>
+		</div>
+		<script>
+const imageWidth = document.getElementById("screen-width"), imageHeight = document.getElementById("screen-height"), create = document.getElementById("screen-create"), warning = document.getElementById("screen-warning"), screen = document.getElementById("screen");
+
+create.onclick = function() {
+	const width = +imageWidth.value, height = +imageHeight.value;
+	if (isNaN(width) || isNaN(height)) {
+		warning.style.display = "";
+		warning.textContent = "The image's dimensions are not properly filled in. Default ones will be filled instead.";
+		imageWidth.value = 32;
+		imageHeight.value = 32;
+	} else if (width <= 0 || height <= 0) {
+		warning.style.display = "";
+		warning.textContent = "The image's dimensions must not be equal to or less than 0! Positive values are accepted though.";
+		imageWidth.value = -width;
+		imageHeight.value = -height;
+	} else if (width !== Math.round(width) || height !== Math.round(height)) {
+		warning.style.display = "";
+		warning.textContent = "The image's dimensions must be rounded! Otherwise, the pixel data cannot properly be represented!";
+		imageWidth.value = Math.round(width);
+		imageHeight.value = Math.round(height);
+	} else if (width > 128 || height > 128) {
+		warning.style.display = "";
+		warning.textContent = "It is recommended you try out the main image editor instead of this one, if you want to create large images.";
+	} else {
+		create.remove();
+		imageWidth.remove();
+		imageHeight.remove();
+		warning.remove();
+		alert("More will be coming soon!");
+	}
+}
+		</script>
+	</body>
+</html>
