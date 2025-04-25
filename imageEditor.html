@@ -979,8 +979,8 @@ if (!context) {
 						imageData[i] = g; i++;
 						imageData[i] = b; i++;
 						imageData[i] = a; i++;
-						if (align && i === future) {
-							future = Math.ceil((i + 5) / width) * width;
+						if (align && i >= future) {
+							future = (Math.ceil((i + 5) / width) * width) - 4;
 							break;
 						}
 					}
