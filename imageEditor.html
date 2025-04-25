@@ -24,7 +24,7 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option><option value="smudge">Smudge Right</option><option value="text">Draw Text</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="chromat">Chromatic</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option><option value="smudge">Smudge Right</option><option value="text">Draw Text</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="chromat">Chromatic</option><option value="pixel">Pixelate</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -389,6 +389,9 @@ if (!context) {
 		} else if (effects.value === "chromat") {
 			effectSettings.innerHTML = "<a>Direction (in pixels. negative = R channel leftwards, positive = R channel rightwards):</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\">";
 			effectParams = [document.getElementById("e-shiftdir")];
+		} else if (effects.value === "pixelw" || effects.value === "pixelh") {
+			effectSettings.innerHTML = "<a>Pixel " + (effects.value === "pixelw" ? "Width" : "Height") + ":</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Align Pixellation:</a><input type=\"checkbox\" checked id=\"e-pixelal\">";
+			effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-pixelal")];
 		} else {
 			const x = customModdedEffects.find(x => x[0] === effects.value);
 			if (x) {
@@ -957,6 +960,27 @@ if (!context) {
 				} else {
 					for (i = 2; i < len; i += 3) {
 						imageData[i] = imageData[mod(i + shift, len)]; i++;
+					}
+				}
+				break;
+			}
+			case "pixelw": {
+				let i = 0, size = Math.round(+effectParams[0].value), align = effectParams[1].checked;
+				if (size === 0) return;
+				const width = currentImageData.width * 4;
+				let r, g, b, a, future;
+				for (; i < len; i += 4) {
+					r = imageData[i], i++;
+					g = imageData[i], i++;
+					b = imageData[i], i++;
+					a = imageData[i], i++;
+					future = Math.ceil((i + 1) / width) * width;
+					for (let j = 0; j < size; j++) {
+						imageData[i] = r; i++;
+						imageData[i] = g; i++:
+						imageData[i] = b; i++;
+						imageData[i] = a; i++;
+						if (align && i === future) break;
 					}
 				}
 				break;
