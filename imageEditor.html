@@ -939,23 +939,23 @@ if (!context) {
 				break;
 			}
 			case "shift": {
-				let i = 0, shift = -Math.round(+effectParams[0].value);
+				let i = 0, shift = -Math.round(+effectParams[0].value) * 4;
 				if (shift === 0) {} else if (shift < 0) {
-					for (i = len - 1; i >= 0;) {
+					for (i = len - 1; i >= 0; i -= 3) {
 						imageData[i] = imageData[mod(i + shift, len)]; i--;
 					}
 				} else {
-					for (i = 0; i < len;) {
+					for (i = 0; i < len; i += 3) {
 						imageData[i] = imageData[mod(i + shift, len)]; i++;
 					}
 				}
 				shift = -shift;
 				if (shift === 0) {} else if (shift < 0) {
-					for (i = len - 2; i >= 0;) {
+					for (i = len - 2; i >= 0; i -= 3) {
 						imageData[i] = imageData[mod(i + shift, len)]; i--;
 					}
 				} else {
-					for (i = 2; i < len;) {
+					for (i = 2; i < len; i += 3) {
 						imageData[i] = imageData[mod(i + shift, len)]; i++;
 					}
 				}
