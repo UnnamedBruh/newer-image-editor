@@ -966,9 +966,9 @@ if (!context) {
 			}
 			case "pixelw": {
 				let i = 0, size = Math.round(+effectParams[0].value), align = effectParams[1].checked;
-				if (size === 0) return;
-				const width = currentImageData.width * 4 - 4;
-				let r, g, b, a, future = width;
+				if (size <= 1) return;
+				const width = currentImageData.width * 4;
+				let r, g, b, a, future = width - 4;
 				for (; i < len; i += 4) {
 					r = imageData[i], i++;
 					g = imageData[i], i++;
@@ -980,7 +980,7 @@ if (!context) {
 						imageData[i] = b; i++;
 						imageData[i] = a; i++;
 						if (align && i >= future) {
-							future = (Math.ceil((i + 5) / width) * width) - 4;
+							future = Math.ceil((i + 5) / width) * width - 4;
 							break;
 						}
 					}
