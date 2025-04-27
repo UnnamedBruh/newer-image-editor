@@ -9,14 +9,6 @@ button, body, select, input {
 button, body, a, p, h1, select, option, input {
 	color: white;
 }
-/*
-@font-face {
-	font-family: 'Barcode', sans-serif;
-	src: url('https://unnamedbruh.github.io/newer-image-editor/fonts/barcode.ttf') format('truetype');
-	font-weight: normal;
-	font-style: normal;
-}
-*/
 </style>
 </head>
 <body>
@@ -89,7 +81,6 @@ function loadTgaFromUint8Array(tgaData) {
 		else if ((loader.header.pixelDepth === 24 && image.length !== loader.header.width * loader.header.height * 3) || (loader.header.pixelDepth === 32 && image.length !== loader.header.width * loader.header.height * 4)) alert("There appears to be an image data overflow (providing too many pixel values) or underflow (providing too little pixel values). This has to be fixed, so the image can correctly be loaded next time.");
 		else if ([8, 16, 24, 32].indexOf(loader.header.pixelDepth) === -1) {
 			if (confirm("The TGA image has a very odd specification of the pixel depth (provided was " + loader.header.pixelDepth + ", expected was 8, 16, 24, or 32). Do you want to provide the pixel depth?")) {
-				//16
 				let pixelDepth = +prompt("Provide the pixel depth (the default is 24).") || 24;
 				if ([8, 16, 24, 32].indexOf(loader.header.pixelDepth) === -1) {
 					while ([8, 16, 24, 32].indexOf(loader.header.pixelDepth) === -1) {
@@ -796,26 +787,19 @@ if (!context) {
 				if (+effectParams[0].value < 0.4) {
 					if (!confirm("THIS IMAGE EFFECT MAY CAUSE A SEIZURE FOR THOSE WITH EPILEPSY CONDITIONS FOR RAPID INTERVAL RATES. ARE YOU SURE YOU WANT TO ENABLE THIS?")) break;
 				}
-				if (+canvas.width > 1000 && +canvas.height > 1000) alert("The fascinating effect must require the image to be smaller than the current dimensions."); else {
-					if (+effectParams[0].value < 0.05) alert("PERFORMANCE WARNING: It is not recommended to use intervals with that pausing time! Performance degradations can easily occur, and effects can sometimes overlap with each other, breaking functionality for the time of this animation (10 seconds).");
-					const int = setInterval(function() {
-						// 15, 16
-						effects.selectedIndex = Math.random() < 0.333333 ? (15 + Math.round(Math.random())) : (Math.random() < 0.5 ? 4 : 23 + Math.round(Math.random()));
-						if (effects.selectedIndex === 23 || effects.selectedIndex === 24) {
-							effects.value = effects.selectedIndex === 23 ? "jpeg" : "webp";
-							effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" id=\"e-jpegq\">";
-							effectParams = [document.getElementById("e-jpegq")];
-							effectParams[0].value = Math.round(Math.random() * 40);
-						} else if (effects.selectedIndex === 4) {
-							effects.value = "shift";
-							effectSettings.innerHTML = "<a>Direction (in pixels. negative = leftwards, positive = rightwards):</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Color Padding:</a><input type=\"color\" value=\"#000000\" id=\"e-shiftcolor\"><br><a>Color Padding Opacity:</a><input type=\"number\" value=\"0\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-shiftopac\"><br><a>Wrap Around Image:</a><input type=\"checkbox\" id=\"e-shiftwrap\" checked><br><a>(if enabled) Pixel Level (if disabled) Integral Level:</a><input type=\"checkbox\" id=\"e-shiftint\" checked>";
-							effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-shiftcolor"), document.getElementById("e-shiftopac"), document.getElementById("e-shiftwrap"), document.getElementById("e-shiftint")];
-							effectParams[0].value = Math.round(4 - Math.random() * 8);
-						} else chooseEffect();
-						apply.click();
-					}, Math.max(0, +effectParams[0].value) * 1000);
-					setTimeout(function() {clearInterval(int)}, 10000);
-				}
+				if (+effectParams[0].value < 0.05) alert("PERFORMANCE WARNING: It is not recommended to use intervals with that pausing time! Performance degradations can easily occur, and effects can sometimes overlap with each other, breaking functionality for the time of this animation (10 seconds).");
+				const int = setInterval(function() {
+					effects.selectedIndex = Math.random() < 0.333333 ? (15 + Math.round(Math.random())) : (Math.random() < 0.5 ? 4 : 23 + Math.round(Math.random()));
+					if (effects.selectedIndex === 23 || effects.selectedIndex === 24) {
+						effects.value = effects.selectedIndex === 23 ? "jpeg" : "webp";
+						effectParams = [{value: Math.round(Math.random() * 40)}]
+					} else if (effects.selectedIndex === 4) {
+						effects.value = "shift";
+						effectParams = [{value: Math.round(4 - Math.random() * 8)}, {value: "#000000"}, {value: "0"}, {checked: true}, {checked: true}];
+					} else chooseEffect();
+					apply.click();
+				}, Math.max(0, +effectParams[0].value) * 1000);
+				setTimeout(function() {clearInterval(int)}, 10000);
 				break;
 			}
 			case "mp3": {
