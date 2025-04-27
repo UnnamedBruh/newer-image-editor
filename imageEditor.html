@@ -9,12 +9,14 @@ button, body, select, input {
 button, body, a, p, h1, select, option, input {
 	color: white;
 }
+/*
 @font-face {
 	font-family: 'Barcode', sans-serif;
 	src: url('https://unnamedbruh.github.io/newer-image-editor/fonts/barcode.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }
+*/
 </style>
 </head>
 <body>
@@ -389,8 +391,8 @@ if (!context) {
 		} else if (effects.value === "chromat") {
 			effectSettings.innerHTML = "<a>Direction (in pixels. negative = R channel leftwards, positive = R channel rightwards):</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\">";
 			effectParams = [document.getElementById("e-shiftdir")];
-		} else if (effects.value === "pixelw" || effects.value === "pixelh") {
-			effectSettings.innerHTML = "<a>Pixel " + (effects.value === "pixelw" ? "Width" : "Height") + ":</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Align Pixellation:</a><input type=\"checkbox\" checked id=\"e-pixelal\">";
+		} else if (effects.value === "pixelw") {
+			effectSettings.innerHTML = "<a>Pixel Width:</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Align Pixellation:</a><input type=\"checkbox\" checked id=\"e-pixelal\">";
 			effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-pixelal")];
 		} else {
 			const x = customModdedEffects.find(x => x[0] === effects.value);
@@ -765,6 +767,7 @@ if (!context) {
 					const image = new Image();
 					image.onload = function() {
 						image.onload = function() {};
+						if (effects.value === "webp") context.clearRect(0, 0, +canvas.width, +canvas.height);
 						context.drawImage(image, 0, 0, +canvas.width, +canvas.height);
 						currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
 						image.src = "";
@@ -985,6 +988,10 @@ if (!context) {
 						}
 					}
 				}
+				break;
+			}
+			case "": {
+				
 				break;
 			}
 			default: {
