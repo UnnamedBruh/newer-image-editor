@@ -18,7 +18,7 @@ Background Color: <input id="bgcolor" type="color">
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option><option value="smudge">Smudge Right</option><option value="text">Draw Text</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="chromat">Chromatic</option><option value="pixelw">Pixelate (Width)</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option><option value="smudge">Smudge Right</option><option value="text">Draw Text</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="chromat">Chromatic</option><option value="pixelw">Pixelate (Width)</option><option value="vidstand">ITU-R BT.601 Color Transformation</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script>
 // tga.js
@@ -236,6 +236,32 @@ if (!context) {
 	function interpolate(x, y, n) {
 		return x + (y - x) * n;
 	}
+	// Since these are mathematical formulas, they are not really patented, since everyone can easily come up with mathematical formulas. However, it doesn't mean they can be used for implementing an MPEG decoder/encoder without a license agreement (but that topic is very complicated)
+
+function rgbToYCbCr(r, g, b) { // Three of these values must be between 0 and 255
+  const y  =  0.299*r + 0.587*g + 0.114*b;
+  const cb = -0.1687*r - 0.3313*g + 0.5*b + 128;
+  const cr =  0.5*r - 0.4187*g - 0.0813*b + 128;
+  return [y, cb, cr];
+}
+
+function yCbCrToRGB(y, cb, cr) {
+  // Shift Cb and Cr back to the [-128, 127] range
+  cb -= 128;
+  cr -= 128;
+
+  // Apply inverse transformation (ITU-R BT.601 standard)
+  const r = y + 1.402 * cr;
+  const g = y - 0.344136 * cb - 0.714136 * cr;
+  const b = y + 1.772 * cb;
+
+  // Clamp values to [0, 255] and round to integers
+  return [
+    Math.min(255, Math.max(0, Math.round(r))),
+    Math.min(255, Math.max(0, Math.round(g))),
+    Math.min(255, Math.max(0, Math.round(b)))
+  ];
+}
 	function applyGaussianBlur(imageData, kernel) {
 		const width = imageData.width;
 		const height = imageData.height;
@@ -385,6 +411,9 @@ if (!context) {
 		} else if (effects.value === "pixelw") {
 			effectSettings.innerHTML = "<a>Pixel Width:</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Align Pixellation:</a><input type=\"checkbox\" checked id=\"e-pixelal\">";
 			effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-pixelal")];
+		} else if (effects.value === "vidstand") {
+			effectSettings.innerHTML = "<a>RGB -> YCbCr:</a><input type=\"checkbox\" checked id=\"e-vidstandcol\">";
+			effectParams = [document.getElementById("e-vidstandcol")];
 		} else {
 			const x = customModdedEffects.find(x => x[0] === effects.value);
 			if (x) {
@@ -974,8 +1003,24 @@ if (!context) {
 				}
 				break;
 			}
-			case "": {
-				
+			case "vidstand": {
+				if (effectParams[0].checked) {
+					let i = 0, color = [0, 0, 0];
+					for (; i < len;) {
+						color = rgbToYCbCr(imageData[i], imageData[i + 1], imageData[i + 2]);
+						imageData[i] = color[0]; i++;
+						imageData[i] = color[1]; i++;
+						imageData[i] = color[2]; i += 2;
+					}
+				} else {
+					let i = 0, color = [0, 0, 0];
+					for (; i < len;) {
+						color = yCbCrToRGB(imageData[i], imageData[i + 1], imageData[i + 2]);
+						imageData[i] = color[0]; i++;
+						imageData[i] = color[1]; i++;
+						imageData[i] = color[2]; i += 2;
+					}
+				}
 				break;
 			}
 			default: {
