@@ -19,7 +19,7 @@
 		x(imgD);
 	}
 
-	customModdedEffects.push(["emb", "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%", function() {
+	customModdedEffects.push(["emb", "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\" title=\"How much this effect will be applied.\">%", function() {
 		return [document.getElementById("e-invpro")];
 	}, emboss]);
 
@@ -50,7 +50,7 @@
 		// x(imgD);
 	}
 
-	customModdedEffects.push(["rand", "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%", function() {
+	customModdedEffects.push(["rand", "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\" title=\"How much this effect will be applied.\">%", function() {
 		return [document.getElementById("e-invpro")];
 	}, noise]);
 
