@@ -325,19 +325,19 @@ function yCbCrToRGB(y, cb, cr) {
 	function chooseEffect() {
 		effectSettings.innerHTML = "";
 		if (effects.value === "tint" || effects.value === "tintadd" || effects.value === "tintsub") {
-			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\">" + ((effects.value === "tintadd" || effects.value === "tintsub") ? "<br><a>Wrap Colors Within Limits:</a><input type=\"checkbox\" checked id=\"e-tintx\">" : "");
+			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\" title=\"The RGB color to filter (or perform a mathematical operand on) each color channel.\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\" title=\"The opacity (A) to multiply the image's opacity.\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\" title=\"The multiplier for RGB channels. 2 may brighten the image.\">" + ((effects.value === "tintadd" || effects.value === "tintsub") ? "<br><a>Wrap Colors Within Limits:</a><input type=\"checkbox\" checked id=\"e-tintx\" title=\"For example, if a color value is outside the range of 0 - 255, the value is automatically wrapped within the limit, instead of being clamped.\">" : "");
 			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac"), document.getElementById("e-tintmult"), document.getElementById("e-tintx")];
 		} else if (effects.value === "tintblend") {
-			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\"><br><a>Blending Percentage:</a><input type=\"number\" value=\"20\" min=\"0\" max=\"100\" step=\"1\" id=\"e-tintopac\">";
+			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\" title=\"The RGB color for blending a rectangular overlay.\"><br><a>Blending Percentage:</a><input type=\"number\" value=\"20\" min=\"0\" max=\"100\" step=\"1\" id=\"e-tintopac\" title=\"The opacity of the rectangular overlay.\">";
 			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac")];
 		} else if (effects.value === "shift") {
-			effectSettings.innerHTML = "<a>Direction (in pixels. negative = leftwards, positive = rightwards):</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Color Padding:</a><input type=\"color\" value=\"#000000\" id=\"e-shiftcolor\"><br><a>Color Padding Opacity:</a><input type=\"number\" value=\"0\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-shiftopac\"><br><a>Wrap Around Image:</a><input type=\"checkbox\" id=\"e-shiftwrap\"><br><a>(if enabled) Pixel Level (if disabled) Integral Level:</a><input type=\"checkbox\" id=\"e-shiftint\" checked>";
+			effectSettings.innerHTML = "<a>Direction & Distance:</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\" title=\"The image's pixels will be shifted to the left if this value is negative, and right if this value is positive. The distance measures in either pixels, or individual values within the image buffer.\"><br><a>Color Padding:</a><input type=\"color\" value=\"#000000\" id=\"e-shiftcolor\" title=\"The default RGB color, which replaces a proportion of image that creates a gap.\"><br><a>Color Padding Opacity:</a><input type=\"number\" value=\"0\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-shiftopac\" title=\"The default color's opacity (A).\"><br><a>Wrap Around Image:</a><input type=\"checkbox\" id=\"e-shiftwrap\" title=\"Whether the pixels should wrap around the top or bottom of the image or not.\"><br><a>(if enabled) Pixel Level (if disabled) Integral Level:</a><input type=\"checkbox\" id=\"e-shiftint\" checked title=\"Whether the distance (Direction & Distance) shall be used to (if checked) shift the pixels, or (if unchecked) shift the values in the image buffer.\">";
 			effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-shiftcolor"), document.getElementById("e-shiftopac"), document.getElementById("e-shiftwrap"), document.getElementById("e-shiftint")];
 		} else if (effects.value === "backg") {
-			effectSettings.innerHTML = "<a>Background Color:</a><input type=\"color\" value=\"#000000\" id=\"e-backcolor\">";
+			effectSettings.innerHTML = "<a>Background Color:</a><input type=\"color\" value=\"#000000\" id=\"e-backcolor\" title=\"The color of the background. This may affect only images with transparent pixels.\">";
 			effectParams = [document.getElementById("e-backcolor")];
 		} else if (effects.value === "gblur" || effects.value === "sharpg") {
-			effectSettings.innerHTML = "<a>Kernel Size (Slight Blur Spread, and Smoothness):</a><input type=\"number\" value=\"3\" step=\"2\" min=\"1\" max=\"15\" id=\"e-gblurkernel\"><br><a>Sigma Value:</a><input type=\"number\" value=\"1\" step=\"0.1\" min=\"0\" max=\"100\" id=\"e-gblursigma\">";
+			effectSettings.innerHTML = "<a>Kernel Size (Slight Blur Spread, and Smoothness):</a><input type=\"number\" value=\"3\" step=\"2\" min=\"1\" max=\"15\" id=\"e-gblurkernel\" title=\"How 'smooth' the blurring is.\"><br><a>Sigma Value:</a><input type=\"number\" value=\"1\" step=\"0.1\" min=\"0\" max=\"100\" id=\"e-gblursigma\">";
 			effectParams = [document.getElementById("e-gblurkernel"), document.getElementById("e-gblursigma")];
 		} else if (effects.value === "crop" || effects.value === "rect") {
 			effectSettings.innerHTML = "<a>X:</a><input type=\"number\" value=\"0\" id=\"e-cropx\"><br><a>Y:</a><input type=\"number\" value=\"0\" id=\"e-cropy\"><br><a>Width:</a><input type=\"number\" value=\"0\" id=\"e-cropw\"><br><a>Height:</a><input type=\"number\" value=\"0\" id=\"e-croph\"><br><a>" + (effects.value === "rect" ? "Rectangle" : "Highlight") + " Color:</a><input type=\"color\" value=\"#ffffff\" id=\"e-cropc\">" + (effects.value === "rect" ? "<br><a>Rectangle Opacity:</a><input type=\"number\" value=\"1\" step=\"0.01\" min=\"0\" max=\"1\" id=\"e-recto\">" : "");
@@ -353,10 +353,10 @@ function yCbCrToRGB(y, cb, cr) {
 				}
 			}
 		} else if (effects.value === "inv" || effects.value === "sepia" || effects.value === "graya" || effects.value === "grayb" || effects.value === "rgbsh" || effects.value === "rgbre" || effects.value === "smudge") {
-			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\">%" + (effects.value === "smudge" ? "<br><a>Smudging factor (as a percentage):</a><input type=\"number\" value=\"5\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-smudgepro\">%" : "");
+			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-invpro\" title=\"How much the effect will be applied.\">%" + (effects.value === "smudge" ? "<br><a>Smudging factor (as a percentage):</a><input type=\"number\" value=\"5\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-smudgepro\">%" : "");
 			effectParams = [document.getElementById("e-invpro"), document.getElementById("e-smudgepro")];
 		} else if (effects.value === "resi" || effects.value === "parag" || effects.value === "resid") {
-			effectSettings.innerHTML = "<a>Width:</a><input type=\"number\" value=\"\" id=\"e-resiw\"><br><a>Height:</a><input type=\"number\" value=\"\" id=\"e-resih\">" + (effects.value === "resi" ? "<br><a>Anti-aliasing:</a><input type=\"checkbox\" checked id=\"e-resia\">" : "");
+			effectSettings.innerHTML = "<a>Width:</a><input type=\"number\" value=\"\" id=\"e-resiw\">px<br><a>Height:</a><input type=\"number\" value=\"\" id=\"e-resih\">px" + (effects.value === "resi" ? "<br><a>Anti-aliasing:</a><input type=\"checkbox\" checked id=\"e-resia\" title=\"Whether the image should be smooth (if checked), or rough around the edges (if unchecked).\">" : "");
 			effectParams = [document.getElementById("e-resiw"), document.getElementById("e-resih"), effects.value === "resi" ? document.getElementById("e-resia") : null];
 			effectParams[0].value = canvas.width;
 			effectParams[1].value = canvas.height;
@@ -364,7 +364,7 @@ function yCbCrToRGB(y, cb, cr) {
 			effectSettings.innerHTML = "<a>Contrast Level:</a><input type=\"number\" value=\"0.5\" step=\"0.02\" min=\"0\" max=\"10\" id=\"e-contr\">";
 			effectParams = [document.getElementById("e-contr")];
 		} else if (effects.value === "grayc") {
-			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-graypro\">%<br><a>R Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayr\">%<br><a>G Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayg\">%<br><a>B Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayb\">%";
+			effectSettings.innerHTML = "<a>Progress (as a percentage):</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-graypro\" title=\"How much the effect will be applied.\">%<br><a>R Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayr\">%<br><a>G Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayg\">%<br><a>B Grayscale Multiplier:</a><input type=\"number\" value=\"100\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-grayb\">%";
 			effectParams = [document.getElementById("e-graypro"), document.getElementById("e-grayr"), document.getElementById("e-grayg"), document.getElementById("e-grayb")];
 		} else if (effects.value === "opac") {
 			effectSettings.innerHTML = "<a>Transparency (as a percentage):</a><input type=\"number\" value=\"0\" step=\"0.390625\" min=\"0\" max=\"100\" id=\"e-opactr\"><a id=\"percent\">%</a><br><a>Act As Opacity Multiplier:</a><input type=\"checkbox\" id=\"e-opacmu\">";
@@ -377,16 +377,16 @@ function yCbCrToRGB(y, cb, cr) {
 				effectParams[0].value = effectParams[1].checked ? +effectParams[0].value / 100 : +effectParams[0].value * 100;
 			}
 		} else if (effects.value === "jpeg" || effects.value === "webp") {
-			effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" value=\"80\" step=\"1\" min=\"1\" max=\"100\" id=\"e-jpegq\">";
+			effectSettings.innerHTML = "<a>Quality:</a><input type=\"number\" value=\"80\" step=\"1\" min=\"1\" max=\"100\" id=\"e-jpegq\" title=\"The quality of the image (when converted to a lossy format), which will significantly affect the clarity of the image.\">";
 			effectParams = [document.getElementById("e-jpegq")];
 		} else if (effects.value === "minip") {
-			effectSettings.innerHTML = "<a>Palette Reduction:</a><input type=\"number\" value=\"16\" step=\"1\" min=\"1\" max=\"256\" id=\"e-minipq\">";
+			effectSettings.innerHTML = "<a>Palette Reduction:</a><input type=\"number\" value=\"16\" step=\"1\" min=\"1\" max=\"256\" id=\"e-minipq\" title=\"The rounding factor for reducing the amount of unique colors in the image buffer.\">";
 			effectParams = [document.getElementById("e-minipq")];
 		} else if (effects.value === "jpegd") {
-			effectSettings.innerHTML = "<a>Effect Interval:</a><input type=\"number\" value=\"0.05\" step=\"0.01\" min=\"0\" max=\"10\" id=\"e-jpegdint\">";
+			effectSettings.innerHTML = "<a>Effect Interval:</a><input type=\"number\" value=\"0.5\" step=\"0.01\" min=\"0\" max=\"10\" id=\"e-jpegdint\" title=\"Do not use if you have epilepsy, unless the interval value is over 0.4.\">";
 			effectParams = [document.getElementById("e-jpegdint")];
 		} else if (effects.value === "mp3") {
-			effectSettings.innerHTML = "<a>Bitrate:</a><input type=\"number\" value=\"128\" step=\"16\" min=\"32\" max=\"320\" id=\"e-mp3bitrate\"><br><a>This effect is unconventional. First, the image data is directly encoded using <a href=\"https://github.com/webpack-contrib/lamejs\">lamejs</a> with the chosen bitrate, then the MP3 data is decoded back into the image. THIS PROCESS MAY BE COMPUTATIONALLY EXPENSIVE FOR LARGER IMAGES!</a>";
+			effectSettings.innerHTML = "<a>Bitrate:</a><input type=\"number\" value=\"128\" step=\"16\" min=\"32\" max=\"320\" id=\"e-mp3bitrate\"><br><a>This effect is unconventional. First, the image data is directly encoded using <a href=\"https://github.com/webpack-contrib/lamejs\">lamejs</a> with the chosen bitrate, then the MP3 data is decoded back into the image. THIS PROCESS MAY BE COMPUTATIONALLY EXPENSIVE FOR IMAGES WITH DIMENSIONS OVER 400X400!</a>";
 			effectParams = [document.getElementById("e-mp3bitrate")];
 		} else if (effects.value === "draw") {
 			effectSettings.innerHTML = "<a>Size (in pixels):</a><input type=\"number\" value=\"2\" step=\"0.5\" min=\"0.01\" max=\"4096\" id=\"e-drawwidth\"><br><a>Color:</a><input type=\"color\" value=\"#000000\" id=\"e-drawcolor\"><br><a>Sharp Edges:</a><input type=\"checkbox\" id=\"e-drawsharp\">";
@@ -406,13 +406,13 @@ function yCbCrToRGB(y, cb, cr) {
 				}
 			}
 		} else if (effects.value === "chromat") {
-			effectSettings.innerHTML = "<a>Direction (in pixels. negative = R channel leftwards, positive = R channel rightwards):</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\">";
+			effectSettings.innerHTML = "<a>Direction & Distance:</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\" title=\"The final direction and distance the R and B channels. If this value is negative, R channel moves to the left, B channel moves to the right. If this value is positive, R channel moves to the right, B channel moves to the left.\">px";
 			effectParams = [document.getElementById("e-shiftdir")];
 		} else if (effects.value === "pixelw") {
-			effectSettings.innerHTML = "<a>Pixel Width:</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\"><br><a>Align Pixellation:</a><input type=\"checkbox\" checked id=\"e-pixelal\">";
+			effectSettings.innerHTML = "<a>Pixel Width:</a><input type=\"number\" value=\"0\" id=\"e-shiftdir\" title=\"The width of each pixel when this effect is applied.\">px<br><a>Align Pixellation:</a><input type=\"checkbox\" checked id=\"e-pixelal\" title=\"Whether the effect would prevent any 'parallelism' caused by the rightest pixels.\">";
 			effectParams = [document.getElementById("e-shiftdir"), document.getElementById("e-pixelal")];
 		} else if (effects.value === "vidstand") {
-			effectSettings.innerHTML = "<a>RGB -> YCbCr:</a><input type=\"checkbox\" checked id=\"e-vidstandcol\">";
+			effectSettings.innerHTML = "<a>RGB -> YCbCr:</a><input type=\"checkbox\" checked id=\"e-vidstandcol\" title=\"Whether the image's color channels will be transated to YCbCr, or back to RGB values.\">";
 			effectParams = [document.getElementById("e-vidstandcol")];
 		} else {
 			const x = customModdedEffects.find(x => x[0] === effects.value);
