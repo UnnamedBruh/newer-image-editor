@@ -398,7 +398,10 @@ function yCbCrToRGB(y, cb, cr) {
 			for (const p of effectParams) {
 				p.oninput = function() {
 					const t = effectParams[3].value;
-					if (warnBarcode && t === "Barcode") warnBarcode = null; alert("Only Latin letters A - P will appear as random segments of a real barcode! However, remember the barcode font's purpose for being displayed, and not for sending real text.");
+					if (warnBarcode && t === "Barcode") {
+						warnBarcode = false;
+						alert("Only Latin letters A - P will appear as random segments of a real barcode! However, remember the barcode font's purpose for being displayed, and not for sending real text.");
+					}
 					context.putImageData(currentImageData, 0, 0);
 					context.fillStyle = "rgba(" + extractRGBA2(effectParams[1].value, 0.3).join(", ") + ")";
 					context.font = effectParams[7].value + " " + effectParams[0].value + "px " + (t.includes(" ") ? ("\"" + t + "\"") : t);
