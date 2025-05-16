@@ -1143,7 +1143,7 @@ function exportTGA() {
 			for (let i = 0, j = 36; i < len; i++, j++) {
 				buffer.setUint8(j, x[i]);
 			}
-			const blob = new Blob([buffer.buffer], "audio/wav");
+			const blob = new Blob([buffer.buffer], {type: "audio/wav"});
 			const link = document.createElement('a');
 			link.href = URL.createObjectURL(blob);
 			link.download = 'exportedImage.' + format[3];
