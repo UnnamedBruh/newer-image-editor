@@ -1112,7 +1112,7 @@ function exportTGA() {
 			const sampleRate = Math.round(Math.abs(+(prompt("What should the samplerate be for the audio?", "48000") || 48000)));
 			const bitsPerSample = Math.round(Math.abs(+(prompt("What should the bits per sample be for the audio?", "16") || 16)) / 8) * 8;
 			const channels = Math.round(Math.abs(+(prompt("What should the channels be for the audio?", "1") || 1)));
-			const chs = prompt("What should the color channels be before exporting to the audio?", "rgba") === "rgba";
+			const chs = prompt("What should the color channels be before exporting to the audio?", "rgba") === "rgb";
 
 			const buffer = new DataView(new ArrayBuffer(44 + currentImageData.data.byteLength - (currentImageData.data.byteLength / 4 * chs)));
 			buffer.setUint8(0, 82); // R
@@ -1143,7 +1143,7 @@ function exportTGA() {
 			// This is when the real data is exported. For now, we just write down the data currentImageData has to offer.
 			const x = currentImageData.data;
 			const len = x.byteLength;
-			if (chs) {
+			if (!chs) {
 				for (let i = 0, j = 44; i < len; i++, j++) {
 					buffer.setUint8(j, x[i]);
 				}
