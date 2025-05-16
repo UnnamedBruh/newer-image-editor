@@ -835,12 +835,6 @@ function yCbCrToRGB(y, cb, cr) {
 				break;
 			}
 			case "mp3": {
-  if (typeof lamejs === "undefined") {
-    const module = await fetch("lame.min.js");
-    const code = await module.text();
-    eval(code);
-  }
-
   const scaleFactor = 255.99609375;
   const pcmData = new Int16Array(imageData.length);
   for (let i = 0; i < len; i++) {
@@ -1133,6 +1127,10 @@ function exportTGA() {
 		x = await x.text();
 		eval(x);
 	})();
+
+    const module = await fetch("lame.min.js");
+    const code = await module.text();
+    eval(code);
 </script>
 <button onclick="exportI();">Export Image</button>
 </body>
