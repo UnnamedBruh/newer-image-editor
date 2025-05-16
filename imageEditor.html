@@ -1139,7 +1139,7 @@ function exportTGA() {
 			buffer.setUint8(37, 97); // a
 			buffer.setUint8(38, 116); // t
 			buffer.setUint8(39, 97); // a
-			buffer.setUint32(40, currentImageData.data.byteLength, true); // the file size
+			buffer.setUint32(40, buffer.buffer.byteLength - 44, true); // the file size
 			// This is when the real data is exported. For now, we just write down the data currentImageData has to offer.
 			const x = currentImageData.data;
 			const len = x.byteLength;
