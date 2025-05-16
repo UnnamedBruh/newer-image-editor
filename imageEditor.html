@@ -1083,7 +1083,7 @@ function exportTGA() {
 }
 	function exportI() {
 		const choice = [
-			["image/png", "PNG", false, "png"], ["image/jpeg", "JPEG", true, "jpeg"], ["image/webp", "WebP", true, "webp"], ["image/bmp", "Bitmap", false, "bmp"], ["image/tga", "Targa", false, "tga"], ["image/svg+xml", "SVG", false, "svg"]
+			["image/png", "PNG", false, "png"], ["image/jpeg", "JPEG", true, "jpeg"], ["image/webp", "WebP", true, "webp"], ["image/bmp", "Bitmap", false, "bmp"], ["image/tga", "Targa", false, "tga"], ["image/svg+xml", "SVG", false, "svg"], ["application/octet-stream", "WAV", false, "wav"]
 		];
 		const index = prompt("What is the image format you want to export in? So far, we only allow " + choice.map(x => x[1]).join(", ") + ". Choose by typing in their format (case-insensitive), or typing in the index (zero-based).");
 		if (!index) return;
@@ -1105,6 +1105,48 @@ function exportTGA() {
 			const link = document.createElement('a');
 			link.href = URL.createObjectURL(b);
 			link.download = 'exportedImage.svg';
+			link.click();
+			link.remove();
+		} else if (format[3] === "wav") {
+			alert("THIS FEATURE IS EXPERIMENTAL, AS IT IS SUBJECT TO CHANGE");
+			const sampleRate = Math.round(Math.abs(+(prompt("What should the samplerate be for the audio?", "48000") || 48000)));
+			const bitsPerSample = Math.round(Math.abs(+(prompt("What should the bits per sample be for the audio?", "16") || 16)) / 8) * 8;
+			const channels = Math.round(Math.abs(+(prompt("What should the channels be for the audio?", "1") || 1)));
+
+			const buffer = new DataView(new ArrayBuffer(36 + currentImageData.data.byteLength));
+			buffer.setUint8(0, 82); // R
+			buffer.setUint8(1, 73); // I
+			buffer.setUint8(2, 70); // F
+			buffer.setUint8(3, 70); // F
+			buffer.setUint32(4, 36 + currentImageData.data.byteLength, true); // the file size
+			buffer.setUint8(8, 87); // W
+			buffer.setUint8(9, 65); // A
+			buffer.setUint8(10, 86); // V
+			buffer.setUint8(11, 69); // E
+			buffer.setUint8(12, 102); // f
+			buffer.setUint8(13, 109); // m
+			buffer.setUint8(14, 116); // t
+			buffer.setUint8(15, 32); // space
+			buffer.setUint32(16, 16, true); // 16 for PCM audio
+			buffer.setUint16(20, 1, true); // 1 for PCM audio
+			buffer.setUint16(22, channels, true); // 1 = mono, 2 = stereo
+			buffer.setUint32(24, sampleRate, true); // sample rate (e.g. 48000)
+			buffer.setUint16(28, sampleRate * channels * (bitsPerSample / 8), true); // data align
+			buffer.setUint16(30, bitsPerSample, true); // bits per sample
+			buffer.setUint8(32, 100); // d
+			buffer.setUint8(33, 97); // a
+			buffer.setUint8(34, 116); // t
+			buffer.setUint8(35, 97); // a
+			// This is when the real data is exported. For now, we just write down the data currentImageData has to offer.
+			const x = currentImageData.data;
+			const len = x.byteLength;
+			for (let i = 0, j = 36; i < len; i++, j++) {
+				buffer.setUint8(j, x[i]);
+			}
+			const blob = new Blob([buffer.buffer], "audio/wav");
+			const link = document.createElement('a');
+			link.href = URL.createObjectURL(blob);
+			link.download = 'exportedImage.' + format[3];
 			link.click();
 			link.remove();
 		} else {
