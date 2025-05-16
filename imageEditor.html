@@ -1169,10 +1169,11 @@ function exportTGA() {
 		x = await x.text();
 		eval(x);
 	})();
-
-    const module = await fetch("lame.min.js");
-    const code = await module.text();
-    eval(code);
+	(async function() {
+		const module = await fetch("lame.min.js");
+		const code = await module.text();
+		eval(code);
+	})();
 </script>
 <button onclick="exportI();">Export Image</button>
 </body>
