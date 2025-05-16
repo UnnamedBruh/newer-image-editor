@@ -765,8 +765,6 @@ function yCbCrToRGB(y, cb, cr) {
 			case "resid": {
 				canvas.width = +effectParams[0].value;
 				canvas.height = +effectParams[1].value;
-
-				// Not all browsers have the same behavior of handling direct dimension changes, so we'll clear the canvas, then put the image data
 				context.clearRect(0, 0, +effectParams[0].value, +effectParams[1].value);
 				break;
 			}
@@ -817,7 +815,7 @@ function yCbCrToRGB(y, cb, cr) {
 			}
 			case "jpegd": {
 				if (+effectParams[0].value < 0.4) {
-					if (!confirm("THIS IMAGE EFFECT MAY CAUSE A SEIZURE FOR THOSE WITH EPILEPSY CONDITIONS FOR RAPID INTERVAL RATES. ARE YOU SURE YOU WANT TO ENABLE THIS?")) break;
+					if (!confirm("THIS IMAGE EFFECT MAY CAUSE A SEIZURE FOR ANYONE WITH EPILEPSY CONDITIONS FOR RAPID INTERVAL RATES. ARE YOU SURE YOU WANT TO ENABLE THIS?")) break;
 				}
 				if (+effectParams[0].value < 0.05) alert("PERFORMANCE WARNING: It is not recommended to use intervals with that pausing time! Performance degradations can easily occur, and effects can sometimes overlap with each other, breaking functionality for the time of this animation (10 seconds).");
 				const int = setInterval(function() {
