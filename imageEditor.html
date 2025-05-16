@@ -1112,13 +1112,14 @@ function exportTGA() {
 			const sampleRate = Math.round(Math.abs(+(prompt("What should the samplerate be for the audio?", "48000") || 48000)));
 			const bitsPerSample = Math.round(Math.abs(+(prompt("What should the bits per sample be for the audio?", "16") || 16)) / 8) * 8;
 			const channels = Math.round(Math.abs(+(prompt("What should the channels be for the audio?", "1") || 1)));
+			const chs = prompt("What should the color channels be before exporting to the audio?", "rgba") === "rgba";
 
-			const buffer = new DataView(new ArrayBuffer(36 + currentImageData.data.byteLength));
+			const buffer = new DataView(new ArrayBuffer(44 + currentImageData.data.byteLength - (currentImageData.data.byteLength / 4 * chs)));
 			buffer.setUint8(0, 82); // R
 			buffer.setUint8(1, 73); // I
 			buffer.setUint8(2, 70); // F
 			buffer.setUint8(3, 70); // F
-			buffer.setUint32(4, 36 + currentImageData.data.byteLength, true); // the file size
+			buffer.setUint32(4, buffer.buffer.byteLength, true); // the file size
 			buffer.setUint8(8, 87); // W
 			buffer.setUint8(9, 65); // A
 			buffer.setUint8(10, 86); // V
@@ -1131,17 +1132,28 @@ function exportTGA() {
 			buffer.setUint16(20, 1, true); // 1 for PCM audio
 			buffer.setUint16(22, channels, true); // 1 = mono, 2 = stereo
 			buffer.setUint32(24, sampleRate, true); // sample rate (e.g. 48000)
-			buffer.setUint16(28, sampleRate * channels * (bitsPerSample / 8), true); // data align
-			buffer.setUint16(30, bitsPerSample, true); // bits per sample
-			buffer.setUint8(32, 100); // d
-			buffer.setUint8(33, 97); // a
-			buffer.setUint8(34, 116); // t
-			buffer.setUint8(35, 97); // a
+			buffer.setUint32(28, sampleRate * channels * (bitsPerSample / 8), true); // byterate
+			buffer.setUint16(32, channels * (bitsPerSample / 8), true); // block align
+			buffer.setUint16(34, bitsPerSample, true); // bits per sample
+			buffer.setUint8(36, 100); // d
+			buffer.setUint8(37, 97); // a
+			buffer.setUint8(38, 116); // t
+			buffer.setUint8(39, 97); // a
+			buffer.setUint32(40, currentImageData.data.byteLength, true); // the file size
 			// This is when the real data is exported. For now, we just write down the data currentImageData has to offer.
 			const x = currentImageData.data;
 			const len = x.byteLength;
-			for (let i = 0, j = 36; i < len; i++, j++) {
-				buffer.setUint8(j, x[i]);
+			if (chs) {
+				for (let i = 0, j = 44; i < len; i++, j++) {
+					buffer.setUint8(j, x[i]);
+				}
+			} else {
+				let i = 0, j = 44;
+				for (; i < len; i++) {
+					buffer.setUint8(j++, x[i++]);
+					buffer.setUint8(j++, x[i++]);
+					buffer.setUint8(j++, x[i++]);
+				}
 			}
 			const blob = new Blob([buffer.buffer], {type: "audio/wav"});
 			const link = document.createElement('a');
