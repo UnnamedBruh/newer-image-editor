@@ -1027,8 +1027,8 @@ function yCbCrToRGB(y, cb, cr) {
 					let key = r | (g << 8) | (b << 16) | (a << 24);
 					let x = colMap[key];
 					if (x === undefined) {
-						colMap[key] = x = size++;
-						i += 4;
+						x = size++
+						colMap[key] = x;
 					}
 					imageData[i++] = x;
 					imageData[i++] = x;
