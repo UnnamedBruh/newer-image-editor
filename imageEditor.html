@@ -1020,19 +1020,19 @@ function yCbCrToRGB(y, cb, cr) {
 				break;
 			}
 			case "uniq": {
-				let i = 0;
-				let colMap = new Map();
+				let i = 0, size= 0;
+				let colMap = Object.create(null);
 				for (; i < len;) {
 					let r = imageData[i], g = imageData[i + 1], b = imageData[i + 2], a = imageData[i + 3];
 					let key = String.fromCharCode(r) + String.fromCharCode(g) + String.fromCharCode(b) + String.fromCharCode(a);
-					if (colMap.has(key)) {
-						let x = colMap.get(key);
-						imageData[i++] = x;
-						imageData[i++] = x;
-						imageData[i++] = x;
+					let x = colMap[key];
+					if (x !== undefined) {
+						imageData[i++] = x[0];
+						imageData[i++] = x[1];
+						imageData[i++] = x[0];
 						imageData[i++] = 255;
 					} else {
-						colMap.set(key, colMap.size);
+						colMap[key] = [size++, Math.floor(size / 256) * 256];
 						i += 4;
 					}
 				}
