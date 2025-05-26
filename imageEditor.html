@@ -1024,17 +1024,16 @@ function yCbCrToRGB(y, cb, cr) {
 				let colMap = Object.create(null);
 				for (; i < len;) {
 					let r = imageData[i], g = imageData[i + 1], b = imageData[i + 2], a = imageData[i + 3];
-					let key = String.fromCharCode(r) + String.fromCharCode(g) + String.fromCharCode(b) + String.fromCharCode(a);
+					let key = r | (g << 8) | (b << 16) | (a << 24);
 					let x = colMap[key];
-					if (x !== undefined) {
-						imageData[i++] = x[0];
-						imageData[i++] = x[1];
-						imageData[i++] = x[0];
-						imageData[i++] = 255;
-					} else {
-						colMap[key] = [size++, Math.floor(size / 256) * 256];
+					if (x === undefined) {
+						colMap[key] = x = size++;
 						i += 4;
 					}
+					imageData[i++] = x;
+					imageData[i++] = x;
+					imageData[i++] = x;
+					imageData[i++] = 255;
 				}
 				break;
 			}
