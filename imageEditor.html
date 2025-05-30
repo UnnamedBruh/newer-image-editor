@@ -1089,7 +1089,7 @@ function yCbCrToRGB(y, cb, cr) {
 						imageData[i] = imageData[mod(i + shift, len)]; i++;
 					}
 				}
-				for (i = 0; i < len;) {
+				for (i = 0; i < len; i += 4) {
 					if (Math.random() < 0.01) {
 						const pixels = Math.min(i + Math.floor(Math.random() * 32) * 4, len);
 						for (; i < pixels;) {
