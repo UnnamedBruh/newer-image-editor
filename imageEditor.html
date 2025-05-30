@@ -98,7 +98,7 @@ function loadTgaFromUint8Array(tgaData) {
 	}
 }
 
-const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs"), blend = document.getElementById("blendi");
+const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs"), blend = document.getElementById("blendi"), ble = document.getElementById("ble");
 const context = canvas.getContext("2d");
 if (!context) {
 	alert("Your browser does not support the 2D canvas context yet. Either upgrade to a newer version of your browser, or try using a different one.");
@@ -354,6 +354,7 @@ function yCbCrToRGB(y, cb, cr) {
 	let customModdedEffects = [];
 	function chooseEffect() {
 		effectSettings.innerHTML = "";
+		ble.style = "display: none";
 		if (effects.value === "tint" || effects.value === "tintadd" || effects.value === "tintsub") {
 			effectSettings.innerHTML = "<a>Tint Color:</a><input type=\"color\" value=\"#FF0000\" id=\"e-tintcolor\" title=\"The RGB color to filter (or perform a mathematical operand on) each color channel.\"><br><a>Tint Opacity:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"1\" step=\"0.00390625\" id=\"e-tintopac\" title=\"The opacity (A) to multiply the image's opacity.\"><br><a>Tint Multiplier:</a><input type=\"number\" value=\"1\" min=\"0\" max=\"255\" step=\"1\" id=\"e-tintmult\" title=\"The multiplier for RGB channels. 2 may brighten the image.\">" + ((effects.value === "tintadd" || effects.value === "tintsub") ? "<br><a>Wrap Colors Within Limits:</a><input type=\"checkbox\" checked id=\"e-tintx\" title=\"For example, if a color value is outside the range of 0 - 255, the value is automatically wrapped within the limit, instead of being clamped.\">" : "");
 			effectParams = [document.getElementById("e-tintcolor"), document.getElementById("e-tintopac"), document.getElementById("e-tintmult"), document.getElementById("e-tintx")];
@@ -449,6 +450,7 @@ function yCbCrToRGB(y, cb, cr) {
 			effectParams = [document.getElementById("e-vidstandcol")];
 		} else if (effects.value === "blendgl") {
 			effectSettings.innerHTML = "<a>Randomized Y Position:</a><input type=\"number\" checked id=\"e-blendgly\">";
+			ble.style = "";
 			effectParams = [document.getElementById("e-blendgly")];
 		} else {
 			const x = customModdedEffects.find(x => x[0] === effects.value);
