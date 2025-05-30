@@ -1089,14 +1089,15 @@ function yCbCrToRGB(y, cb, cr) {
 						imageData[i] = imageData[mod(i + shift, len)]; i++;
 					}
 				}
+				const b = blendImage.data;
 				for (i = 0; i < len; i += 4) {
 					if (Math.random() < 0.01) {
 						const pixels = Math.min(i + Math.floor(Math.random() * 32) * 4, len);
 						for (; i < pixels;) {
-							imageData[i] = blendImage[i]; i++;
-							imageData[i] = blendImage[i]; i++;
-							imageData[i] = blendImage[i]; i++;
-							imageData[i] = blendImage[i]; i++;
+							imageData[i] = b[i]; i++;
+							imageData[i] = b[i]; i++;
+							imageData[i] = b[i]; i++;
+							imageData[i] = b[i]; i++;
 						}
 					}
 				}
