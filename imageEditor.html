@@ -14,11 +14,13 @@ button, body, a, p, h1, select, option, input {
 <body>
 Background Color: <input id="bgcolor" type="color">
 <h1>Image Editor</h1>
-<input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
+Image Being Edited: <input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"><div id="blend" style="display: none">
+Image Being Blended: <input id="blendi" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga">
+</div><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option><option value="smudge">Smudge Right</option><option value="text">Draw Text</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="chromat">Chromatic</option><option value="pixelw">Pixelate (Width)</option><option value="vidstand">ITU-R BT.601 Color Transformation</option><option value="uniq">Unique Colors</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="tint">Tint (Filter Color)</option><option value="tintblend">Tint (Blend Color)</option><option value="shift">Shift</option><option value="backg">Apply Background</option><option value="gblur">Gaussian Blur</option><option value="crop">Crop</option><option value="inv">Invert Colors</option><option value="sharpg">High Contrast</option><option value="sepia">Sepia</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="contr">Contrast</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="resi">Resize Image</option><option value="parag">Resize Image Without Aligning Columns</option><option value="resid">Resize Image Dimensions</option><option value="opac">Set Opacity</option><option value="jpeg">JPEG-ify</option><option value="webp">WEBP-ify</option><option value="minip">Minimize Color Palette</option><option value="jpegd">Image Distortion Animation</option><option value="rect">Draw Rectangle</option><option value="mp3">MP3-ify</option><option value="rotate">Rotate Left</option><option value="draw">Draw</option><option value="smudge">Smudge Right</option><option value="text">Draw Text</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="chromat">Chromatic</option><option value="pixelw">Pixelate (Width)</option><option value="vidstand">ITU-R BT.601 Color Transformation</option><option value="uniq">Unique Colors</option><option value="blendgl">Blend In Image (glitch art)</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script src="lame.min.js"></script>
 <script>
@@ -96,25 +98,24 @@ function loadTgaFromUint8Array(tgaData) {
 	}
 }
 
-const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs");
+const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs"), blend = document.getElementById("blendi");
 const context = canvas.getContext("2d");
 if (!context) {
 	alert("Your browser does not support the 2D canvas context yet. Either upgrade to a newer version of your browser, or try using a different one.");
 }
-	let currentImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), backupImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), originalImage;
-	fileInput.addEventListener("input", function(event) {
+	let currentImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), backupImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), originalImage, blendImage;
+
+	function edited(event, fla) {
 		const file = event.target.files[0];
 		let fileReader = new FileReader();
 		fileReader.onload = async function(res) {
 			if (treatFile.value === "att") {
 				if (file.name.endsWith(".tga")) {
 					alert("TGA.js is being used to decode the image. (Borrowed code from https://github.com/vthibault/tga.js/blob/master/src/tga.js - later modified to fit this editor's standards)");
-					currentImageData = loadTgaFromUint8Array(new Uint8Array(res.target.result));
-					backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-					canvas.width = currentImageData.width;
-					canvas.height = currentImageData.height;
-					context.clearRect(0, 0, +canvas.width, +canvas.height);
-					context.putImageData(currentImageData, 0, 0);
+					if (fla) {
+						currentImageData = loadTgaFromUint8Array(new Uint8Array(res.target.result));
+						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+					} else blendImage = loadTgaFromUint8Array(new Uint8Array(res.target.result));
 				} else {
 					const img = new Image();
 					img.onload = function() {
@@ -122,8 +123,13 @@ if (!context) {
 						canvas.height = img.height;
 						context.clearRect(0, 0, +canvas.width, +canvas.height);
 						context.drawImage(img, 0, 0, +canvas.width, +canvas.height);
-						currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
-						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+						if (fla) {
+							currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
+							backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+						} else {
+							blendImage = context.getImageData(0, 0, +canvas.width, +canvas.height);
+							context.putImageData(currentImageData, 0, 0);
+						}
 						originalImage = img;
 					}
 					img.src = res.target.result;
@@ -137,9 +143,16 @@ if (!context) {
 						canvas.height = height;
 						const roundedUint = new Uint8ClampedArray(width * height * 4);
 						roundedUint.set(new Uint8ClampedArray(res.target.result));
-						currentImageData = new ImageData(roundedUint, width, height);
-						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-						context.putImageData(currentImageData, 0, 0);
+						if (fla) {
+							currentImageData = new ImageData(roundedUint, width, height);
+							backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+							context.putImageData(currentImageData, 0, 0);
+						} else {
+							blendImage = new ImageData(roundedUint, width, height);
+							canvas.width = currentImageData.width;
+							canvas.height = currentImageData.height;
+							context.putImageData(currentImageData, 0, 0);
+						}
 					} else if (treatFile.value === "asb") {
 						const height = Math.ceil(res.target.result.byteLength / width / 3);
 						canvas.width = width;
@@ -152,9 +165,16 @@ if (!context) {
 							roundedUint[i] = buff[byte]; i++, byte++;
 							roundedUint[i] = 255; i++;
 						}
-						currentImageData = new ImageData(roundedUint, width, height);
-						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-						context.putImageData(currentImageData, 0, 0);
+						if (fla) {
+							currentImageData = new ImageData(roundedUint, width, height);
+							backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+							context.putImageData(currentImageData, 0, 0);
+						} else {
+							blendImage = new ImageData(roundedUint, width, height);
+							canvas.width = currentImageData.width;
+							canvas.height = currentImageData.height;
+							context.putImageData(currentImageData, 0, 0);
+						}
 					} else if (treatFile.value === "asd") {
 						const height = Math.ceil(res.target.result.byteLength / width);
 						canvas.width = width;
@@ -167,9 +187,16 @@ if (!context) {
 							roundedUint[i] = buff[first]; i++;
 							roundedUint[i] = 255; i++; first++;
 						}
-						currentImageData = new ImageData(roundedUint, width, height);
-						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-						context.putImageData(currentImageData, 0, 0);
+						if (fla) {
+							currentImageData = new ImageData(roundedUint, width, height);
+							backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+							context.putImageData(currentImageData, 0, 0);
+						} else {
+							blendImage = new ImageData(roundedUint, width, height);
+							canvas.width = currentImageData.width;
+							canvas.height = currentImageData.height;
+							context.putImageData(currentImageData, 0, 0);
+						}
 					}
 				} else {
 					fileInput.style.display = "none";
@@ -217,9 +244,11 @@ if (!context) {
 			}
 		}
 		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga")) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
-	});
+	}
+	
+	fileInput.addEventListener("input", (event) => edited(event, true));
 	treatFile.oninput = function() {
-		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp"; else fileInput.accept = ".*";
+		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp, .avi"; else fileInput.accept = ".*";
 	}
 	let effectParams = [];
 	function extractRGBA(hex, a) {
@@ -418,6 +447,9 @@ function yCbCrToRGB(y, cb, cr) {
 		} else if (effects.value === "vidstand") {
 			effectSettings.innerHTML = "<a>RGB -> YCbCr:</a><input type=\"checkbox\" checked id=\"e-vidstandcol\" title=\"Whether the image's color channels will be transated to YCbCr, or back to RGB values.\">";
 			effectParams = [document.getElementById("e-vidstandcol")];
+		} else if (effects.value === "blendgl") {
+			effectSettings.innerHTML = "<a>Randomized Y Position:</a><input type=\"number\" checked id=\"e-blendgly\">";
+			effectParams = [document.getElementById("e-blendgly")];
 		} else {
 			const x = customModdedEffects.find(x => x[0] === effects.value);
 			if (x) {
@@ -464,6 +496,7 @@ function yCbCrToRGB(y, cb, cr) {
 		}
 	}
 	effects.oninput = chooseEffect;
+	blend.addEventListener("input", (event) => edited(event, false));
 	apply.onclick = async function() {
 		const imageData = currentImageData.data;
 		let len = imageData.length;
@@ -1034,6 +1067,36 @@ function yCbCrToRGB(y, cb, cr) {
 					imageData[i++] = x;
 					imageData[i++] = x;
 					imageData[i++] = 255;
+				}
+				break;
+			}
+			case "blendgl": {
+				let i = 0, shift = Math.round((Math.random() - 0.5) * +effectParams[0].value * 2) * 4 * currentImageData.width;
+				if (shift === 0) {} else if (shift < 0) {
+					for (i = len - 1; i >= 0;) {
+						imageData[i] = imageData[mod(i + shift, len)]; i--;
+						imageData[i] = imageData[mod(i + shift, len)]; i--;
+						imageData[i] = imageData[mod(i + shift, len)]; i--;
+						imageData[i] = imageData[mod(i + shift, len)]; i--;
+					}
+				} else {
+					for (i = 0; i < len;) {
+						imageData[i] = imageData[mod(i + shift, len)]; i++;
+						imageData[i] = imageData[mod(i + shift, len)]; i++;
+						imageData[i] = imageData[mod(i + shift, len)]; i++;
+						imageData[i] = imageData[mod(i + shift, len)]; i++;
+					}
+				}
+				for (i = 0; i < len;) {
+					if (Math.random() < 0.01) {
+						const pixels = Math.min(i + Math.floor(Math.random() * 32) * 4, len);
+						for (; i < pixels;) {
+							imageData[i] = blendImage[i]; i++;
+							imageData[i] = blendImage[i]; i++;
+							imageData[i] = blendImage[i]; i++;
+							imageData[i] = blendImage[i]; i++;
+						}
+					}
 				}
 				break;
 			}
