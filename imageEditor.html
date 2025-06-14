@@ -14,8 +14,8 @@ button, body, a, p, h1, select, option, input {
 <body>
 Background Color: <input id="bgcolor" type="color">
 <h1>Image Editor</h1>
-Image Being Edited: <input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"><div id="blend" style="display: none">
-Image Being Blended: <input id="blendi" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga">
+Image Being Edited: <input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .mng, .tga"><div id="blend" style="display: none">
+Image Being Blended: <input id="blendi" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .mng, .tga">
 </div><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
@@ -248,7 +248,7 @@ if (!context) {
 	
 	fileInput.addEventListener("input", (event) => edited(event, true));
 	treatFile.oninput = function() {
-		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp, .avi"; else fileInput.accept = ".*";
+		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .mng, .tga"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp, .avi, .m4v, .mov, .mkv, .av1, .hevc"; else fileInput.accept = ".*";
 	}
 	let effectParams = [];
 	function extractRGBA(hex, a) {
