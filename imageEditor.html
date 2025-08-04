@@ -137,17 +137,18 @@ if (!context) {
 			} else {
 				if (treatFile.value !== "asv") {
 					const width = Math.round(+(prompt("What should the width of the raw file data be for the final image? (The height is automatically determined. The default value is 300)") || 300));
+					let height, roundedUint;
 					if (treatFile.value === "asa") {
-						const height = Math.ceil(res.target.result.byteLength / width / 4);
+						height = Math.ceil(res.target.result.byteLength / width / 4);
 						canvas.width = width;
 						canvas.height = height;
-						const roundedUint = new Uint8ClampedArray(width * height * 4);
+						roundedUint = new Uint8ClampedArray(width * height * 4);
 						roundedUint.set(new Uint8ClampedArray(res.target.result));
 					} else if (treatFile.value === "asb") {
-						const height = Math.ceil(res.target.result.byteLength / width / 3);
+						height = Math.ceil(res.target.result.byteLength / width / 3);
 						canvas.width = width;
 						canvas.height = height;
-						const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
+						roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
 						let byte = 0;
 						for (let i = 0; i < roundedUint.byteLength;) {
 							roundedUint[i] = buff[byte]; i++, byte++;
@@ -159,7 +160,7 @@ if (!context) {
 						const height = Math.ceil(res.target.result.byteLength / width);
 						canvas.width = width;
 						canvas.height = height;
-						const roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
+						roundedUint = new Uint8ClampedArray(width * height * 4), buff = new Uint8ClampedArray(res.target.result);
 						let first = 0;
 						for (let i = 0; i < roundedUint.byteLength;) {
 							roundedUint[i] = buff[first]; i++;
