@@ -143,16 +143,6 @@ if (!context) {
 						canvas.height = height;
 						const roundedUint = new Uint8ClampedArray(width * height * 4);
 						roundedUint.set(new Uint8ClampedArray(res.target.result));
-						if (fla) {
-							currentImageData = new ImageData(roundedUint, width, height);
-							backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-							context.putImageData(currentImageData, 0, 0);
-						} else {
-							blendImage = new ImageData(roundedUint, width, height);
-							canvas.width = currentImageData.width;
-							canvas.height = currentImageData.height;
-							context.putImageData(currentImageData, 0, 0);
-						}
 					} else if (treatFile.value === "asb") {
 						const height = Math.ceil(res.target.result.byteLength / width / 3);
 						canvas.width = width;
@@ -164,16 +154,6 @@ if (!context) {
 							roundedUint[i] = buff[byte]; i++, byte++;
 							roundedUint[i] = buff[byte]; i++, byte++;
 							roundedUint[i] = 255; i++;
-						}
-						if (fla) {
-							currentImageData = new ImageData(roundedUint, width, height);
-							backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-							context.putImageData(currentImageData, 0, 0);
-						} else {
-							blendImage = new ImageData(roundedUint, width, height);
-							canvas.width = currentImageData.width;
-							canvas.height = currentImageData.height;
-							context.putImageData(currentImageData, 0, 0);
 						}
 					} else if (treatFile.value === "asd") {
 						const height = Math.ceil(res.target.result.byteLength / width);
@@ -187,16 +167,16 @@ if (!context) {
 							roundedUint[i] = buff[first]; i++;
 							roundedUint[i] = 255; i++; first++;
 						}
-						if (fla) {
-							currentImageData = new ImageData(roundedUint, width, height);
-							backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
-							context.putImageData(currentImageData, 0, 0);
-						} else {
-							blendImage = new ImageData(roundedUint, width, height);
-							canvas.width = currentImageData.width;
-							canvas.height = currentImageData.height;
-							context.putImageData(currentImageData, 0, 0);
-						}
+					}
+					if (fla) {
+						currentImageData = new ImageData(roundedUint, width, height);
+						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
+						context.putImageData(currentImageData, 0, 0);
+					} else {
+						blendImage = new ImageData(roundedUint, width, height);
+						canvas.width = currentImageData.width;
+						canvas.height = currentImageData.height;
+						context.putImageData(currentImageData, 0, 0);
 					}
 				} else {
 					fileInput.style.display = "none";
@@ -431,7 +411,7 @@ function yCbCrToRGB(y, cb, cr) {
 					const t = effectParams[3].value;
 					if (warnBarcode && t === "Barcode") {
 						warnBarcode = false;
-						alert("Only Latin letters A - P will appear as random segments of a real barcode! However, remember the barcode font's purpose for being displayed, and not for sending real text.");
+						alert("Only Latin letters A - P will appear as random segments of a real barcode! Please remember the barcode font's purpose is for being displayed (or pranking people, since they can't actually be scanned).");
 					}
 					context.putImageData(currentImageData, 0, 0);
 					context.fillStyle = "rgba(" + extractRGBA2(effectParams[1].value, 0.3).join(", ") + ")";
