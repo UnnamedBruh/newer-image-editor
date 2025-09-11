@@ -530,7 +530,7 @@ function generateGaussianKernel(sigma, size) {
 	}
 	effects.oninput = chooseEffect;
 	blend.addEventListener("input", (event) => edited(event, false));
-async function simulateVPCompression(bitrate = 1_000_000, codec = "vp8") { // This was written using GPT-5.0 Mini to speed things up.
+async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // This was written and modified using GPT-5.0 Mini to speed things up.
 	recordedChunks = [];
 	const stream = canvas.captureStream(30); // 30 FPS
 
