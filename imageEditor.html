@@ -530,53 +530,55 @@ function generateGaussianKernel(sigma, size) {
 	}
 	effects.oninput = chooseEffect;
 	blend.addEventListener("input", (event) => edited(event, false));
-async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // This was written using GPT-5.0 Mini
-	const recordedChunks = [];
-	const stream = canvas.captureStream(30); // 30 FPS
-	bitrate = Math.ceil(bitrate / 50_000) * 50_000;
+async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // This function was written using GPT-5.0 Mini with additional tweaks
+    const recordedChunks = [];
+    const stream = canvas.captureStream(30); // 30 FPS
+    bitrate = Math.floor(bitrate / 50_000) * 50_000;
+    const mimeType = `video/webm; codecs=${codec}`;
 
-	const mimeType = `video/webm; codecs=${codec}`;
-	if (!MediaRecorder.isTypeSupported(mimeType)) {
-		alert(`${codec} encoding is unfortuntely not supported in this browser. Try selecting a different video codec.`);
-		return;
-	}
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+        alert(`${codec} encoding is not supported in this browser.`);
+    }
 
-	const mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bitrate });
+    const mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bitrate });
 
-	mediaRecorder.ondataavailable = (event) => {
-		if (event.data.size > 0) recordedChunks.push(event.data);
-	};
+    mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recordedChunks.push(event.data);
+    };
+
+    mediaRecorder.start();
+
+    // Wait ~1 frame at 30 FPS
+	alert("Debug 1");
+    await new Promise((resolve) => setTimeout(() => resolve(), 40));
 
 	const stopPromise = new Promise((resolve) => {
-		mediaRecorder.onstop = resolve;
-	});
+        mediaRecorder.onstop = resolve;
+    });
 
-	mediaRecorder.start();
+    mediaRecorder.stop();
+	alert("Debug 2");
+    await stopPromise;
 
-	// Capture ~3 frames at 30 FPS (~100ms)
-	await new Promise((resolve) => setTimeout(resolve, 111));
+    // Create video from recorded data
+    const blob = new Blob(recordedChunks, { type: mimeType });
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(blob);
+    video.muted = true;
 
-	mediaRecorder.stop();
-	await stopPromise;
+    // Wait until metadata is loaded
+	alert("Debug 3");
+    await new Promise((resolve) => video.addEventListener('loadedmetadata', resolve, { once: true }));
 
-	const blob = new Blob(recordedChunks, { type: mimeType });
-	const video = document.createElement('video');
-	video.src = URL.createObjectURL(blob);
-	video.muted = true;
+    // Seek to last frame
+    video.currentTime = video.duration;
+	alert("Debug 4");
+    await new Promise((resolve) => video.addEventListener('seeked', resolve, { once: true }));
 
-	await new Promise((resolve) => {
-		video.addEventListener('loadedmetadata', resolve, { once: true });
-	});
+    video.pause();
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-	video.currentTime = video.duration;
-
-	await new Promise((resolve) => {
-		video.addEventListener('seeked', resolve, { once: true });
-	});
-
-	video.pause();
-	context.drawImage(video, 0, 0, canvas.width, canvas.height);
-	currentImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    currentImageData = context.getImageData(0, 0, canvas.width, canvas.height);
 }
 	apply.onclick = async function() {
 		const imageData = currentImageData.data;
@@ -696,7 +698,7 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 			}
 			case "gblur": {
 				const kernel = generateGaussianKernel(Math.max(0.1, Math.min(2, +effectParams[1].value)), Math.max(1, Math.min(29, Math.round(+effectParams[0].value / 2) * 2 + 1)));
-				const cur = new ImageData(currentImageData.data, currentImageData.width, currentImageData.height);
+				let cur = new ImageData(currentImageData.data, currentImageData.width, currentImageData.height);
 				if (effectParams[2].checked) cur = applyGaussianBlurX(cur, kernel);
 				if (effectParams[3].checked) cur = applyGaussianBlurY(cur, kernel);
 				currentImageData = cur;
