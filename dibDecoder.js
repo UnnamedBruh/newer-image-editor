@@ -138,73 +138,73 @@ function DIB(array, tags = METADATA_AND_IMAGE | DEBUGGING) {
 		result.imageData = pixelArray;
 	}
 	// Handle RLE-compressed BMP (8-bit or 4-bit)
-    else if (compressionType === 1 || compressionType === 2) {
-        let isRLE8 = compressionType === 1;
-        let x = 0, y = 0;
-        let ptr = imageDataOffset;
+	else if (compressionType === 1 || compressionType === 2) {
+		let isRLE8 = compressionType === 1;
+		let x = 0, y = 0;
+		let ptr = imageDataOffset;
 
-        while (ptr < array.length && y < absHeight) {
-            let count = array[ptr++];
-            let value = array[ptr++];
+		while (ptr < array.length && y < absHeight) {
+			let count = array[ptr++];
+			let value = array[ptr++];
 
-            if (count > 0) {
-                // Encoded mode
-                for (let i = 0; i < count; i++) {
-                    if (x >= width) {
-                        x = 0;
-                        y++;
-                        if (y >= absHeight) break;
-                    }
+			if (count > 0) {
+				// Encoded mode
+				for (let i = 0; i < count; i++) {
+					if (x >= width) {
+						x = 0;
+						y++;
+						if (y >= absHeight) break;
+					}
 
-                    let destIndex = ((topDown ? y : absHeight - 1 - y) * width + x) * 3;
+					let destIndex = ((topDown ? y : absHeight - 1 - y) * width + x) * 3;
 
-                    if (isRLE8) {
-                        let colorOffset = value * 4;
-                        pixelArray[destIndex]     = colorPalette[colorOffset + 2]; // R
-                        pixelArray[destIndex + 1] = colorPalette[colorOffset + 1]; // G
-                        pixelArray[destIndex + 2] = colorPalette[colorOffset];     // B
-                    } else { // RLE4
-                        let pixelVal = (i & 1) === 0 ? (value >> 4) : (value & 0x0F);
-                        let colorOffset = pixelVal * 4;
-                        pixelArray[destIndex]     = colorPalette[colorOffset + 2];
-                        pixelArray[destIndex + 1] = colorPalette[colorOffset + 1];
-                        pixelArray[destIndex + 2] = colorPalette[colorOffset];
-                    }
-                    x++;
-                }
-            } else {
-                // Escape codes
-                if (value === 0) { // End of line
-                    x = 0;
-                    y++;
-                } else if (value === 1) { // End of bitmap
-                    break;
-                } else if (value === 2) { // Delta
-                    let dx = array[ptr++];
-                    let dy = array[ptr++];
-                    x += dx;
-                    y += dy;
-                } else {
-                    // Absolute mode
-                    let absCount = value;
-                    for (let i = 0; i < absCount; i++) {
-                        let pixelVal = isRLE8 ? array[ptr++] : ((i & 1) === 0 ? array[ptr] >> 4 : array[ptr++] & 0x0F);
-                        let destIndex = ((topDown ? y : absHeight - 1 - y) * width + x) * 3;
-                        let colorOffset = pixelVal * 4;
-                        pixelArray[destIndex]     = colorPalette[colorOffset + 2];
-                        pixelArray[destIndex + 1] = colorPalette[colorOffset + 1];
-                        pixelArray[destIndex + 2] = colorPalette[colorOffset];
-                        x++;
-                    }
-                    // Align ptr to even boundary for RLE
-                    if (!isRLE8 && (absCount & 1) === 1) ptr++;
-                }
-            }
-        }
-    } else {
-        if (tags & DEBUGGING) console.warn("Unsupported compression type:", compressionType);
-        pixelArray = null;
-    }
+					if (isRLE8) {
+						let colorOffset = value * 4;
+						pixelArray[destIndex]	 = colorPalette[colorOffset + 2]; // R
+						pixelArray[destIndex + 1] = colorPalette[colorOffset + 1]; // G
+						pixelArray[destIndex + 2] = colorPalette[colorOffset];	 // B
+					} else { // RLE4
+						let pixelVal = (i & 1) === 0 ? (value >> 4) : (value & 0x0F);
+						let colorOffset = pixelVal * 4;
+						pixelArray[destIndex]	 = colorPalette[colorOffset + 2];
+						pixelArray[destIndex + 1] = colorPalette[colorOffset + 1];
+						pixelArray[destIndex + 2] = colorPalette[colorOffset];
+					}
+					x++;
+				}
+			} else {
+				// Escape codes
+				if (value === 0) { // End of line
+					x = 0;
+					y++;
+				} else if (value === 1) { // End of bitmap
+					break;
+				} else if (value === 2) { // Delta
+					let dx = array[ptr++];
+					let dy = array[ptr++];
+					x += dx;
+					y += dy;
+				} else {
+					// Absolute mode
+					let absCount = value;
+					for (let i = 0; i < absCount; i++) {
+						let pixelVal = isRLE8 ? array[ptr++] : ((i & 1) === 0 ? array[ptr] >> 4 : array[ptr++] & 0x0F);
+						let destIndex = ((topDown ? y : absHeight - 1 - y) * width + x) * 3;
+						let colorOffset = pixelVal * 4;
+						pixelArray[destIndex]	 = colorPalette[colorOffset + 2];
+						pixelArray[destIndex + 1] = colorPalette[colorOffset + 1];
+						pixelArray[destIndex + 2] = colorPalette[colorOffset];
+						x++;
+					}
+					// Align ptr to even boundary for RLE
+					if (!isRLE8 && (absCount & 1) === 1) ptr++;
+				}
+			}
+		}
+	} else {
+		if (tags & DEBUGGING) console.warn("Unsupported compression type:", compressionType);
+		pixelArray = null;
+	}
 
 	return result;
 }
