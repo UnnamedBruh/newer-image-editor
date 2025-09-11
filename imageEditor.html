@@ -577,7 +577,11 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 	});
 
     // Seek to last frame
-    video.currentTime = video.duration;
+    try {
+		video.currentTime = video.duration;
+	} catch {
+		video.currentTime = 0.005;
+	}
 	alert("Debug 4");
 	await new Promise((resolve) => {
 		const timer = setTimeout(resolve, 50);
