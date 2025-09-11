@@ -530,42 +530,61 @@ function generateGaussianKernel(sigma, size) {
 	}
 	effects.oninput = chooseEffect;
 	blend.addEventListener("input", (event) => edited(event, false));
-async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // This was written and modified using GPT-5.0 Mini to speed things up.
-	recordedChunks = [];
+async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // This function was written using GPT-5.0 Mini
+	// Check codec support first
+	const mimeType = `video/webm; codecs=${codec}`;
+	if (!MediaRecorder.isTypeSupported(mimeType)) {
+		alert(`The codec ${codec} is not supported. Try selecting a different one?`);
+		return;
+	}
+
+	const recordedChunks = [];
 	const stream = canvas.captureStream(30); // 30 FPS
 
+	// Round bitrate
 	bitrate = Math.floor(bitrate / 50_000) * 50_000;
 
-	// MediaRecorder with VP9 codec
-	const options = { mimeType: 'video/webm; codecs=' + codec, videoBitsPerSecond: bitrate };
+	const options = { mimeType, videoBitsPerSecond: bitrate };
 	const mediaRecorder = new MediaRecorder(stream, options);
 
 	mediaRecorder.ondataavailable = (event) => {
 		if (event.data.size > 0) recordedChunks.push(event.data);
 	};
 
+	// Wrap onstop in a promise so we can await it
+	const stopped = new Promise((resolve) => {
+		mediaRecorder.onstop = resolve;
+	});
+
 	mediaRecorder.start();
 
-	// Wait ~1/10 second for ~3 frames at 30 FPS
+	// Capture a few frames (~100ms)
 	await new Promise(resolve => setTimeout(resolve, 111));
 
-	mediaRecorder.onstop = async () => {
-		const blob = new Blob(recordedChunks, { type: 'video/webm' });
-
-		// Play back last frame to canvas
-		const video = document.createElement('video');
-		video.src = URL.createObjectURL(blob);
-		video.muted = true;
-
-		await video.play();
-		video.currentTime = video.duration;
-		video.pause();
-
-		context.drawImage(video, 0, 0, canvas.width, canvas.height);
-		currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
-	};
-
 	mediaRecorder.stop();
+	await stopped; // Wait for onstop to finish
+
+	// Create blob and video
+	const blob = new Blob(recordedChunks, { type: mimeType });
+	const video = document.createElement('video');
+	video.src = URL.createObjectURL(blob);
+	video.muted = true;
+
+	// Wait for video metadata to load
+	await new Promise((resolve) => {
+		video.onloadedmetadata = resolve;
+	});
+
+	// Draw the last frame to canvas
+	video.currentTime = video.duration - 0.01; // Slightly before the end
+	await video.play();
+	video.pause();
+
+	context.drawImage(video, 0, 0, canvas.width, canvas.height);
+	currentImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+	// Clean up
+	URL.revokeObjectURL(video.src);
 }
 	apply.onclick = async function() {
 		const imageData = currentImageData.data;
