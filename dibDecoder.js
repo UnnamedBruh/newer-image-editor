@@ -1,103 +1,210 @@
-// This is an unfinished decoder I am working on.
+// This is an unfinished decoder I am working on. I used a lot of GPT-4.0 and GPT-4.0 Mini (six months ago when this was updated), and GPT-5.0 Mini for this project, but there is some of my code as well, so it's technically my AI-assisted implementation.
 
 const METADATA_ONLY = 0;
 const METADATA_AND_IMAGE = 1;
 const DEBUGGING = 2;
 
 function readUInt32LE(array, offset) {
-    return (array[offset]) | (array[offset + 1] << 8) | (array[offset + 2] << 16) | (array[offset + 3] << 24);
+	return (array[offset]) | (array[offset + 1] << 8) | (array[offset + 2] << 16) | (array[offset + 3] << 24);
 }
 
 function readInt32LE(array, offset) {
-    let value = readUInt32LE(array, offset);
-    return value & 0x80000000 ? value - 0x100000000 : value;
+	let value = readUInt32LE(array, offset);
+	return value & 0x80000000 ? value - 0x100000000 : value;
 }
 
 function DIB(array, tags = METADATA_AND_IMAGE | DEBUGGING) {
-    if (array instanceof ArrayBuffer) array = new Uint8Array(array);
-    else if (!(array instanceof Uint8Array)) throw new TypeError("Expected a Uint8Array or an ArrayBuffer.");
+	if (array instanceof ArrayBuffer) array = new Uint8Array(array);
+	else if (!(array instanceof Uint8Array)) throw new TypeError("Expected a Uint8Array or an ArrayBuffer.");
 
-    if (!(array[0] === 66 && array[1] === 77)) throw new TypeError("Invalid BMP file: missing 'BM' header.");
+	if (!(array[0] === 66 && array[1] === 77)) throw new TypeError("Invalid BMP file: missing 'BM' header.");
 
-    let fileSize = readUInt32LE(array, 2);
-    let fileTampered = fileSize !== array.byteLength;
-    if (fileTampered && tags & DEBUGGING) console.warn("Warning: File size mismatch, possible corruption.");
+	let fileSize = readUInt32LE(array, 2);
+	let fileTampered = fileSize !== array.byteLength;
+	if (fileTampered && tags & DEBUGGING) console.warn("Warning: The BMP file size has a mismatch.");
 
-    let imageDataStarter = readUInt32LE(array, 10);
-    if (imageDataStarter >= fileSize) console.warn("Warning: Image data pointer is out of bounds.");
+	let imageDataStarter = readUInt32LE(array, 10);
+	if (imageDataStarter >= fileSize && tags & DEBUGGING) console.warn("Warning: Image data pointer is out of bounds.");
 
-    let headerSize = readUInt32LE(array, 14);
-    if (![40, 52, 56, 108, 124].includes(headerSize)) {
-        if (tags & DEBUGGING) console.warn("Unsupported header size:", headerSize);
-        return { "status": "unsupportedHeader", "reason": "Header size not supported yet" };
-    }
+	let headerSize = readUInt32LE(array, 14);
+	if (![40, 52, 56, 108, 124].includes(headerSize)) {
+		if (tags & DEBUGGING) console.warn("Unsupported header size:", headerSize);
+		return { "status": "unsupportedHeader", "reason": "Header size not supported yet" };
+	}
 
-    let width = readInt32LE(array, 18);
-    let height = readInt32LE(array, 22);
-    let colorDepth = (array[28]) | (array[29] << 8);
-    let compressionType = readUInt32LE(array, 30);
+	let width = readInt32LE(array, 18);
+	let height = readInt32LE(array, 22);
+	let colorDepth = (array[28]) | (array[29] << 8);
+	let compressionType = readUInt32LE(array, 30);
 
-    let result = {
-        "startHeader": "BM",
-        "fileSize": fileSize,
-        "imageDataPointer": imageDataStarter,
-        "headerSize": headerSize,
-        "width": width,
-        "height": height,
-        "colorDepth": colorDepth,
-        "compressionType": compressionType,
-        "isFilePossiblyTampered": fileTampered
-    };
+	let result = {
+		"startHeader": "BM",
+		"fileSize": fileSize,
+		"imageDataPointer": imageDataStarter,
+		"headerSize": headerSize,
+		"width": width,
+		"height": height,
+		"colorDepth": colorDepth,
+		"compressionType": compressionType,
+		"isFilePossiblyTampered": fileTampered
+	};
 
-    // If only metadata is requested, return early
-    if (tags % 2 === METADATA_ONLY) {
-        return result;
-    }
+	// If only metadata is requested, return early
+	if (!(tags & 1)) {
+		return result;
+	}
 
-    // Extract color palette if needed (for 1, 4, or 8-bit images)
-    let colorPalette = null;
-    if (colorDepth === 1 || colorDepth === 4 || colorDepth === 8) {
-        let paletteSize = Math.pow(2, colorDepth) * 4; // 4 bytes per color
-        colorPalette = new Uint8Array(paletteSize);
+	// Extract color palette if needed (for 1, 4, or 8-bit images)
+	let colorPalette = null;
+	if (colorDepth === 1 || colorDepth === 4 || colorDepth === 8) {
+		let paletteSize = Math.pow(2, colorDepth) * 4; // 4 bytes per color
+		colorPalette = new Uint8Array(paletteSize);
 
-        // Read the color palette (after the header, before the pixel data)
-        for (let i = 0; i < paletteSize; i++) {
-            colorPalette[i] = array[imageDataStarter + i];
-        }
-        result.colorPalette = colorPalette;
-    }
+		// Read the color palette (after the DIB header, before the pixel data)
+		let paletteOffset = 14 + headerSize;
+		for (let i = 0; i < paletteSize; i++) {
+			colorPalette[i] = array[paletteOffset + i];
+		}
+		result.colorPalette = colorPalette;
+	}
 
-    // Extract pixel data only if requested and uncompressed 24-bit or with palette
-    if ((tags & METADATA_AND_IMAGE) && (compressionType === 0 && colorDepth === 24 || colorDepth <= 8)) {
-        let rowSize = Math.ceil((width * 3 + 3) / 4) * 4; // BMP rows are padded to 4-byte multiples
-        let pixelArray = new Uint8Array(width * height * 3); // Flattened RGB array
-        let rowIndex = 0;
+	// Determine if the image is top-down (negative height)
+	let topDown = height < 0;
+	let absHeight = Math.abs(height);
 
-        for (let y = height - 1; y >= 0; y--) { // BMP is stored bottom-left to up-right, similar to TARGA images
-            let rowOffset = imageDataStarter + paletteSize + y * rowSize; // Adjust for palette size
-            for (let x = 0; x < width; x++) {
-                let pixelOffset = rowOffset + x;
-                let destIndex = rowIndex * width * 3 + x * 3;
+	// Only extract pixel data for supported types
+	if (compressionType === 0) { // Uncompressed
+		let rowSize;
+		let pixelArray = new Uint8Array(width * absHeight * 3); // Flattened RGB array
+		let rowIndex = 0;
+		const widthCache = (width << 1) + width; // Similar to width * 3, but with bitwise + add optimizations
 
-                // If the image uses a color palette (1, 4, 8-bit images), look up the RGB values from the palette
-                if (colorDepth <= 8) {
-                    let paletteIndex = array[pixelOffset];
-                    let colorOffset = paletteIndex * 4;
-                    pixelArray[destIndex] = colorPalette[colorOffset + 2];   // Red
-                    pixelArray[destIndex + 1] = colorPalette[colorOffset + 1]; // Green
-                    pixelArray[destIndex + 2] = colorPalette[colorOffset];     // Blue
+		if (colorDepth === 24) {
+			rowSize = Math.ceil(widthCache * 0.25) * 4; // If anyone is confused, this would return Math.ceil(widthCache / 4) * 4
+			for (let y = 0; y < absHeight; y++) {
+				let row = topDown ? y : absHeight - 1 - y;
+				let rowOffset = imageDataStarter + row * rowSize;
+				let cacheX;
+				for (let x = 0; x < width; x++) {
+					cacheX = (x << 1) + x;
+					let pixelOffset = rowOffset + cacheX;
+					let destIndex = rowIndex * widthCache + cacheX + x;
+					pixelArray[destIndex] = array[pixelOffset + 2]; // R
+					pixelArray[destIndex + 1] = array[pixelOffset + 1]; // G
+					pixelArray[destIndex + 2] = array[pixelOffset];	 // B
+					pixelArray[destIndex + 3] = 255;
+				}
+				rowIndex++;
+			}
+		} else if (colorDepth === 8 || colorDepth === 4 || colorDepth === 1) {
+			// Each row is padded to 4-byte boundaries
+			rowSize = Math.ceil((width * colorDepth + 31) * 0.03125) * 4;
+			for (let y = 0; y < absHeight; y++) {
+				let row = topDown ? y : absHeight - 1 - y;
+				let rowOffset = imageDataStarter + row * rowSize;
+				let bitMask, bitsPerPixel = colorDepth;
+
+				let trueColor = colorDepth === 8, middleColor = colorDepth === 4;
+
+				let cacheX;
+	
+				for (let x = 0; x < width; x++) {
+					let byteIndex, shift;
+					cacheX = x << 2;
+					if (trueColor) {
+						byteIndex = rowOffset + x;
+						shift = 0;
+					} else if (middleColor) {
+						byteIndex = rowOffset + (x >> 1);
+						shift = (1 - (x & 1)) * 4;
+					} else { // 1-bit
+						byteIndex = rowOffset + (x >> 3);
+						shift = 7 - (x & 7);
+					}
+
+					let paletteIndex = (array[byteIndex] >> shift) & ((1 << bitsPerPixel) - 1);
+					let colorOffset = paletteIndex << 2; // Same as paletteIndex * 4
+
+					let destIndex = rowIndex * widthCache + cacheX;
+					pixelArray[destIndex] = colorPalette[colorOffset + 2]; // R
+					pixelArray[destIndex + 1] = colorPalette[colorOffset + 1]; // G
+					pixelArray[destIndex + 2] = colorPalette[colorOffset];	 // B
+					pixelArray[destIndex + 3] = 255; // A (not directly specified)
+				}
+				rowIndex++;
+			}
+		}
+
+		result.imageData = pixelArray;
+	}
+	// Handle RLE-compressed BMP (8-bit or 4-bit)
+    else if (compressionType === 1 || compressionType === 2) {
+        let isRLE8 = compressionType === 1;
+        let x = 0, y = 0;
+        let ptr = imageDataOffset;
+
+        while (ptr < array.length && y < absHeight) {
+            let count = array[ptr++];
+            let value = array[ptr++];
+
+            if (count > 0) {
+                // Encoded mode
+                for (let i = 0; i < count; i++) {
+                    if (x >= width) {
+                        x = 0;
+                        y++;
+                        if (y >= absHeight) break;
+                    }
+
+                    let destIndex = ((topDown ? y : absHeight - 1 - y) * width + x) * 3;
+
+                    if (isRLE8) {
+                        let colorOffset = value * 4;
+                        pixelArray[destIndex]     = colorPalette[colorOffset + 2]; // R
+                        pixelArray[destIndex + 1] = colorPalette[colorOffset + 1]; // G
+                        pixelArray[destIndex + 2] = colorPalette[colorOffset];     // B
+                    } else { // RLE4
+                        let pixelVal = (i & 1) === 0 ? (value >> 4) : (value & 0x0F);
+                        let colorOffset = pixelVal * 4;
+                        pixelArray[destIndex]     = colorPalette[colorOffset + 2];
+                        pixelArray[destIndex + 1] = colorPalette[colorOffset + 1];
+                        pixelArray[destIndex + 2] = colorPalette[colorOffset];
+                    }
+                    x++;
+                }
+            } else {
+                // Escape codes
+                if (value === 0) { // End of line
+                    x = 0;
+                    y++;
+                } else if (value === 1) { // End of bitmap
+                    break;
+                } else if (value === 2) { // Delta
+                    let dx = array[ptr++];
+                    let dy = array[ptr++];
+                    x += dx;
+                    y += dy;
                 } else {
-                    let pixelOffset24 = rowOffset + x * 3;
-                    pixelArray[destIndex] = array[pixelOffset24 + 2];     // Red
-                    pixelArray[destIndex + 1] = array[pixelOffset24 + 1]; // Green
-                    pixelArray[destIndex + 2] = array[pixelOffset24];     // Blue
+                    // Absolute mode
+                    let absCount = value;
+                    for (let i = 0; i < absCount; i++) {
+                        let pixelVal = isRLE8 ? array[ptr++] : ((i & 1) === 0 ? array[ptr] >> 4 : array[ptr++] & 0x0F);
+                        let destIndex = ((topDown ? y : absHeight - 1 - y) * width + x) * 3;
+                        let colorOffset = pixelVal * 4;
+                        pixelArray[destIndex]     = colorPalette[colorOffset + 2];
+                        pixelArray[destIndex + 1] = colorPalette[colorOffset + 1];
+                        pixelArray[destIndex + 2] = colorPalette[colorOffset];
+                        x++;
+                    }
+                    // Align ptr to even boundary for RLE
+                    if (!isRLE8 && (absCount & 1) === 1) ptr++;
                 }
             }
-            rowIndex++;
         }
-
-        result.imageData = pixelArray; // Store extracted RGB pixel array
+    } else {
+        if (tags & DEBUGGING) console.warn("Unsupported compression type:", compressionType);
+        pixelArray = null;
     }
 
-    return result;
+	return result;
 }
