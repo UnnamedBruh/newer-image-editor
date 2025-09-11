@@ -550,7 +550,7 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 
     // Wait ~1 frame at 30 FPS
 	alert("Debug 1");
-    await new Promise((resolve) => setTimeout(() => resolve(), 40));
+    await new Promise((resolve) => setTimeout(() => resolve(), 100));
 
 	const stopPromise = new Promise((resolve) => {
         mediaRecorder.onstop = resolve;
@@ -568,12 +568,24 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 
     // Wait until metadata is loaded
 	alert("Debug 3");
-    await new Promise((resolve) => video.addEventListener('loadedmetadata', resolve, { once: true }));
+	await new Promise((resolve) => {
+		const timer = setTimeout(resolve, 200); // fallback in case event never fires
+		video.addEventListener('canplay', () => {
+			clearTimeout(timer);
+			resolve();
+		}, { once: true });
+	});
 
     // Seek to last frame
     video.currentTime = video.duration;
 	alert("Debug 4");
-    await new Promise((resolve) => video.addEventListener('seeked', resolve, { once: true }));
+	await new Promise((resolve) => {
+		const timer = setTimeout(resolve, 50);
+		video.addEventListener('seeked', () => {
+			clearTimeout(timer);
+			resolve();
+		}, { once: true });
+	});
 
     video.pause();
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
