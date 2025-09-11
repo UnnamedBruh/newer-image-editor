@@ -103,7 +103,6 @@ const fileInput = document.getElementById("image"), treatFile = document.getElem
 const context = canvas.getContext("2d");
 if (!context) {
 	alert("Your browser does not support the 2D canvas context yet. Either upgrade to a newer version of your browser, or try using a different one.");
-	return;
 }
 	let currentImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), backupImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), originalImage, blendImage;
 
