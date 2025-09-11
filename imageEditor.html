@@ -530,61 +530,53 @@ function generateGaussianKernel(sigma, size) {
 	}
 	effects.oninput = chooseEffect;
 	blend.addEventListener("input", (event) => edited(event, false));
-async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // This function was written using GPT-5.0 Mini
-	// Check codec support first
+async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // This was written using GPT-5.0 Mini
+	const recordedChunks = [];
+	const stream = canvas.captureStream(30); // 30 FPS
+	bitrate = Math.ceil(bitrate / 50_000) * 50_000;
+
 	const mimeType = `video/webm; codecs=${codec}`;
 	if (!MediaRecorder.isTypeSupported(mimeType)) {
-		alert(`The codec ${codec} is not supported. Try selecting a different one?`);
+		alert(`${codec} encoding is unfortuntely not supported in this browser. Try selecting a different video codec.`);
 		return;
 	}
 
-	const recordedChunks = [];
-	const stream = canvas.captureStream(30); // 30 FPS
-
-	// Round bitrate
-	bitrate = Math.floor(bitrate / 50_000) * 50_000;
-
-	const options = { mimeType, videoBitsPerSecond: bitrate };
-	const mediaRecorder = new MediaRecorder(stream, options);
+	const mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bitrate });
 
 	mediaRecorder.ondataavailable = (event) => {
 		if (event.data.size > 0) recordedChunks.push(event.data);
 	};
 
-	// Wrap onstop in a promise so we can await it
-	const stopped = new Promise((resolve) => {
+	const stopPromise = new Promise((resolve) => {
 		mediaRecorder.onstop = resolve;
 	});
 
 	mediaRecorder.start();
 
-	// Capture a few frames (~100ms)
-	await new Promise(resolve => setTimeout(resolve, 111));
+	// Capture ~3 frames at 30 FPS (~100ms)
+	await new Promise((resolve) => setTimeout(resolve, 111));
 
 	mediaRecorder.stop();
-	await stopped; // Wait for onstop to finish
+	await stopPromise;
 
-	// Create blob and video
 	const blob = new Blob(recordedChunks, { type: mimeType });
 	const video = document.createElement('video');
 	video.src = URL.createObjectURL(blob);
 	video.muted = true;
 
-	// Wait for video metadata to load
 	await new Promise((resolve) => {
-		video.onloadedmetadata = resolve;
+		video.addEventListener('loadedmetadata', resolve, { once: true });
 	});
 
-	// Draw the last frame to canvas
-	video.currentTime = video.duration - 0.01; // Slightly before the end
-	await video.play();
-	video.pause();
+	video.currentTime = video.duration;
 
+	await new Promise((resolve) => {
+		video.addEventListener('seeked', resolve, { once: true });
+	});
+
+	video.pause();
 	context.drawImage(video, 0, 0, canvas.width, canvas.height);
 	currentImageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-	// Clean up
-	URL.revokeObjectURL(video.src);
 }
 	apply.onclick = async function() {
 		const imageData = currentImageData.data;
