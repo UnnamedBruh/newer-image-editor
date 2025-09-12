@@ -75,7 +75,7 @@ function DIB(array, tags = METADATA_AND_IMAGE | DEBUGGING) {
 	// Only extract pixel data for supported types
 	if (compressionType === 0) { // Uncompressed
 		let rowSize;
-		let pixelArray = new Uint8Array(width * absHeight * 3); // Flattened RGB array
+		let pixelArray = new Uint8Array(width * absHeight * 4); // Flattened RGBA array
 		let rowIndex = 0;
 		const widthCache = (width << 1) + width; // Similar to width * 3, but with bitwise + add optimizations
 
@@ -206,5 +206,6 @@ function DIB(array, tags = METADATA_AND_IMAGE | DEBUGGING) {
 		pixelArray = null;
 	}
 
+	result.imageData = new Uint8ClampedArray(result.imageData);
 	return result;
 }
