@@ -130,7 +130,7 @@ if (!context) {
 							alert("If you are editing for casual purposes, you don't have to worry about the error below; just press OK or Okay.\n\n" + error.message);
 							return;
 						}
-						currentImageData = new ImageData(data.imageData, data.width, data.height);
+						currentImageData = new ImageData(data.imageData, Math.abs(data.width), Math.abs(data.height));
 						backupImageData = new ImageData(new Uint8ClampedArray(currentImageData.data), currentImageData.width, currentImageData.height);
 						canvas.width = currentImageData.width;
 						canvas.height = currentImageData.height;
@@ -246,7 +246,7 @@ if (!context) {
 		}
 		if ((treatFile.value === "att" || treatFile.value === "asv") && !file.name.endsWith(".tga") && !file.name.endsWith(".dib")) fileReader.readAsDataURL(file); else fileReader.readAsArrayBuffer(file);
 	}
-	
+
 	fileInput.addEventListener("input", (event) => edited(event, true));
 	treatFile.oninput = function() {
 		if (treatFile.value === "att") fileInput.accept = ".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .mng, .tga, .dib"; else if (treatFile.value === "asv") fileInput.accept = ".mp4, .ogg, .webm, .3gp, .avi, .m4v, .mov, .mkv, .av1, .hevc"; else fileInput.accept = "*";
@@ -960,7 +960,7 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 					effects.selectedIndex = Math.random() < 0.333333 ? (15 + Math.round(Math.random())) : (Math.random() < 0.5 ? 4 : 23 + Math.round(Math.random()));
 					if (effects.selectedIndex === 23 || effects.selectedIndex === 24) {
 						effects.value = effects.selectedIndex === 23 ? "jpeg" : "webp";
-						effectParams = [{value: Math.round(Math.random() * 40)}]
+						effectParams = [{value: Math.round(Math.random() * 40)}];
 					} else if (effects.selectedIndex === 4) {
 						effects.value = "shift";
 						effectParams = [{value: Math.round(4 - Math.random() * 8)}, {value: "#000000"}, {value: "0"}, {checked: true}, {checked: true}];
@@ -1218,7 +1218,7 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 				}
 			}
 		}
-		if (effects.value !== "mp3" && effects.value !== "text") context.putImageData(currentImageData, 0, 0);
+		if (effects.value !== "mp3" && effects.value !== "text" && effects.value !== "vp") context.putImageData(currentImageData, 0, 0);
 		if (effects.value === "resid") currentImageData = context.getImageData(0, 0, +canvas.width, +canvas.height);
 	}
 	const css = document.getElementById("css"), bg = document.getElementById("bgcolor");
