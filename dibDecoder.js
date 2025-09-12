@@ -1,4 +1,4 @@
-// This is an unfinished decoder I am working on. I used a lot of GPT-4.0 and GPT-4.0 Mini (six months ago when this was updated), and GPT-5.0 Mini for this project, but there is some of my code as well, so it's technically my AI-assisted implementation.
+// I used a lot of GPT-4.0 and GPT-4.0 Mini (six months ago when this was updated), and GPT-5.0 Mini for this project, but there is some of my code as well, so it's technically my AI-assisted implementation.
 
 const METADATA_ONLY = 0;
 const METADATA_AND_IMAGE = 1;
