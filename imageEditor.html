@@ -541,6 +541,7 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
     }
 
     const mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bitrate });
+	mediaRecorder.start();
 	await new Promise(resolve => {
 		mediaRecorder.ondataavailable = (event) => {
 			if (event.data && event.data.size > 0) {
@@ -549,7 +550,6 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 			}
 		}
 	});
-	mediaRecorder.start();
 	console.log("Debug 1");
 	let resolvedThisStep = false;
 	const stopPromise = new Promise(resolve => {
