@@ -20,7 +20,7 @@ Image Being Blended: <input id="blendi" type="file" accept=".jfif, .jpeg, .jpg, 
 <hr>
 <canvas id="canvas" width="300" height="300"></canvas>
 <hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="backg">Apply Background</option><option value="blendgl">Blend In Image (glitch art)</option><option value="chromat">Chromatic</option><option value="contr">Contrast</option><option value="crop">Crop</option><option value="draw">Draw</option><option value="rect">Draw Rectangle</option><option value="text">Draw Text</option><option value="emb">Emboss</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="gblur">Gaussian Blur</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="sharpg">High Contrast</option><option value="vidstand">ITU-R BT.601 Color Transformation</option><option value="jpegd">Image Distortion Animation</option><option value="inv">Invert Colors</option><option value="jpeg">JPEG-ify</option><option value="mp3">MP3-ify</option><option value="minip">Minimize Color Palette</option><option value="rand">Noise</option><option value="pixelw">Pixelate (Width)</option><option value="resi">Resize Image</option><option value="resid">Resize Image Dimensions</option><option value="parag">Resize Image Without Aligning Columns</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="rotate">Rotate Left</option><option value="sepia">Sepia</option><option value="opac">Set Opacity</option><option value="shift">Shift</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="smudge">Smudge Right</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintblend">Tint (Blend Color)</option><option value="tint">Tint (Filter Color)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="uniq">Unique Colors</option><option value="vp">VP8/VP9-ify</option><option value="webp">WEBP-ify</option></select><button id="apply">Apply Effect</button>
+<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="backg">Apply Background</option><option value="blendgl">Blend In Image (glitch art)</option><option value="chromat">Chromatic</option><option value="contr">Contrast</option><option value="crop">Crop</option><option value="draw">Draw</option><option value="rect">Draw Rectangle</option><option value="text">Draw Text</option><option value="emb">Emboss</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="gblur">Gaussian Blur</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="sharpg">High Contrast</option><option value="vidstand">ITU-R BT.601 Color Transformation</option><option value="jpegd">Image Distortion Animation</option><option value="inv">Invert Colors</option><option value="jpeg">JPEG-ify</option><option value="mp3">MP3-ify</option><option value="minip">Minimize Color Palette</option><option value="rand">Noise</option><option value="pixelw">Pixelate (Width)</option><option value="purify">Purify (Choose "Purest" Color)</option><option value="resi">Resize Image</option><option value="resid">Resize Image Dimensions</option><option value="parag">Resize Image Without Aligning Columns</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="rotate">Rotate Left</option><option value="sepia">Sepia</option><option value="opac">Set Opacity</option><option value="shift">Shift</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="smudge">Smudge Right</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintblend">Tint (Blend Color)</option><option value="tint">Tint (Filter Color)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="uniq">Unique Colors</option><option value="vp">VP8/VP9-ify</option><option value="webp">WEBP-ify</option></select><button id="apply">Apply Effect</button>
 <div id="configs"></div>
 <script src="lame.min.js"></script>
 <script src="dibDecoder.js"></script>
@@ -267,6 +267,12 @@ if (!context) {
 	function interpolate(x, y, n) {
 		return x + (y - x) * n;
 	}
+	function purifyColorValues(r,g,b, percent) { // I came to implement this effect like, 5 months ago. Man, this is a project to look back onto.
+		if ((r === g && g === b) || percent <= 0) return [r,g,b];
+		const max = Math.max(r,g,b);
+		const diff = [r,g,b].map(x => (max - x) * percent);
+		return [r,g,b].map((x, i) => x - diff[i]);
+	}
 	// Since these are mathematical formulas, they are not patented, since everyone can easily come up with mathematical formulas. However, it doesn't mean they can be used for implementing an MPEG decoder/encoder without a license agreement (but that topic is very complicated)
 
 // These RGB and YCBCR functions are written using GPT-4.0 Mini.
@@ -480,9 +486,12 @@ function generateGaussianKernel(sigma, size) {
 			effectSettings.innerHTML = "<a>RGB -> YCbCr:</a><input type=\"checkbox\" checked id=\"e-vidstandcol\" title=\"Whether the image's color channels will be transated to YCbCr, or back to RGB values.\">";
 			effectParams = [document.getElementById("e-vidstandcol")];
 		} else if (effects.value === "blendgl") {
-			effectSettings.innerHTML = "<a>Randomized Y Position:</a><input type=\"number\" checked id=\"e-blendgly\">";
+			effectSettings.innerHTML = "<a>Randomized Y Position:</a><input type=\"number\" id=\"e-blendgly\">";
 			ble.style = "";
 			effectParams = [document.getElementById("e-blendgly")];
+		} else if (effects.value === "purify") {
+			effectSettings.innerHTML = "<a>Purify Percentage</a><input type=\"number\" id=\"e-purifypercent\" min=\"1\" max=\"100\">";
+			effectParams = [document.getElementById("e-purifypercent")];
 		} else {
 			const x = customModdedEffects.find(x => x[0] === effects.value);
 			if (x) {
@@ -1211,6 +1220,17 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 			}
 			case "vp": {
 				await simulateVPCompression(effectParams[0].value, +effectParams[1].value * 1000);
+				break;
+			}
+			case "purify": {
+				let i = 0, perc = +effectParams[0].value * 0.01;
+				for (; i < len;) {
+					const vals = purifyColorValues(currentImageData[i], currentImageData[i + 1], currentImageData[i + 2], perc);
+					currentImageData[i++] = vals[0];
+					currentImageData[i++] = vals[1];
+					currentImageData[i++] = vals[2];
+					i++;
+				}
 				break;
 			}
 			default: {
