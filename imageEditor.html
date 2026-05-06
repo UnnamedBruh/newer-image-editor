@@ -490,7 +490,7 @@ function generateGaussianKernel(sigma, size) {
 			ble.style = "";
 			effectParams = [document.getElementById("e-blendgly")];
 		} else if (effects.value === "purify") {
-			effectSettings.innerHTML = "<a>Purify Percentage</a><input type=\"number\" id=\"e-purifypercent\" min=\"1\" max=\"100\">";
+			effectSettings.innerHTML = "<a>Purify Percentage:</a> <input type=\"number\" id=\"e-purifypercent\" min=\"1\" max=\"100\" value=\"50\">";
 			effectParams = [document.getElementById("e-purifypercent")];
 		} else {
 			const x = customModdedEffects.find(x => x[0] === effects.value);
@@ -1223,12 +1223,12 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 				break;
 			}
 			case "purify": {
-				let i = 0, perc = +effectParams[0].value * 0.01;
+				let i = 0, perc = +effectParams[0].value * 0.01, data = currentImageData.data;
 				for (; i < len;) {
-					const vals = purifyColorValues(currentImageData[i], currentImageData[i + 1], currentImageData[i + 2], perc);
-					currentImageData[i++] = vals[0];
-					currentImageData[i++] = vals[1];
-					currentImageData[i++] = vals[2];
+					const vals = purifyColorValues(data[i], data[i + 1], data[i + 2], perc);
+					data[i++] = vals[0];
+					data[i++] = vals[1];
+					data[i++] = vals[2];
 					i++;
 				}
 				break;
