@@ -1,109 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<title>Image Editor</title>
-<style id="css">
-button, body, select, input {
-	background-color: rgb(0, 0, 0);
-}
-button, body, a, p, h1, select, option, input {
-	color: white;
-}
-</style>
-</head>
-<body>
-Background Color: <input id="bgcolor" type="color">
-<h1>Image Editor</h1>
-Image Being Edited: <input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .mng, .tga, .dib"><div id="blend" style="display: none">
-Image Being Blended: <input id="blendi" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .mng, .tga, .dib">
-</div><br><a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
-<hr>
-<canvas id="canvas" width="300" height="300"></canvas>
-<hr>
-<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="backg">Apply Background</option><option value="blendgl">Blend In Image (glitch art)</option><option value="chromat">Chromatic</option><option value="contr">Contrast</option><option value="crop">Crop</option><option value="draw">Draw</option><option value="rect">Draw Rectangle</option><option value="text">Draw Text</option><option value="emb">Emboss</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="gblur">Gaussian Blur</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="sharpg">High Contrast</option><option value="vidstand">ITU-R BT.601 Color Transformation</option><option value="jpegd">Image Distortion Animation</option><option value="inv">Invert Colors</option><option value="jpeg">JPEG-ify</option><option value="mp3">MP3-ify</option><option value="minip">Minimize Color Palette</option><option value="rand">Noise</option><option value="pixelw">Pixelate (Width)</option><option value="purify">Purify (Choose "Purest" Color)</option><option value="resi">Resize Image</option><option value="resid">Resize Image Dimensions</option><option value="parag">Resize Image Without Aligning Columns</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="rotate">Rotate Left</option><option value="sepia">Sepia</option><option value="opac">Set Opacity</option><option value="shift">Shift</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="smudge">Smudge Right</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintblend">Tint (Blend Color)</option><option value="tint">Tint (Filter Color)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="uniq">Unique Colors</option><option value="vp">VP8/VP9-ify</option><option value="webp">WEBP-ify</option></select><button id="apply">Apply Effect</button>
-<div id="configs"></div>
-<script src="lame.min.js"></script>
-<script src="dibDecoder.js"></script>
-<script>
-// tga.js (from https://github.com/vthibault/tga.js)
-const TYPE_NO_DATA=0,TYPE_INDEXED=1,TYPE_RGB=2,TYPE_GREY=3,TYPE_RLE_INDEXED=9,TYPE_RLE_RGB=10,TYPE_RLE_GREY=11,ORIGIN_BOTTOM_LEFT=0,ORIGIN_BOTTOM_RIGHT=1,ORIGIN_TOP_LEFT=2,ORIGIN_TOP_RIGHT=3,ORIGIN_SHIFT=4,ORIGIN_MASK=63;class TgaLoader{_checkHeader(){const e=this.header;if(0===e.imageType)throw new Error("No data");if(e.hasColorMap){if(e.colorMapLength>256||24!==e.colorMapDepth||1!==e.colorMapType)throw new Error("Invalid colormap for indexed type")}else if(e.colorMapType)throw new Error("Why does the image contain a palette?");if(!e.width||!e.height)throw new Error("Invalid image size");if(8!==e.pixelDepth&&16!==e.pixelDepth&&24!==e.pixelDepth&&32!==e.pixelDepth)throw new Error('Invalid pixel size "'+e.pixelDepth+'"')}_decodeRLE(e,t,a,r){const o=new Uint8Array(r),i=new Uint8Array(a);let h=0;for(;h<r;){const r=e[t++];let s=1+(127&r);if(128&r){for(let r=0;r<a;++r)i[r]=e[t+r];t+=a;for(let e=0;e<s;++e)o.set(i,h),h+=a}else{s*=a;for(let a=0;a<s;++a)o[h+a]=e[t+a];h+=s,t+=s}}return o}_getImageData8bits(e,t,a,r,o,i,h,s,l,g){for(let n=0,p=o;p!==h;p+=i)for(let o=s;o!==g;o+=l,n++){const i=t[n];e[4*(o+r*p)+3]=255,e[4*(o+r*p)+2]=a[3*i+0],e[4*(o+r*p)+1]=a[3*i+1],e[4*(o+r*p)+0]=a[3*i+2]}return e}_getImageData16bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a+=2){const i=t[a+0]|t[a+1]<<8;e[4*(o+r*n)+0]=(31744&i)>>7,e[4*(o+r*n)+1]=(992&i)>>2,e[4*(o+r*n)+2]=(31&i)>>3,e[4*(o+r*n)+3]=32768&i?0:255}return e}_getImageData24bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a+=3)e[4*(o+r*n)+3]=255,e[4*(o+r*n)+2]=t[a+0],e[4*(o+r*n)+1]=t[a+1],e[4*(o+r*n)]=t[a+2];return e}_getImageData32bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a+=4)e[4*(o+r*n)+2]=t[a+0],e[4*(o+r*n)+1]=t[a+1],e[4*(o+r*n)]=t[a+2],e[4*(o+r*n)+3]=t[a+3];return e}_getImageDataGrey8bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a++){const i=t[a];e[4*(o+r*n)+0]=i,e[4*(o+r*n)+1]=i,e[4*(o+r*n)+2]=i,e[4*(o+r*n)+3]=255}return e}_getImageDataGrey16bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a+=2)e[4*(o+r*n)+0]=t[a+0],e[4*(o+r*n)+1]=t[a+0],e[4*(o+r*n)+2]=t[a+0],e[4*(o+r*n)+3]=t[a+1];return e}load(e){let t=0;if(e.length<18)throw new Error("Not enough data to contain header");const a={idLength:e[t++],colorMapType:e[t++],imageType:e[t++],colorMapIndex:e[t++]|e[t++]<<8,colorMapLength:e[t++]|e[t++]<<8,colorMapDepth:e[t++],offsetX:e[t++]|e[t++]<<8,offsetY:e[t++]|e[t++]<<8,width:e[t++]|e[t++]<<8,height:e[t++]|e[t++]<<8,pixelDepth:e[t++],flags:e[t++]};if(a.hasEncoding=9===a.imageType||10===a.imageType||11===a.imageType,a.hasColorMap=9===a.imageType||1===a.imageType,a.isGreyColor=11===a.imageType||3===a.imageType,this.header=a,this._checkHeader(),t+=a.idLength,t>=e.length)throw new Error("No data");if(a.hasColorMap){const r=a.colorMapLength*(a.colorMapDepth>>3);this.palette=e.subarray(t,t+r),t+=r}const r=a.pixelDepth>>3,o=a.width*a.height,i=o*r;a.hasEncoding?this.imageData=this._decodeRLE(e,t,r,i):this.imageData=e.subarray(t,t+(a.hasColorMap?o:i))}getImageData(e){const{width:t,height:a,flags:r,pixelDepth:o,isGreyColor:i}=this.header,h=(48&r)>>4;let s,l,g,n,p,c,d;switch(e||(e=document?document.createElement("canvas").getContext("2d").createImageData(t,a):{width:t,height:a,data:new Uint8ClampedArray(t*a*4)}),2===h||3===h?(n=0,p=1,c=a):(n=a-1,p=-1,c=-1),2===h||0===h?(s=0,l=1,g=t):(s=t-1,l=-1,g=-1),o){case 8:d=i?this._getImageDataGrey8bits:this._getImageData8bits;break;case 16:d=i?this._getImageDataGrey16bits:this._getImageData16bits;break;case 24:d=this._getImageData24bits;break;case 32:d=this._getImageData32bits}return d.call(this,e.data,this.imageData,this.palette,t,n,p,c,s,l,g),e}}
-
-let isDrawing, lastX, lastY;
-
-function loadTgaFromUint8Array(tgaData) {
-	let buffer, image, loader;
-	try {
-		loader = new TgaLoader();
-		loader.load(tgaData);
-		image = loader.imageData;
-		const possibleInstructions = [
-			[
-				(loader.header.flags & ORIGIN_MASK) === ORIGIN_BOTTOM_LEFT,
-				"flip the image vertically."
-			],
-			[
-				(loader.header.flags & ORIGIN_MASK) === ORIGIN_BOTTOM_RIGHT,
-				"flip the image horizontally, and flip the image vertically."
-			],
-			[
-				(loader.header.flags & ORIGIN_MASK) === ORIGIN_TOP_LEFT,
-				"reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you."
-			],
-			[
-				(loader.header.flags & ORIGIN_MASK) === ORIGIN_TOP_RIGHT,
-				"flip the image horizontally."
-			]
-		];
-		let instructions = possibleInstructions.find(x => x[0])[1];
-		alert("Proper handling for the TGA origins and different color orders should be handled manually. To get the original image, you must " + instructions + (instructions === "reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
-
-		if (loader.header.pixelDepth === 24 || loader.header.colorMapDepth === 24) {
-			const f = new Uint8ClampedArray(loader.header.width * loader.header.height * 4);
-			const len = f.length;
-			let index = 0, i = 0;
-			for (; i < len; i++) {
-				f[i] = image[index]; i++, index++;
-				f[i] = image[index]; i++, index++;
-				f[i] = image[index]; i++, index++;
-				f[i] = 255;
+	<head>
+		<title>Image Editor</title>
+		<style id="css">
+			button, body, select, input {
+				background-color: rgb(0, 0, 0);
 			}
-			return new ImageData(
-				f,
-				loader.header.width,
-				loader.header.height
-			);
-		} else {
-			return new ImageData(
-				new Uint8ClampedArray(image),
-				loader.header.width,
-				loader.header.height
-			);
-		}
-	} catch (err) {
-		alert("There has been an error trying to decode the TGA image: " + err.message);
-		if (tgaData.length === 0) alert("The TGA image contains no file data at all. This is needed to provide the context of the image (e.g. the width, height, color channels, etc), and the image data itself.");
-		else if ((loader.header.pixelDepth === 24 && image.length !== loader.header.width * loader.header.height * 3) || (loader.header.pixelDepth === 32 && image.length !== loader.header.width * loader.header.height * 4)) alert("There appears to be an image data overflow (providing too many pixel values) or underflow (providing too little pixel values). This has to be fixed, so the image can correctly be loaded next time.");
-		else if ([8, 16, 24, 32].indexOf(loader.header.pixelDepth) === -1) {
-			if (confirm("The TGA image has a very odd specification of the pixel depth (provided was " + loader.header.pixelDepth + ", expected was 8, 16, 24, or 32). Do you want to provide the pixel depth?")) {
-				let pixelDepth = +prompt("Provide the pixel depth (the default is 24).") || 24;
-				if ([8, 16, 24, 32].indexOf(loader.header.pixelDepth) === -1) {
-					while ([8, 16, 24, 32].indexOf(loader.header.pixelDepth) === -1) {
-						alert("That level isn't recommended; you need to specify again.");
-						pixelDepth = +prompt("Provide the pixel depth (the default is 24).") || 24;
-					}
+			button, body, a, p, h1, select, option, input {
+				color: white;
+			}
+		</style>
+	</head>
+	<body>
+	Background Color: <input id="bgcolor" type="color">
+	<h1>Image Editor</h1>
+	Image Being Edited: <input id="image" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .mng, .tga, .dib">
+	<div id="blend" style="display: none">
+		Image Being Blended: <input id="blendi" type="file" accept=".jfif, .jpeg, .jpg, .png, .webp, .gif, .bmp, .svg, .cur, .avif, .ico, .apng, .mng, .tga, .dib">
+	</div>
+	<br>
+	<a>File Treaty Type:</a><select id="treatimage"><option value="att">Attempt to decode the image data</option><option value="asa">Assume the file data is raw RGBA image data</option><option value="asb">Assume the file data is raw RGB image data</option><option value="asd">Assume the file data is raw grayscale image data</option><option value="asv">Attempt to decode the video data (and extract any frame selected)</option></select>
+	<hr>
+	<canvas id="canvas" width="300" height="300"></canvas>
+	<hr>
+	<select id="effects"><option>Please select an effect.</option><option value="restore">Restore Image</option><option value="backg">Apply Background</option><option value="blendgl">Blend In Image (glitch art)</option><option value="chromat">Chromatic</option><option value="contr">Contrast</option><option value="crop">Crop</option><option value="draw">Draw</option><option value="rect">Draw Rectangle</option><option value="text">Draw Text</option><option value="emb">Emboss</option><option value="flipx">Flip Horizontally</option><option value="flipy">Flip Vertically</option><option value="gblur">Gaussian Blur</option><option value="graya">Grayscale (By Average)</option><option value="grayb">Grayscale (By Brightness)</option><option value="grayc">Grayscale (By Color Channel)</option><option value="sharpg">High Contrast</option><option value="vidstand">ITU-R BT.601 Color Transformation</option><option value="jpegd">Image Distortion Animation</option><option value="inv">Invert Colors</option><option value="jpeg">JPEG-ify</option><option value="mp3">MP3-ify</option><option value="minip">Minimize Color Palette</option><option value="rand">Noise</option><option value="pixelw">Pixelate (Width)</option><option value="purify">Purify (Choose "Purest" Color)</option><option value="resi">Resize Image</option><option value="resid">Resize Image Dimensions</option><option value="parag">Resize Image Without Aligning Columns</option><option value="rgbre">Reverse Order Of RGB Colors</option><option value="rotate">Rotate Left</option><option value="sepia">Sepia</option><option value="opac">Set Opacity</option><option value="shift">Shift</option><option value="rgbsh">Shift RGB Colors To The Left</option><option value="smudge">Smudge Right</option><option value="tintadd">Tint (Add Color Values)</option><option value="tintblend">Tint (Blend Color)</option><option value="tint">Tint (Filter Color)</option><option value="tintsub">Tint (Subtract Color Values)</option><option value="uniq">Unique Colors</option><option value="vp">VP8/VP9-ify</option><option value="webp">WEBP-ify</option></select><button id="apply">Apply Effect</button>
+	<div id="configs"></div>
+	<script src="lame.min.js"></script>
+	<script src="dibDecoder.js"></script>
+	<script>
+	// tga.js (from https://github.com/vthibault/tga.js)
+	const TYPE_NO_DATA=0,TYPE_INDEXED=1,TYPE_RGB=2,TYPE_GREY=3,TYPE_RLE_INDEXED=9,TYPE_RLE_RGB=10,TYPE_RLE_GREY=11,ORIGIN_BOTTOM_LEFT=0,ORIGIN_BOTTOM_RIGHT=1,ORIGIN_TOP_LEFT=2,ORIGIN_TOP_RIGHT=3,ORIGIN_SHIFT=4,ORIGIN_MASK=63;class TgaLoader{_checkHeader(){const e=this.header;if(0===e.imageType)throw new Error("No data");if(e.hasColorMap){if(e.colorMapLength>256||24!==e.colorMapDepth||1!==e.colorMapType)throw new Error("Invalid colormap for indexed type")}else if(e.colorMapType)throw new Error("Why does the image contain a palette?");if(!e.width||!e.height)throw new Error("Invalid image size");if(8!==e.pixelDepth&&16!==e.pixelDepth&&24!==e.pixelDepth&&32!==e.pixelDepth)throw new Error('Invalid pixel size "'+e.pixelDepth+'"')}_decodeRLE(e,t,a,r){const o=new Uint8Array(r),i=new Uint8Array(a);let h=0;for(;h<r;){const r=e[t++];let s=1+(127&r);if(128&r){for(let r=0;r<a;++r)i[r]=e[t+r];t+=a;for(let e=0;e<s;++e)o.set(i,h),h+=a}else{s*=a;for(let a=0;a<s;++a)o[h+a]=e[t+a];h+=s,t+=s}}return o}_getImageData8bits(e,t,a,r,o,i,h,s,l,g){for(let n=0,p=o;p!==h;p+=i)for(let o=s;o!==g;o+=l,n++){const i=t[n];e[4*(o+r*p)+3]=255,e[4*(o+r*p)+2]=a[3*i+0],e[4*(o+r*p)+1]=a[3*i+1],e[4*(o+r*p)+0]=a[3*i+2]}return e}_getImageData16bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a+=2){const i=t[a+0]|t[a+1]<<8;e[4*(o+r*n)+0]=(31744&i)>>7,e[4*(o+r*n)+1]=(992&i)>>2,e[4*(o+r*n)+2]=(31&i)>>3,e[4*(o+r*n)+3]=32768&i?0:255}return e}_getImageData24bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a+=3)e[4*(o+r*n)+3]=255,e[4*(o+r*n)+2]=t[a+0],e[4*(o+r*n)+1]=t[a+1],e[4*(o+r*n)]=t[a+2];return e}_getImageData32bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a+=4)e[4*(o+r*n)+2]=t[a+0],e[4*(o+r*n)+1]=t[a+1],e[4*(o+r*n)]=t[a+2],e[4*(o+r*n)+3]=t[a+3];return e}_getImageDataGrey8bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a++){const i=t[a];e[4*(o+r*n)+0]=i,e[4*(o+r*n)+1]=i,e[4*(o+r*n)+2]=i,e[4*(o+r*n)+3]=255}return e}_getImageDataGrey16bits(e,t,a,r,o,i,h,s,l,g){for(let a=0,n=o;n!==h;n+=i)for(let o=s;o!==g;o+=l,a+=2)e[4*(o+r*n)+0]=t[a+0],e[4*(o+r*n)+1]=t[a+0],e[4*(o+r*n)+2]=t[a+0],e[4*(o+r*n)+3]=t[a+1];return e}load(e){let t=0;if(e.length<18)throw new Error("Not enough data to contain header");const a={idLength:e[t++],colorMapType:e[t++],imageType:e[t++],colorMapIndex:e[t++]|e[t++]<<8,colorMapLength:e[t++]|e[t++]<<8,colorMapDepth:e[t++],offsetX:e[t++]|e[t++]<<8,offsetY:e[t++]|e[t++]<<8,width:e[t++]|e[t++]<<8,height:e[t++]|e[t++]<<8,pixelDepth:e[t++],flags:e[t++]};if(a.hasEncoding=9===a.imageType||10===a.imageType||11===a.imageType,a.hasColorMap=9===a.imageType||1===a.imageType,a.isGreyColor=11===a.imageType||3===a.imageType,this.header=a,this._checkHeader(),t+=a.idLength,t>=e.length)throw new Error("No data");if(a.hasColorMap){const r=a.colorMapLength*(a.colorMapDepth>>3);this.palette=e.subarray(t,t+r),t+=r}const r=a.pixelDepth>>3,o=a.width*a.height,i=o*r;a.hasEncoding?this.imageData=this._decodeRLE(e,t,r,i):this.imageData=e.subarray(t,t+(a.hasColorMap?o:i))}getImageData(e){const{width:t,height:a,flags:r,pixelDepth:o,isGreyColor:i}=this.header,h=(48&r)>>4;let s,l,g,n,p,c,d;switch(e||(e=document?document.createElement("canvas").getContext("2d").createImageData(t,a):{width:t,height:a,data:new Uint8ClampedArray(t*a*4)}),2===h||3===h?(n=0,p=1,c=a):(n=a-1,p=-1,c=-1),2===h||0===h?(s=0,l=1,g=t):(s=t-1,l=-1,g=-1),o){case 8:d=i?this._getImageDataGrey8bits:this._getImageData8bits;break;case 16:d=i?this._getImageDataGrey16bits:this._getImageData16bits;break;case 24:d=this._getImageData24bits;break;case 32:d=this._getImageData32bits}return d.call(this,e.data,this.imageData,this.palette,t,n,p,c,s,l,g),e}}
+
+	let isDrawing, lastX, lastY;
+
+	function loadTgaFromUint8Array(tgaData) {
+		let buffer, image, loader;
+		try {
+			loader = new TgaLoader();
+			loader.load(tgaData);
+			image = loader.imageData;
+			const possibleInstructions = [
+				[
+					(loader.header.flags & ORIGIN_MASK) === ORIGIN_BOTTOM_LEFT,
+					"flip the image vertically."
+				],
+				[
+					(loader.header.flags & ORIGIN_MASK) === ORIGIN_BOTTOM_RIGHT,
+					"flip the image horizontally, and flip the image vertically."
+				],
+				[
+					(loader.header.flags & ORIGIN_MASK) === ORIGIN_TOP_LEFT,
+					"reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you."
+				],
+				[
+					(loader.header.flags & ORIGIN_MASK) === ORIGIN_TOP_RIGHT,
+					"flip the image horizontally."
+				]
+			];
+			let instructions = possibleInstructions.find(x => x[0])[1];
+			alert("Proper handling for the TGA origins and different color orders should be handled manually. To get the original image, you must " + instructions + (instructions === "reverse the color channels' order, or shift the color channels' to the left repeatedly until the image's color feels right to you." ? "" : " You may also need to shift the color channels until the image's color feels right to you."));
+
+			if (loader.header.pixelDepth === 24 || loader.header.colorMapDepth === 24) {
+				const f = new Uint8ClampedArray(loader.header.width * loader.header.height * 4);
+				const len = f.length;
+				let index = 0, i = 0;
+				for (; i < len; i++) {
+					f[i] = image[index]; i++, index++;
+					f[i] = image[index]; i++, index++;
+					f[i] = image[index]; i++, index++;
+					f[i] = 255;
 				}
-				tgaData[16] = Math.round(pixelDepth & 256);
-				loadTgaFromUint8Array(tgaData);
+				return new ImageData(
+					f,
+					loader.header.width,
+					loader.header.height
+				);
+			} else {
+				return new ImageData(
+					new Uint8ClampedArray(image),
+					loader.header.width,
+					loader.header.height
+				);
+			}
+		} catch (err) {
+			alert("There has been an error trying to decode the TGA image: " + err.message);
+			if (tgaData.length === 0) alert("The TGA image contains no file data at all. This is needed to provide the context of the image (e.g. the width, height, color channels, etc), and the image data itself.");
+			else if ((loader.header.pixelDepth === 24 && image.length !== loader.header.width * loader.header.height * 3) || (loader.header.pixelDepth === 32 && image.length !== loader.header.width * loader.header.height * 4)) alert("There appears to be an image data overflow (providing too many pixel values) or underflow (providing too little pixel values). This has to be fixed, so the image can correctly be loaded next time.");
+			else if ([8, 16, 24, 32].indexOf(loader.header.pixelDepth) === -1) {
+				if (confirm("The TGA image has a very odd specification of the pixel depth (provided was " + loader.header.pixelDepth + ", expected was 8, 16, 24, or 32). Do you want to provide the pixel depth?")) {
+					let pixelDepth = +prompt("Provide the pixel depth (the default is 24).") || 24;
+					if ([8, 16, 24, 32].indexOf(loader.header.pixelDepth) === -1) {
+						while ([8, 16, 24, 32].indexOf(loader.header.pixelDepth) === -1) {
+							alert("That level isn't recommended; you need to specify again.");
+							pixelDepth = +prompt("Provide the pixel depth (the default is 24).") || 24;
+						}
+					}
+					tgaData[16] = Math.round(pixelDepth & 256);
+					loadTgaFromUint8Array(tgaData);
+				}
 			}
 		}
 	}
-}
 
-const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs"), blend = document.getElementById("blendi"), ble = document.getElementById("blend");
-const context = canvas.getContext("2d");
-if (!context) {
-	alert("Your browser does not support the 2D canvas context yet. Either upgrade to a newer version of your browser, or try using a different one.");
-}
+	const fileInput = document.getElementById("image"), treatFile = document.getElementById("treatimage"), canvas = document.getElementById("canvas"), effects = document.getElementById("effects"), applyEffect = document.getElementById("apply"), effectSettings = document.getElementById("configs"), blend = document.getElementById("blendi"), ble = document.getElementById("blend");
+	const context = canvas.getContext("2d");
+	if (!context) {
+		alert("Your browser does not support the 2D canvas context yet. Either upgrade to a newer version of your browser, or try using a different one.");
+	}
 	let currentImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), backupImageData = new ImageData(new Uint8ClampedArray(300 * 300 * 4), 300, 300), originalImage, blendImage;
 
 	function edited(event, fla) {
@@ -274,113 +277,112 @@ if (!context) {
 		return [r,g,b].map((x, i) => x - diff[i]);
 	}
 	// Since these are mathematical formulas, they are not patented, since everyone can easily come up with mathematical formulas. However, it doesn't mean they can be used for implementing an MPEG decoder/encoder without a license agreement (but that topic is very complicated)
+	// These RGB and YCBCR functions are written using GPT-4.0 Mini.
 
-// These RGB and YCBCR functions are written using GPT-4.0 Mini.
+	function rgbToYCbCr(r, g, b) { // Three of these values must be between 0 and 255
+		const y = 0.299*r + 0.587*g + 0.114*b;
+		const cb = -0.1687*r - 0.3313*g + 0.5*b + 128;
+		const cr = 0.5*r - 0.4187*g - 0.0813*b + 128;
+		return [y, cb, cr];
+	}
 
-function rgbToYCbCr(r, g, b) { // Three of these values must be between 0 and 255
-	const y = 0.299*r + 0.587*g + 0.114*b;
-	const cb = -0.1687*r - 0.3313*g + 0.5*b + 128;
-	const cr =  0.5*r - 0.4187*g - 0.0813*b + 128;
-	return [y, cb, cr];
-}
+	function yCbCrToRGB(y, cb, cr) {
+		// Shift Cb and Cr back to the [-128, 127] range
+		cb -= 128;
+		cr -= 128;
 
-function yCbCrToRGB(y, cb, cr) {
-	// Shift Cb and Cr back to the [-128, 127] range
-	cb -= 128;
-	cr -= 128;
+		// Apply inverse transformation (ITU-R BT.601 standard)
+		const r = y + 1.402 * cr;
+		const g = y - 0.344136 * cb - 0.714136 * cr;
+		const b = y + 1.772 * cb;
 
-	// Apply inverse transformation (ITU-R BT.601 standard)
-	const r = y + 1.402 * cr;
-	const g = y - 0.344136 * cb - 0.714136 * cr;
-	const b = y + 1.772 * cb;
+		// Clamp values to [0, 255] and round to integers
+		return [
+			Math.min(255, Math.max(0, Math.round(r))),
+			Math.min(255, Math.max(0, Math.round(g))),
+			Math.min(255, Math.max(0, Math.round(b)))
+		];
+	}
 
-	// Clamp values to [0, 255] and round to integers
-	return [
-		Math.min(255, Math.max(0, Math.round(r))),
-		Math.min(255, Math.max(0, Math.round(g))),
-		Math.min(255, Math.max(0, Math.round(b)))
-	];
-}
+	function applyGaussianBlurX(imageData, kernel) { // All of these Gaussian-related functions were written using GPT-5.0 Mini!
+		const width = imageData.width;
+		const height = imageData.height;
+		const output = new ImageData(new Uint8ClampedArray(width * height * 4), width, height);
+		const halfKernel = Math.floor(kernel.length / 2);
+		const data = output.data;
 
-function applyGaussianBlurX(imageData, kernel) { // All of these Gaussian-related functions were written using GPT-5.0 Mini!
-	const width = imageData.width;
-	const height = imageData.height;
-	const output = new ImageData(new Uint8ClampedArray(width * height * 4), width, height);
-	const halfKernel = Math.floor(kernel.length / 2);
-	const data = output.data;
-
-	for (let y = 0; y < height; y++) {
-		for (let x = 0; x < width; x++) {
-			let r = 0, g = 0, b = 0, a = 0;
-			for (let k = 0; k < kernel.length; k++) {
-				const px = x + k - halfKernel;
-				if (px >= 0 && px < width) {
-					const idx = (y * width + px) * 4;
-					const weight = kernel[k];
-					r += imageData.data[idx] * weight;
-					g += imageData.data[idx + 1] * weight;
-					b += imageData.data[idx + 2] * weight;
-					a += imageData.data[idx + 3] * weight;
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < width; x++) {
+				let r = 0, g = 0, b = 0, a = 0;
+				for (let k = 0; k < kernel.length; k++) {
+					const px = x + k - halfKernel;
+					if (px >= 0 && px < width) {
+						const idx = (y * width + px) * 4;
+						const weight = kernel[k];
+						r += imageData.data[idx] * weight;
+						g += imageData.data[idx + 1] * weight;
+						b += imageData.data[idx + 2] * weight;
+						a += imageData.data[idx + 3] * weight;
+					}
 				}
+				const outIdx = (y * width + x) * 4;
+				data[outIdx] = r;
+				data[outIdx + 1] = g;
+				data[outIdx + 2] = b;
+				data[outIdx + 3] = a;
 			}
-			const outIdx = (y * width + x) * 4;
-			data[outIdx] = r;
-			data[outIdx + 1] = g;
-			data[outIdx + 2] = b;
-			data[outIdx + 3] = a;
 		}
+		return output;
 	}
-	return output;
-}
-function applyGaussianBlurY(imageData, kernel) {
-	const width = imageData.width;
-	const height = imageData.height;
-	const output = new ImageData(new Uint8ClampedArray(width * height * 4), width, height);
-	const halfKernel = Math.floor(kernel.length / 2);
-	const data = output.data;
+	function applyGaussianBlurY(imageData, kernel) {
+		const width = imageData.width;
+		const height = imageData.height;
+		const output = new ImageData(new Uint8ClampedArray(width * height * 4), width, height);
+		const halfKernel = Math.floor(kernel.length / 2);
+		const data = output.data;
 
-	for (let y = 0; y < height; y++) {
-		for (let x = 0; x < width; x++) {
-			let r = 0, g = 0, b = 0, a = 0;
-			for (let k = 0; k < kernel.length; k++) {
-				const py = y + k - halfKernel;
-				if (py >= 0 && py < height) {
-					const idx = (py * width + x) * 4;
-					const weight = kernel[k];
-					r += imageData.data[idx] * weight;
-					g += imageData.data[idx + 1] * weight;
-					b += imageData.data[idx + 2] * weight;
-					a += imageData.data[idx + 3] * weight;
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < width; x++) {
+				let r = 0, g = 0, b = 0, a = 0;
+				for (let k = 0; k < kernel.length; k++) {
+					const py = y + k - halfKernel;
+					if (py >= 0 && py < height) {
+						const idx = (py * width + x) * 4;
+						const weight = kernel[k];
+						r += imageData.data[idx] * weight;
+						g += imageData.data[idx + 1] * weight;
+						b += imageData.data[idx + 2] * weight;
+						a += imageData.data[idx + 3] * weight;
+					}
 				}
+				const outIdx = (y * width + x) * 4;
+				data[outIdx] = r;
+				data[outIdx + 1] = g;
+				data[outIdx + 2] = b;
+				data[outIdx + 3] = a;
 			}
-			const outIdx = (y * width + x) * 4;
-			data[outIdx] = r;
-			data[outIdx + 1] = g;
-			data[outIdx + 2] = b;
-			data[outIdx + 3] = a;
 		}
+		return output;
 	}
-	return output;
-}
-function generateGaussianKernel(sigma, size) {
-	const kernel = [];
-	const mean = Math.floor(size / 2);
-	let sum = 0;
+	function generateGaussianKernel(sigma, size) {
+		const kernel = [];
+		const mean = Math.floor(size / 2);
+		let sum = 0;
 
-	for (let x = 0; x < size; x++) {
-		const dx = x - mean;
-		const value = Math.exp(-(dx * dx) / (2 * sigma * sigma));
-		kernel[x] = value;
-		sum += value;
+		for (let x = 0; x < size; x++) {
+			const dx = x - mean;
+			const value = Math.exp(-(dx * dx) / (2 * sigma * sigma));
+			kernel[x] = value;
+			sum += value;
+		}
+
+		// Normalize so that the sum is 1
+		for (let x = 0; x < size; x++) {
+			kernel[x] /= sum;
+		}
+
+		return kernel;
 	}
-
-	// Normalize so that the sum is 1
-	for (let x = 0; x < size; x++) {
-		kernel[x] /= sum;
-	}
-
-	return kernel;
-}
 	function mod(x, y) {
 		let result = x % y;
 		return result < 0 ? result + y : result;
@@ -539,76 +541,77 @@ function generateGaussianKernel(sigma, size) {
 	}
 	effects.oninput = chooseEffect;
 	blend.addEventListener("input", (event) => edited(event, false));
-async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // This function was written using GPT-5.0 Mini with additional tweaks
-    const recordedChunks = [];
-    const stream = canvas.captureStream(30); // 30 FPS
-    bitrate = Math.floor(bitrate / 50_000) * 50_000;
-    const mimeType = `video/webm; codecs=${codec}`;
+	async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // This function was written using GPT-5.0 Mini with additional tweaks
+		const recordedChunks = [];
+		const stream = canvas.captureStream(30); // 30 FPS
+		bitrate = Math.floor(bitrate / 50_000) * 50_000;
+		const mimeType = `video/webm; codecs=${codec}`;
 
-    if (!MediaRecorder.isTypeSupported(mimeType)) {
-        alert(`${codec} encoding is not supported in this browser.`);
-    }
-
-    const mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bitrate });
-	mediaRecorder.start();
-	await new Promise(resolve => {
-		mediaRecorder.ondataavailable = (event) => {
-			if (event.data && event.data.size > 0) {
-				recordedChunks.push(event.data);
-				resolve();
-			}
+		if (!MediaRecorder.isTypeSupported(mimeType)) {
+			alert(`${codec} encoding is not supported in this browser.`);
 		}
-	});
-	console.log("Debug 1");
-	let resolvedThisStep = false;
-	const stopPromise = new Promise(resolve => {
-		mediaRecorder.onstop = resolve;
-		setTimeout(() => {
-			if (mediaRecorder.state !== "inactive") mediaRecorder.stop();
-		}, 300);
-	});
 
-    mediaRecorder.stop();
-	await stopPromise;
-	console.log("Debug 2");
+		const mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bitrate });
+		mediaRecorder.start();
+		await new Promise(resolve => {
+			mediaRecorder.ondataavailable = (event) => {
+				if (event.data && event.data.size > 0) {
+					recordedChunks.push(event.data);
+					resolve();
+				}
+			}
+		});
+		console.log("Debug 1");
+		let resolvedThisStep = false;
+		const stopPromise = new Promise(resolve => {
+			mediaRecorder.onstop = resolve;
+			setTimeout(() => {
+				if (mediaRecorder.state !== "inactive") mediaRecorder.stop();
+			}, 300);
+		});
 
-    // Create video from recorded data
-    const blob = new Blob(recordedChunks, { type: mimeType });
-    const video = document.createElement('video');
-    video.src = URL.createObjectURL(blob);
-    video.muted = true;
+		mediaRecorder.stop();
+		await stopPromise;
+		console.log("Debug 2");
 
-    // Wait until metadata is loaded
-	console.log("Debug 3");
-	await new Promise((resolve) => {
-		const timer = setTimeout(resolve, 1000); // fallback in case event never fires
-		video.addEventListener('canplay', () => {
-			clearTimeout(timer);
-			resolve();
-		}, { once: true });
-	});
+		// Create video from recorded data
+		const blob = new Blob(recordedChunks, { type: mimeType });
+		const video = document.createElement('video');
+		video.src = URL.createObjectURL(blob);
+		video.muted = true;
 
-    // Seek to last frame
-    try {
-		video.currentTime = video.duration-0.1;
-	} catch {
-		video.currentTime = 0.005;
+		// Wait until metadata is loaded
+		console.log("Debug 3");
+		await new Promise((resolve) => {
+			const timer = setTimeout(resolve, 1000); // fallback in case event never fires
+			video.addEventListener('canplay', () => {
+				clearTimeout(timer);
+				resolve();
+			}, { once: true });
+		});
+
+		// Seek to last frame
+		try {
+			video.currentTime = video.duration-0.1;
+		} catch {
+			video.currentTime = 0.005;
+		}
+		console.log("Debug 4");
+		await new Promise((resolve) => {
+			const timer = setTimeout(resolve, 1000);
+			video.addEventListener('seeked', () => {
+				clearTimeout(timer);
+				resolve();
+			}, { once: true });
+		});
+
+		video.pause();
+		context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+		currentImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+		console.log("Image drawn!")
 	}
-	console.log("Debug 4");
-	await new Promise((resolve) => {
-		const timer = setTimeout(resolve, 1000);
-		video.addEventListener('seeked', () => {
-			clearTimeout(timer);
-			resolve();
-		}, { once: true });
-	});
 
-    video.pause();
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    currentImageData = context.getImageData(0, 0, canvas.width, canvas.height);
-	console.log("Image drawn!")
-}
 	apply.onclick = async function() {
 		const imageData = currentImageData.data;
 		let len = imageData.length;
@@ -984,51 +987,51 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 				break;
 			}
 			case "mp3": {
-  const scaleFactor = 255.99609375;
-  const pcmData = new Int16Array(imageData.length);
-  for (let i = 0; i < len; i++) {
-	pcmData[i] = (imageData[i] - 128) * scaleFactor;
-  }
+				const scaleFactor = 255.99609375;
+				const pcmData = new Int16Array(imageData.length);
+				for (let i = 0; i < len; i++) {
+					pcmData[i] = (imageData[i] - 128) * scaleFactor;
+				}
 
-  const bitrate = Math.floor(Math.max(16, Math.min(320, +effectParams[0].value)) / 16) * 16;
-  let mp3Encoder = new lamejs.Mp3Encoder(1, 48000, bitrate); // mono, 48kHz, adjusted bitrate
-  let mp3Data = [];
-  let buffer = mp3Encoder.encodeBuffer(pcmData);
-  mp3Data.push(new Uint8Array(buffer));
+				const bitrate = Math.floor(Math.max(16, Math.min(320, +effectParams[0].value)) / 16) * 16;
+				let mp3Encoder = new lamejs.Mp3Encoder(1, 48000, bitrate); // mono, 48kHz, adjusted bitrate
+				let mp3Data = [];
+				let buffer = mp3Encoder.encodeBuffer(pcmData);
+				mp3Data.push(new Uint8Array(buffer));
 
-  const finalBuffer = mp3Encoder.flush();
-  if (finalBuffer.length > 0) {
-	mp3Data.push(finalBuffer);
-  }
+				const finalBuffer = mp3Encoder.flush();
+				if (finalBuffer.length > 0) {
+					mp3Data.push(finalBuffer);
+				}
 
-  const mp3Blob = new Blob(mp3Data, { type: "audio/mpeg" });
-  const mp3ArrayBuffer = await mp3Blob.arrayBuffer();
-  mp3Data = null;  // Remove the reference to the MP3 data to free memory
+				const mp3Blob = new Blob(mp3Data, { type: "audio/mpeg" });
+				const mp3ArrayBuffer = await mp3Blob.arrayBuffer();
+				mp3Data = null; // Remove the reference to the MP3 data to free memory
 
-  let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  let audioBuffer = await new Promise((resolve, reject) => {
-	audioContext.decodeAudioData(mp3ArrayBuffer, resolve, reject);
-  });
+				let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+				let audioBuffer = await new Promise((resolve, reject) => {
+					audioContext.decodeAudioData(mp3ArrayBuffer, resolve, reject);
+				});
 
-  let decodedPCM = audioBuffer.getChannelData(0);
+				let decodedPCM = audioBuffer.getChannelData(0);
 
-  const originalHeight = currentImageData.height;
-  const originalWidth = currentImageData.width;
-  const totalPixels = originalWidth * originalHeight;
-  const newHeight = Math.ceil(decodedPCM.length / originalWidth);
-  
-  const reconstructedImageData = new Uint8ClampedArray(newHeight * originalWidth * 4);
-  for (let i = 0; i < decodedPCM.length; i++) {
-	reconstructedImageData[i] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
-  }
+				const originalHeight = currentImageData.height;
+				const originalWidth = currentImageData.width;
+				const totalPixels = originalWidth * originalHeight;
+				const newHeight = Math.ceil(decodedPCM.length / originalWidth);
 
-  currentImageData = new ImageData(reconstructedImageData, originalWidth, newHeight);
-  canvas.height = Math.ceil(newHeight / 4);
-  context.putImageData(currentImageData, 0, 0);
+				const reconstructedImageData = new Uint8ClampedArray(newHeight * originalWidth * 4);
+				for (let i = 0; i < decodedPCM.length; i++) {
+					reconstructedImageData[i] = Math.min(255, Math.max(0, (1 + decodedPCM[i]) * 127.5));
+				}
 
-  currentImageData = context.getImageData(0, 0, originalWidth, canvas.height);
-  break;
-}
+				currentImageData = new ImageData(reconstructedImageData, originalWidth, newHeight);
+				canvas.height = Math.ceil(newHeight / 4);
+				context.putImageData(currentImageData, 0, 0);
+
+				currentImageData = context.getImageData(0, 0, originalWidth, canvas.height);
+				break;
+			}
 			case "rotate": {
 				const width = currentImageData.width * 4, im = new ImageData(new Uint8ClampedArray(len), currentImageData.height, currentImageData.width);
 				const da = im.data;
@@ -1249,51 +1252,51 @@ async function simulateVPCompression(codec = "vp8", bitrate = 1_000_000) { // Th
 	bg.oninput = function() {
 		css.textContent = `button,body,select,input{background-color:${bg.value};}button,body,a,p,h1,select,option,input{color:${extractRGBA2(bg.value, 0).reduce((a, b) => a + b) > 382 ? "black" : "white"};}`;
 	}
-function exportTGA() {
-	let header = new Uint8Array(18);
-	header[2] = 2;
-	header[12] = +canvas.width & 0xFF;
-	header[13] = (+canvas.width >> 8) & 0xFF;
-	header[14] = +canvas.height & 0xFF;
-	header[15] = (+canvas.height >> 8) & 0xFF;
-	const choice = prompt("Should the exported TGA image use the alpha channel? (yes = RGBA is used, no = RGB is used, other choice = encoder decides the color depth)");
-	header[16] = choice === "yes" ? 32 : (choice === "no" ? 24 : 0);
-	header[17] = ORIGIN_TOP_LEFT;
-	const imgData = currentImageData.data, len = currentImageData.data.length;
-	if (header[16] === 0) {
-		header[16] = 24;
-		for (let i = 3; i < len; i += 4) {
-			if (imgData[i] !== 255) {
-				header[16] = 32;
-				break;
+	function exportTGA() {
+		let header = new Uint8Array(18);
+		header[2] = 2;
+		header[12] = +canvas.width & 0xFF;
+		header[13] = (+canvas.width >> 8) & 0xFF;
+		header[14] = +canvas.height & 0xFF;
+		header[15] = (+canvas.height >> 8) & 0xFF;
+		const choice = prompt("Should the exported TGA image use the alpha channel? (yes = RGBA is used, no = RGB is used, other choice = encoder decides the color depth)");
+		header[16] = choice === "yes" ? 32 : (choice === "no" ? 24 : 0);
+		header[17] = ORIGIN_TOP_LEFT;
+		const imgData = currentImageData.data, len = currentImageData.data.length;
+		if (header[16] === 0) {
+			header[16] = 24;
+			for (let i = 3; i < len; i += 4) {
+				if (imgData[i] !== 255) {
+					header[16] = 32;
+					break;
+				}
 			}
 		}
-	}
 
-	const pixelData = new Uint8Array(currentImageData.width * currentImageData.height * (header[16] / 8));
-	let idx = 0, i = 0;
-	if (header[16] === 24) {
-		for (; i < len; i++) {
-			pixelData[idx++] = imgData[i++];
-			pixelData[idx++] = imgData[i++];
-			pixelData[idx++] = imgData[i++];
+		const pixelData = new Uint8Array(currentImageData.width * currentImageData.height * (header[16] / 8));
+		let idx = 0, i = 0;
+		if (header[16] === 24) {
+			for (; i < len; i++) {
+				pixelData[idx++] = imgData[i++];
+				pixelData[idx++] = imgData[i++];
+				pixelData[idx++] = imgData[i++];
+			}
+		} else {
+			for (; i < len;) {
+				pixelData[i] = imgData[i]; i++;
+				pixelData[i] = imgData[i]; i++;
+				pixelData[i] = imgData[i]; i++;
+				pixelData[i] = imgData[i]; i++;
+			}
 		}
-	} else {
-		for (; i < len;) {
-			pixelData[i] = imgData[i]; i++;
-			pixelData[i] = imgData[i]; i++;
-			pixelData[i] = imgData[i]; i++;
-			pixelData[i] = imgData[i]; i++;
-		}
-	}
-	const blob = new Blob([header, pixelData], { type: 'image/tga' });
+		const blob = new Blob([header, pixelData], { type: 'image/tga' });
 
-	const link = document.createElement('a');
-	link.href = URL.createObjectURL(blob);
-	link.download = 'exportedImage.tga';
-	link.click();
-	link.remove();
-}
+		const link = document.createElement('a');
+		link.href = URL.createObjectURL(blob);
+		link.download = 'exportedImage.tga';
+		link.click();
+		link.remove();
+	}
 	function exportI() {
 		const choice = [
 			["image/png", "PNG", false, "png"], ["image/jpeg", "JPEG", true, "jpeg"], ["image/webp", "WebP", true, "webp"], ["image/bmp", "Bitmap", false, "bmp"], ["image/tga", "Targa", false, "tga"], ["image/svg+xml", "SVG", false, "svg"], ["application/octet-stream", "WAV", false, "wav"]
@@ -1388,8 +1391,8 @@ function exportTGA() {
 			}, format[0], format[2] ? +Math.min(1, Math.max(0, +prompt("What should the quality of the exported image be? (0 = worst quality + lower file size, 1 = best quality + higher file size, 0.8 = balanced quality + file size)"))) : 0);
 		}
 	}
-</script>
-<script src="otherEffects.js"></script>
-<button onclick="exportI();">Export Image</button>
-</body>
+	</script>
+	<script src="otherEffects.js"></script>
+	<button onclick="exportI();">Export Image</button>
+	</body>
 </html>
